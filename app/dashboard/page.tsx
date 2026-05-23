@@ -177,10 +177,11 @@ function OrderDetail({
   const [commentary, setCommentary] = useState<AnalystCommentary>(
     initialOrder.analyst_commentary ?? {}
   );
-  const [generating, setGenerating] = useState(false);
-  const [saving, setSaving]         = useState(false);
-  const [genError, setGenError]     = useState<string | null>(null);
-  const [saveMsg, setSaveMsg]       = useState<string | null>(null);
+  const [generating, setGenerating]     = useState(false);
+  const [saving, setSaving]             = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [genError, setGenError]         = useState<string | null>(null);
+  const [saveMsg, setSaveMsg]           = useState<string | null>(null);
 
   const answers = [
     order.q1, order.q2, order.q3, order.q4, order.q5,
@@ -203,6 +204,32 @@ function OrderDetail({
       setGenError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function downloadPdf() {
+    setDownloadingPdf(true);
+    try {
+      const res = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "PDF generation failed");
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `sea-glass-insights-${order.business_name.toLowerCase().replace(/\s+/g, "-")}-report.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "PDF generation failed");
+    } finally {
+      setDownloadingPdf(false);
     }
   }
 
@@ -337,13 +364,20 @@ function OrderDetail({
               </div>
             ))}
 
-            <div className="flex items-center gap-4 pt-2">
+            <div className="flex items-center gap-3 pt-2 flex-wrap">
               <button
                 onClick={saveCommentary}
                 disabled={saving}
                 className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50"
               >
                 {saving ? "Saving…" : "Save Commentary"}
+              </button>
+              <button
+                onClick={downloadPdf}
+                disabled={downloadingPdf}
+                className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {downloadingPdf ? "Building PDF…" : "⬇ Download Final PDF"}
               </button>
               {saveMsg && (
                 <span className="text-green-600 text-sm font-medium">{saveMsg}</span>
