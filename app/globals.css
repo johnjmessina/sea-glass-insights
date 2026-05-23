@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* ── Sea Glass Insights brand tokens ── */
+:root {
+  --background: #FDF5E6;
+  --foreground: #1a1a1a;
+}
+
+@theme inline {
+  /* Background / text */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Brand palette */
+  --color-navy:    #0A2F61;
+  --color-seafoam: #00CED1;
+  --color-seagreen: #2E8B57;
+  --color-sand:    #FDF5E6;
+
+  /* Convenient shades */
+  --color-navy-dark:    #071f42;
+  --color-seafoam-dark: #00a8ab;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Georgia, 'Times New Roman', serif;
+}
