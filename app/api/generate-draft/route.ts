@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { generateReportDraft } from "@/lib/claude";
 
 export async function POST(req: NextRequest) {
   const { orderId } = await req.json();
@@ -8,44 +9,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
   }
 
-  // Fetch the order
-  const { data: order, error } = await supabase
+  // Fetch the full order
+  const { data: order, error: fetchError } = await supabase
     .from("orders")
     .select("*")
     .eq("id", orderId)
     .single();
 
-  if (error || !order) {
+  if (fetchError || !order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  // Claude API integration coming in Step 6.
-  // Returning a placeholder draft so the dashboard UI is fully testable now.
-  const draft = {
-    snapshot:
-      `${order.business_name} is a small business operated by ${order.customer_name}. ` +
-      `${order.q1 ?? ""}`,
-    customer_profile:
-      `Based on the intake: ${order.q3 ?? ""}`,
-    competitive_landscape:
-      `Competitors identified: ${order.q4 ?? ""}. Key differentiator: ${order.q5 ?? ""}`,
-    positioning:
-      `Current challenge: ${order.q6 ?? ""}. 12-month goal: ${order.q7 ?? ""}`,
-    insights:
-      `1. ${order.q9 ?? "Market insight pending Claude integration."}\n` +
-      `2. Current marketing: ${order.q8 ?? ""}`,
-    recommendations:
-      `1. Address the challenge: ${order.q6 ?? ""}\n` +
-      `2. Leverage differentiator: ${order.q5 ?? ""}\n` +
-      `3. Expand on: ${order.q10 ?? ""}\n` +
-      `4. Focus marketing around ideal customer: ${order.q3 ?? ""}`,
-  };
+  // Call Claude
+  let draft;
+  try {
+    draft = await generateReportDraft(order);
+  } catch (err) {
+    console.error("Claude generation error:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Generation failed" },
+      { status: 500 }
+    );
+  }
 
-  // Persist draft to Supabase
-  await supabase
+  // Persist draft and move status to in_progress
+  const { error: saveError } = await supabase
     .from("orders")
     .update({ ai_draft: draft, status: "in_progress" })
     .eq("id", orderId);
+
+  if (saveError) {
+    console.error("Supabase save error:", saveError);
+    // Still return the draft even if save fails — John can still see it
+  }
 
   return NextResponse.json({ draft });
 }
