@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { supabase } from "@/lib/supabase";
 
-// Stripe metadata values are capped at 500 chars
 function trunc(s: string): string {
   return s?.slice(0, 490) ?? "";
 }
@@ -10,29 +10,44 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      customerName,
-      businessName,
-      email,
+      customerName, businessName, email,
       q1, q2, q3, q4, q5, q6, q7, q8, q9, q10,
     } = body;
 
     if (!customerName || !businessName || !email) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // 1. Save order to Supabase first (status: pending_payment)
+    const { data: order, error: dbError } = await supabase
+      .from("orders")
+      .insert({
+        customer_name: customerName,
+        business_name: businessName,
+        email,
+        status: "pending_payment",
+        q1, q2, q3, q4, q5, q6, q7, q8, q9, q10,
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error("Supabase insert error:", dbError);
+      return NextResponse.json({ error: "Failed to save order" }, { status: 500 });
+    }
+
+    // 2. Create Stripe Checkout Session with the order ID
     const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: email,
+      client_reference_id: order.id,
       line_items: [
         {
           price_data: {
             currency: "usd",
-            unit_amount: 14900, // $149.00
+            unit_amount: 14900,
             product_data: {
               name: "Sea Glass Insights — Premium Market Research Report",
               description: `Custom market research report for ${businessName}`,
@@ -42,30 +57,23 @@ export async function POST(req: NextRequest) {
         },
       ],
       metadata: {
+        order_id:     order.id,
         customerName: trunc(customerName),
         businessName: trunc(businessName),
-        email: trunc(email),
-        q1: trunc(q1),
-        q2: trunc(q2),
-        q3: trunc(q3),
-        q4: trunc(q4),
-        q5: trunc(q5),
-        q6: trunc(q6),
-        q7: trunc(q7),
-        q8: trunc(q8),
-        q9: trunc(q9),
-        q10: trunc(q10),
       },
       success_url: `${baseUrl}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/get-report`,
+      cancel_url:  `${baseUrl}/get-report`,
     });
+
+    // 3. Attach the Stripe session ID to the order
+    await supabase
+      .from("orders")
+      .update({ stripe_session_id: session.id })
+      .eq("id", order.id);
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error("Stripe session error:", err);
-    return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 }
-    );
+    console.error("Checkout session error:", err);
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
   }
 }
