@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
 function trunc(s: string): string {
@@ -18,6 +17,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY", detail: "env var not set" }, { status: 500 });
+    }
+
     // 1. Save order to Supabase first (status: pending_payment)
     const { data: order, error: dbError } = await supabase
       .from("orders")
@@ -33,49 +37,60 @@ export async function POST(req: NextRequest) {
 
     if (dbError) {
       console.error("Supabase insert error:", dbError);
-      return NextResponse.json({ error: "Failed to save order" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to save order", detail: dbError.message }, { status: 500 });
     }
 
-    // 2. Create Stripe Checkout Session with the order ID
-    // Derive base URL from the actual request so it's correct in every environment
-    // (avoids NEXT_PUBLIC_URL being http://localhost:3000 in production live mode)
+    // 2. Build base URL from request headers
     const proto = req.headers.get("x-forwarded-proto") ?? "http";
     const host  = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "localhost:3000";
     const baseUrl = process.env.NEXT_PUBLIC_URL ?? `${proto}://${host}`;
 
-    const session = await stripe.checkout.sessions.create({
+    // 3. Create Stripe Checkout Session via raw fetch (bypasses SDK HTTP client issues)
+    const params = new URLSearchParams({
       mode: "payment",
       customer_email: email,
       client_reference_id: order.id,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            unit_amount: 14900,
-            product_data: {
-              name: "Sea Glass Insights — Premium Market Research Report",
-              description: `Custom market research report for ${businessName}`,
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        order_id:     order.id,
-        customerName: trunc(customerName),
-        businessName: trunc(businessName),
-      },
+      "line_items[0][price_data][currency]": "usd",
+      "line_items[0][price_data][unit_amount]": "14900",
+      "line_items[0][price_data][product_data][name]": "Sea Glass Insights — Premium Market Research Report",
+      "line_items[0][price_data][product_data][description]": `Custom market research report for ${businessName}`,
+      "line_items[0][quantity]": "1",
+      "metadata[order_id]": order.id,
+      "metadata[customerName]": trunc(customerName),
+      "metadata[businessName]": trunc(businessName),
       success_url: `${baseUrl}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${baseUrl}/get-report`,
+      cancel_url: `${baseUrl}/get-report`,
     });
 
-    // 3. Attach the Stripe session ID to the order
-    await supabase
-      .from("orders")
-      .update({ stripe_session_id: session.id })
-      .eq("id", order.id);
+    const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${stripeKey}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Stripe-Version": "2024-06-20",
+      },
+      body: params.toString(),
+      cache: "no-store",
+    });
 
-    return NextResponse.json({ url: session.url });
+    const stripeData = await stripeRes.json() as { url?: string; error?: { message: string } };
+
+    if (!stripeRes.ok || !stripeData.url) {
+      const detail = stripeData.error?.message ?? `Stripe status ${stripeRes.status}`;
+      console.error("Stripe API error:", detail);
+      return NextResponse.json({ error: "Failed to create checkout session", detail }, { status: 500 });
+    }
+
+    // 4. Attach the Stripe session ID to the order
+    const sessionId = (stripeData as { id?: string }).id;
+    if (sessionId) {
+      await supabase
+        .from("orders")
+        .update({ stripe_session_id: sessionId })
+        .eq("id", order.id);
+    }
+
+    return NextResponse.json({ url: stripeData.url });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Checkout session error:", err);
