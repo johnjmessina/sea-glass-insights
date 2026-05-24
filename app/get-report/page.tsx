@@ -77,19 +77,16 @@ export default function GetReportPage() {
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
 
       {/* ── Nav ── */}
-      <header style={{ backgroundColor: NAVY, padding: "16px 32px", display: "flex", alignItems: "center" }}>
-        <Link href="/">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logos/logo_transparent_FINAL.png"
-            alt="Sea Glass Insights"
-            style={{ width: "180px", height: "auto" }}
-          />
+      <header style={{ backgroundColor: NAVY, padding: "18px 32px", display: "flex", alignItems: "center" }}>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <span style={{ fontFamily: CORMORANT, fontSize: "1.4rem", fontWeight: 700, color: "white", letterSpacing: "0.02em" }}>
+            Sea Glass Insights
+          </span>
         </Link>
       </header>
 
       {/* ── Page header ── */}
-      <div style={{ backgroundColor: NAVY, color: "white", textAlign: "center", padding: "56px 24px 0" }}>
+      <div style={{ backgroundColor: NAVY, color: "white", textAlign: "center", padding: "56px 24px 0", borderRadius: "0 0 2rem 2rem" }}>
         <p style={{
           fontFamily: MONTSERRAT,
           color: TEAL,
@@ -125,12 +122,7 @@ export default function GetReportPage() {
           your report with the assistance of AI.
         </p>
 
-        {/* Wave transition */}
-        <div style={{ position: "relative", marginBottom: "-2px" }}>
-          <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%" }}>
-            <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill={SAND} />
-          </svg>
-        </div>
+        <div style={{ paddingBottom: "48px" }} />
       </div>
 
       {/* ── Form ── */}
