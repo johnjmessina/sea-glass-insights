@@ -2,7 +2,7 @@
 
 /* ── Sea Glass Insights brand tokens ── */
 :root {
-  --background: #FDF5E6;
+  --background: #F4EADA;
   --foreground: #1a1a1a;
 }
 
@@ -15,7 +15,7 @@
   --color-navy:    #0A2F61;
   --color-seafoam: #00CED1;
   --color-seagreen: #2E8B57;
-  --color-sand:    #FDF5E6;
+  --color-sand:    #F4EADA;
 
   /* Convenient shades */
   --color-navy-dark:    #071f42;
