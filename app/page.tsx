@@ -5,13 +5,22 @@ export default function Home() {
     <div className="flex flex-col min-h-full">
       {/* ── Nav ── */}
       <header className="bg-navy text-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <span className="text-xl font-bold tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
-            Sea Glass Insights
-          </span>
-          <span className="ml-3 text-seafoam text-sm hidden sm:inline">
-            Refining the Edge.
-          </span>
+        <div className="flex items-center gap-3">
+          {/* Place your logo at public/images/logo.png */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/logo.png"
+            alt="Sea Glass Insights"
+            className="h-9 w-auto"
+          />
+          <div>
+            <span className="text-xl font-bold tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
+              Sea Glass Insights
+            </span>
+            <span className="ml-3 text-seafoam text-sm hidden sm:inline">
+              Refining the Edge.
+            </span>
+          </div>
         </div>
         <Link
           href="/get-report"
@@ -29,15 +38,20 @@ export default function Home() {
         <h1 className="text-4xl sm:text-5xl font-bold leading-tight max-w-2xl mx-auto mb-6">
           Know your market.<br />Own your edge.
         </h1>
-        <p className="text-blue-200 text-lg max-w-xl mx-auto mb-10">
+        <p className="text-blue-200 text-lg max-w-xl mx-auto mb-8">
           A professionally written, analyst-reviewed market research report
-          tailored to your small business — delivered in 48–72 hours.
+          tailored to your small business, delivered in 48–72 hours.
         </p>
+        <div className="flex items-baseline justify-center gap-3 mb-6">
+          <span className="text-blue-300 text-xl line-through">$199</span>
+          <span className="text-white text-4xl font-bold">$149</span>
+          <span className="text-seafoam text-sm font-semibold uppercase tracking-wide">Intro Price</span>
+        </div>
         <Link
           href="/get-report"
           className="inline-block bg-seafoam text-navy font-bold text-lg px-8 py-4 rounded-full hover:bg-seafoam-dark transition-colors"
         >
-          Order Your Report — $149
+          Order Your Report
         </Link>
       </section>
 
@@ -104,16 +118,21 @@ export default function Home() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="bg-seagreen text-white text-center py-20 px-6">
-        <h2 className="text-3xl font-bold mb-4">Ready to refine your edge?</h2>
-        <p className="text-green-100 text-lg mb-8 max-w-md mx-auto">
+      <section className="bg-seafoam text-center py-20 px-6">
+        <h2 className="text-3xl font-bold mb-4 text-navy">Ready to refine your edge?</h2>
+        <p className="text-navy/70 text-lg mb-6 max-w-md mx-auto">
           One flat fee. No subscriptions. A report written by a real analyst who read every word you submitted.
         </p>
+        <div className="flex items-baseline justify-center gap-3 mb-8">
+          <span className="text-navy/40 text-xl line-through">$199</span>
+          <span className="text-navy text-4xl font-bold">$149</span>
+          <span className="text-navy/60 text-sm font-semibold uppercase tracking-wide">Intro Price</span>
+        </div>
         <Link
           href="/get-report"
-          className="inline-block bg-white text-seagreen font-bold text-lg px-8 py-4 rounded-full hover:bg-sand transition-colors"
+          className="inline-block bg-navy text-white font-bold text-lg px-8 py-4 rounded-full hover:opacity-90 transition-opacity"
         >
-          Start Your Report — $149
+          Start Your Report
         </Link>
       </section>
 

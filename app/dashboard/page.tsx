@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Order, AIDraft, AnalystCommentary } from "@/lib/supabase";
+import type { Order, AIDraft, Insight, Recommendation } from "@/lib/supabase";
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_LABELS: Record<string, string> = {
   pending_payment: "Pending Payment",
@@ -20,12 +20,12 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const SECTIONS: { key: keyof AIDraft; label: string }[] = [
-  { key: "snapshot",              label: "Business Snapshot" },
-  { key: "customer_profile",      label: "Customer Profile" },
+  { key: "snapshot",              label: "Business Snapshot"    },
+  { key: "customer_profile",      label: "Customer Profile"      },
   { key: "competitive_landscape", label: "Competitive Landscape" },
-  { key: "positioning",           label: "Market Positioning" },
-  { key: "insights",              label: "Key Insights" },
-  { key: "recommendations",       label: "Recommendations" },
+  { key: "positioning",           label: "Market Positioning"    },
+  { key: "insights",              label: "Key Insights"          },
+  { key: "recommendations",       label: "Recommendations"       },
 ];
 
 const QUESTIONS = [
@@ -41,10 +41,10 @@ const QUESTIONS = [
   "Is there anything else you want the report to focus on?",
 ];
 
-// ── Login Gate ───────────────────────────────────────────────────────────────
+// ── Login Gate ────────────────────────────────────────────────────────────────
 
 function LoginGate({ onAuth }: { onAuth: () => void }) {
-  const [pw, setPw] = useState("");
+  const [pw, setPw]       = useState("");
   const [error, setError] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -54,24 +54,23 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: pw }),
     });
-    if (res.ok) {
-      onAuth();
-    } else {
-      setError(true);
-      setPw("");
-    }
+    if (res.ok) onAuth();
+    else { setError(true); setPw(""); }
   }
 
   return (
     <div className="min-h-screen bg-sand flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow border border-gray-100 p-10 w-full max-w-sm text-center">
+        <img
+          src="/images/logo.png"
+          alt="Sea Glass Insights"
+          className="h-10 w-auto mx-auto mb-4"
+          onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+        />
         <p className="text-seafoam text-xs font-semibold uppercase tracking-widest mb-2">
           Analyst Access
         </p>
-        <h1
-          className="text-navy text-2xl font-bold mb-6"
-          style={{ fontFamily: "Georgia, serif" }}
-        >
+        <h1 className="text-navy text-2xl font-bold mb-6" style={{ fontFamily: "Georgia, serif" }}>
           Sea Glass Insights
         </h1>
         <form onSubmit={submit} className="space-y-4">
@@ -85,9 +84,7 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
             }`}
             autoFocus
           />
-          {error && (
-            <p className="text-red-500 text-xs">Incorrect password.</p>
-          )}
+          {error && <p className="text-red-500 text-xs">Incorrect password.</p>}
           <button
             type="submit"
             className="w-full bg-navy text-white font-semibold py-3 rounded-full hover:bg-navy-dark transition-colors"
@@ -100,32 +97,23 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
   );
 }
 
-// ── Order List ───────────────────────────────────────────────────────────────
+// ── Order List ────────────────────────────────────────────────────────────────
 
-function OrderList({
-  orders,
-  onSelect,
-}: {
-  orders: Order[];
-  onSelect: (o: Order) => void;
-}) {
+function OrderList({ orders, onSelect }: { orders: Order[]; onSelect: (o: Order) => void }) {
   const paid = orders.filter(o => o.status !== "pending_payment");
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2
-          className="text-navy text-2xl font-bold"
-          style={{ fontFamily: "Georgia, serif" }}
-        >
+        <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
           Orders
         </h2>
-        <span className="text-sm text-gray-400">{paid.length} paid order{paid.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-400">
+          {paid.length} paid order{paid.length !== 1 ? "s" : ""}
+        </span>
       </div>
-
       {paid.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 p-12 text-center text-gray-400">
-          No paid orders yet. They'll appear here after customers complete payment.
+          No paid orders yet. They&apos;ll appear here after customers complete payment.
         </div>
       ) : (
         <div className="space-y-3">
@@ -148,11 +136,7 @@ function OrderList({
                   })}
                 </p>
               </div>
-              <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ml-4 ${
-                  STATUS_COLORS[order.status] ?? STATUS_COLORS.new
-                }`}
-              >
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ml-4 ${STATUS_COLORS[order.status] ?? STATUS_COLORS.new}`}>
                 {STATUS_LABELS[order.status] ?? order.status}
               </span>
             </button>
@@ -163,36 +147,39 @@ function OrderList({
   );
 }
 
-// ── Order Detail ─────────────────────────────────────────────────────────────
+// ── Order Detail ──────────────────────────────────────────────────────────────
 
-function OrderDetail({
-  order: initialOrder,
-  onBack,
-}: {
-  order: Order;
-  onBack: () => void;
-}) {
-  const [order, setOrder]           = useState<Order>(initialOrder);
-  const [draft, setDraft]           = useState<AIDraft | null>(initialOrder.ai_draft);
-  const [commentary, setCommentary] = useState<AnalystCommentary>(
-    initialOrder.analyst_commentary ?? {}
-  );
-  const [generating, setGenerating]     = useState(false);
-  const [saving, setSaving]             = useState(false);
-  const [downloadingPdf, setDownloadingPdf] = useState(false);
-  const [genError, setGenError]         = useState<string | null>(null);
-  const [saveMsg, setSaveMsg]           = useState<string | null>(null);
+function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: () => void }) {
+  const [order, setOrder]               = useState<Order>(initialOrder);
+  const [draft, setDraft]               = useState<AIDraft | null>(initialOrder.ai_draft);
+  const [analystNote, setAnalystNote]   = useState<string>(initialOrder.analyst_note ?? "");
+
+  // Edit state — only snapshot (string) and insights/recommendations (cards) are editable inline
+  type EditMode = "snapshot" | "insights" | "recommendations" | null;
+  const [editingSection, setEditingSection] = useState<EditMode>(null);
+  const [snapshotBuf, setSnapshotBuf]       = useState<string>("");
+  const [cardsBuf, setCardsBuf]             = useState<Array<{ title: string; body: string }>>([]);
+
+  const [generating, setGenerating]               = useState(false);
+  const [saving, setSaving]                       = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(false);
+  const [sendingReport, setSendingReport]         = useState(false);
+  const [genError, setGenError]                   = useState<string | null>(null);
+  const [saveMsg, setSaveMsg]                     = useState<string | null>(null);
+  const [sendMsg, setSendMsg]                     = useState<string | null>(null);
 
   const answers = [
     order.q1, order.q2, order.q3, order.q4, order.q5,
     order.q6, order.q7, order.q8, order.q9, order.q10,
   ];
 
+  // ── Generate draft ──────────────────────────────────────────────────────────
   async function generateDraft() {
     setGenerating(true);
     setGenError(null);
+    setEditingSection(null);
     try {
-      const res = await fetch("/api/generate-draft", {
+      const res  = await fetch("/api/generate-draft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId: order.id }),
@@ -207,53 +194,88 @@ function OrderDetail({
     }
   }
 
-  async function downloadPdf() {
-    setDownloadingPdf(true);
-    try {
-      const res = await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "PDF generation failed");
-      }
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href     = url;
-      a.download = `sea-glass-insights-${order.business_name.toLowerCase().replace(/\s+/g, "-")}-report.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "PDF generation failed");
-    } finally {
-      setDownloadingPdf(false);
-    }
-  }
-
-  async function saveCommentary() {
+  // ── Save report ─────────────────────────────────────────────────────────────
+  async function saveReport() {
     setSaving(true);
     setSaveMsg(null);
     try {
+      const newStatus = order.status === "new" ? "in_progress" : order.status;
       await fetch("/api/update-order-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderId: order.id,
-          analyst_commentary: commentary,
-          status: "in_progress",
+          orderId:      order.id,
+          ai_draft:     draft,
+          analyst_note: analystNote,
+          status:       newStatus,
         }),
       });
-      setOrder(prev => ({ ...prev, status: "in_progress", analyst_commentary: commentary }));
-      setSaveMsg("Commentary saved.");
+      setOrder(prev => ({
+        ...prev,
+        status:       newStatus as Order["status"],
+        ai_draft:     draft,
+        analyst_note: analystNote,
+      }));
+      setSaveMsg("Report saved.");
       setTimeout(() => setSaveMsg(null), 3000);
     } finally {
       setSaving(false);
     }
   }
 
+  // ── Download .docx ──────────────────────────────────────────────────────────
+  async function downloadReport() {
+    setDownloadingReport(true);
+    try {
+      const res = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, analystNote }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "Report generation failed");
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      const businessName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
+      a.download = `SeaGlassInsights-${businessName}-Report.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Report generation failed");
+    } finally {
+      setDownloadingReport(false);
+    }
+  }
+
+  // ── Send report to customer ─────────────────────────────────────────────────
+  async function sendReport() {
+    if (!confirm(`Send the report to ${order.email}?`)) return;
+    setSendingReport(true);
+    setSendMsg(null);
+    try {
+      const res = await fetch("/api/send-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Send failed");
+      setOrder(prev => ({ ...prev, status: "delivered" }));
+      setSendMsg(`Report sent to ${order.email}`);
+      setTimeout(() => setSendMsg(null), 6000);
+    } catch (e: unknown) {
+      setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
+      setTimeout(() => setSendMsg(null), 8000);
+    } finally {
+      setSendingReport(false);
+    }
+  }
+
+  // ── Status ──────────────────────────────────────────────────────────────────
   async function updateStatus(status: string) {
     await fetch("/api/update-order-status", {
       method: "POST",
@@ -263,21 +285,224 @@ function OrderDetail({
     setOrder(prev => ({ ...prev, status: status as Order["status"] }));
   }
 
+  // ── Inline editing helpers ──────────────────────────────────────────────────
+  function startEdit(key: keyof AIDraft) {
+    if (!draft) return;
+    if (key === "snapshot") {
+      setSnapshotBuf(draft.snapshot);
+      setEditingSection("snapshot");
+    } else if (key === "insights") {
+      setCardsBuf(draft.insights.map(i => ({ title: i.title, body: i.body })));
+      setEditingSection("insights");
+    } else if (key === "recommendations") {
+      setCardsBuf(draft.recommendations.map(r => ({ title: r.title, body: r.body })));
+      setEditingSection("recommendations");
+    }
+  }
+
+  function applyEdit() {
+    if (!draft || !editingSection) return;
+    if (editingSection === "snapshot") {
+      setDraft(prev => prev ? { ...prev, snapshot: snapshotBuf } : prev);
+    } else if (editingSection === "insights") {
+      setDraft(prev => prev ? { ...prev, insights: cardsBuf as Insight[] } : prev);
+    } else if (editingSection === "recommendations") {
+      setDraft(prev => prev ? { ...prev, recommendations: cardsBuf as Recommendation[] } : prev);
+    }
+    setEditingSection(null);
+  }
+
+  // ── Section content renderer ────────────────────────────────────────────────
+  function renderContent(key: keyof AIDraft, d: AIDraft): React.ReactNode {
+
+    // ── Snapshot (editable string) ──
+    if (key === "snapshot") {
+      if (editingSection === "snapshot") {
+        return (
+          <div>
+            <textarea
+              rows={10}
+              value={snapshotBuf}
+              onChange={e => setSnapshotBuf(e.target.value)}
+              className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed"
+              autoFocus
+            />
+            <EditActions onApply={applyEdit} onCancel={() => setEditingSection(null)} />
+          </div>
+        );
+      }
+      return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{d.snapshot}</p>;
+    }
+
+    // ── Customer profile (read-only cards) ──
+    if (key === "customer_profile") {
+      if (!Array.isArray(d.customer_profile))
+        return <OldFormatFallback text={String(d.customer_profile)} />;
+      return (
+        <div className="space-y-3">
+          {d.customer_profile.map((seg, i) => (
+            <div key={i} className="border-l-2 border-seafoam/40 pl-3 py-0.5">
+              <p className="font-semibold text-navy text-sm">
+                {["A","B","C","D","E"][i]}. {seg.name}
+              </p>
+              <p className="text-sm text-gray-600 mt-0.5 leading-relaxed">{seg.desc}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                <span className="font-medium text-gray-600">Motivation:</span> {seg.motivation}
+              </p>
+              <p className="text-xs text-gray-500">
+                <span className="font-medium text-gray-600">Key Need:</span> {seg.key_need}
+              </p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ── Competitive landscape (read-only table) ──
+    if (key === "competitive_landscape") {
+      if (!Array.isArray(d.competitive_landscape))
+        return <OldFormatFallback text={String(d.competitive_landscape)} />;
+      return (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-navy text-white">
+                <th className="text-left px-3 py-2 font-semibold text-xs">Competitor</th>
+                <th className="text-left px-3 py-2 font-semibold text-xs">Their Strength</th>
+                <th className="text-left px-3 py-2 font-semibold text-xs text-seafoam">Your Edge</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.competitive_landscape.map((c, i) => (
+                <tr key={i} className={i % 2 === 0 ? "bg-sand" : "bg-white"}>
+                  <td className="px-3 py-2 font-semibold text-navy text-xs border border-gray-100">{c.name}</td>
+                  <td className="px-3 py-2 text-gray-600 text-xs border border-gray-100">{c.strength}</td>
+                  <td className="px-3 py-2 text-teal-700 text-xs border border-gray-100">{c.edge}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    // ── Positioning (read-only two lists) ──
+    if (key === "positioning") {
+      if (!d.positioning || !Array.isArray(d.positioning.strengths))
+        return <OldFormatFallback text={String(d.positioning)} />;
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Strengths</p>
+            <ul className="space-y-1.5">
+              {d.positioning.strengths.map((s, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                  <span className="text-seafoam mt-0.5 shrink-0 font-bold">▸</span>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Vulnerabilities</p>
+            <ul className="space-y-1.5">
+              {d.positioning.vulnerabilities.map((v, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                  <span className="text-orange-400 mt-0.5 shrink-0 font-bold">▸</span>
+                  {v}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Insights & Recommendations (editable cards) ──
+    if (key === "insights" || key === "recommendations") {
+      const rawItems = key === "insights" ? d.insights : d.recommendations;
+      if (!Array.isArray(rawItems))
+        return <OldFormatFallback text={String(rawItems)} />;
+      const items = rawItems;
+      const label = key === "insights" ? "Insight" : "Recommendation";
+
+      if (editingSection === key) {
+        return (
+          <div className="space-y-3">
+            {cardsBuf.map((item, i) => (
+              <div key={i} className="border border-seafoam/30 rounded-lg p-3 space-y-2 bg-gray-50">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  {label} {i + 1}
+                </p>
+                <div>
+                  <label className="text-xs text-gray-500 font-medium">Title</label>
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={e => {
+                      const updated = [...cardsBuf];
+                      updated[i] = { ...updated[i], title: e.target.value };
+                      setCardsBuf(updated);
+                    }}
+                    className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-seafoam mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 font-medium">Body</label>
+                  <textarea
+                    rows={3}
+                    value={item.body}
+                    onChange={e => {
+                      const updated = [...cardsBuf];
+                      updated[i] = { ...updated[i], body: e.target.value };
+                      setCardsBuf(updated);
+                    }}
+                    className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-seafoam mt-1 resize-y"
+                  />
+                </div>
+              </div>
+            ))}
+            <EditActions onApply={applyEdit} onCancel={() => setEditingSection(null)} />
+          </div>
+        );
+      }
+
+      // Read mode
+      return (
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="flex gap-3">
+              <div className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
+                style={{ backgroundColor: key === "insights" ? "#0A2F61" : "#00CED1" }}>
+                {i + 1}
+              </div>
+              <div>
+                <p className="font-semibold text-navy text-sm">{item.title}</p>
+                <p className="text-sm text-gray-600 mt-0.5 leading-relaxed">{item.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  }
+
+  // Sections that support inline editing
+  const isEditable = (key: keyof AIDraft): boolean =>
+    key === "snapshot" || key === "insights" || key === "recommendations";
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div>
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={onBack}
-          className="text-sm text-gray-400 hover:text-navy transition-colors"
-        >
+        <button onClick={onBack} className="text-sm text-gray-400 hover:text-navy transition-colors">
           ← All Orders
         </button>
         <div className="h-4 w-px bg-gray-200" />
-        <h2
-          className="text-navy text-2xl font-bold"
-          style={{ fontFamily: "Georgia, serif" }}
-        >
+        <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
           {order.business_name}
         </h2>
         <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLORS[order.status]}`}>
@@ -289,7 +514,12 @@ function OrderDetail({
       <div className="bg-white rounded-xl border border-gray-100 px-6 py-4 mb-6 flex flex-wrap gap-6 text-sm">
         <div><span className="text-gray-400">Customer</span><p className="font-semibold text-navy mt-0.5">{order.customer_name}</p></div>
         <div><span className="text-gray-400">Email</span><p className="font-semibold text-navy mt-0.5">{order.email}</p></div>
-        <div><span className="text-gray-400">Submitted</span><p className="font-semibold text-navy mt-0.5">{new Date(order.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p></div>
+        <div>
+          <span className="text-gray-400">Submitted</span>
+          <p className="font-semibold text-navy mt-0.5">
+            {new Date(order.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+          </p>
+        </div>
         <div><span className="text-gray-400">Order ID</span><p className="font-mono text-xs text-gray-400 mt-0.5">{order.id.slice(0, 8)}…</p></div>
       </div>
 
@@ -312,11 +542,11 @@ function OrderDetail({
         </div>
       </div>
 
-      {/* Generate AI Draft */}
+      {/* Report Draft */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
-            AI Draft Report
+            Report Draft
           </h3>
           <button
             onClick={generateDraft}
@@ -327,9 +557,7 @@ function OrderDetail({
           </button>
         </div>
 
-        {genError && (
-          <p className="text-red-500 text-sm mb-4">{genError}</p>
-        )}
+        {genError && <p className="text-red-500 text-sm mb-4">{genError}</p>}
 
         {generating && (
           <div className="flex items-center gap-3 py-8 justify-center text-gray-400">
@@ -338,88 +566,161 @@ function OrderDetail({
           </div>
         )}
 
+        {!draft && !generating && (
+          <p className="text-sm text-gray-400 py-4 text-center">
+            Click &ldquo;Generate AI Draft&rdquo; to create the report using Claude.
+          </p>
+        )}
+
         {draft && !generating && (
-          <div className="space-y-6">
-            {SECTIONS.map(({ key, label }) => (
-              <div key={key} className="border-t border-gray-100 pt-5 first:border-0 first:pt-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-1.5 h-5 bg-seafoam rounded" />
-                  <h4 className="font-semibold text-navy text-sm">{label}</h4>
+          <div>
+            {/* Old-format warning — shown for drafts generated before the structured format */}
+            {!Array.isArray(draft.customer_profile) && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex items-start gap-3">
+                <span className="text-amber-500 text-lg shrink-0">⚠</span>
+                <div>
+                  <p className="text-amber-800 text-sm font-semibold">Draft format is outdated</p>
+                  <p className="text-amber-700 text-sm mt-0.5">
+                    This report was generated before the new structured format. Click{" "}
+                    <strong>Regenerate Draft</strong> above, then save before downloading.
+                  </p>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">
-                  {draft[key]}
-                </p>
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                  Your Analyst Commentary
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Add your expert commentary here…"
-                  value={commentary[key] ?? ""}
-                  onChange={e =>
-                    setCommentary(prev => ({ ...prev, [key]: e.target.value }))
-                  }
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y"
-                />
+              </div>
+            )}
+
+            {SECTIONS.map(({ key, label }) => (
+              <div key={key} className="border-t border-gray-100 py-5 first:border-0 first:pt-0">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-5 bg-seafoam rounded-full shrink-0" />
+                    <h4 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                      {label}
+                    </h4>
+                  </div>
+                  {isEditable(key) && editingSection !== key && (
+                    <button
+                      onClick={() => startEdit(key)}
+                      className="text-xs text-seafoam hover:text-navy border border-seafoam/40 hover:border-navy/40 rounded-full px-3 py-1 transition-colors font-medium shrink-0"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
+                {renderContent(key, draft)}
               </div>
             ))}
 
-            <div className="flex items-center gap-3 pt-2 flex-wrap">
+            {/* A Note from the Analyst */}
+            <div className="border-t-2 border-dashed border-seagreen/30 pt-6 mt-2">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1 h-5 bg-seagreen rounded-full" />
+                <h4 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                  A Note from the Analyst
+                </h4>
+              </div>
+              <p className="text-xs text-gray-400 ml-3 mb-3 leading-relaxed">
+                Write one warm, personal closing paragraph in your own voice. This appears at the end of the Word document.
+              </p>
+              <textarea
+                rows={5}
+                placeholder={`e.g. "Working through your intake responses, what struck me most was the clarity of your instincts — you already know what makes you different. This report is designed to give that instinct a sharper edge…"`}
+                value={analystNote}
+                onChange={e => setAnalystNote(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seagreen resize-y leading-relaxed"
+              />
+            </div>
+
+            {/* Save + Download + Send */}
+            <div className="flex items-center gap-3 pt-5 flex-wrap">
               <button
-                onClick={saveCommentary}
+                onClick={saveReport}
                 disabled={saving}
                 className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50"
               >
-                {saving ? "Saving…" : "Save Commentary"}
+                {saving ? "Saving…" : "Save Report"}
               </button>
               <button
-                onClick={downloadPdf}
-                disabled={downloadingPdf}
+                onClick={downloadReport}
+                disabled={downloadingReport}
                 className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {downloadingPdf ? "Building PDF…" : "⬇ Download Final PDF"}
+                {downloadingReport ? "Building Report…" : "⬇ Download Report"}
+              </button>
+              <button
+                onClick={sendReport}
+                disabled={sendingReport || order.status === "delivered"}
+                className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {sendingReport
+                  ? "Sending…"
+                  : order.status === "delivered"
+                  ? "✓ Sent"
+                  : "✉ Send to Customer"}
               </button>
               {saveMsg && (
                 <span className="text-green-600 text-sm font-medium">{saveMsg}</span>
               )}
+              {sendMsg && (
+                <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>
+                  {sendMsg}
+                </span>
+              )}
             </div>
           </div>
         )}
-
-        {!draft && !generating && (
-          <p className="text-sm text-gray-400 py-4 text-center">
-            Click "Generate AI Draft" to create the report using Claude.
-          </p>
-        )}
       </div>
 
-      {/* Status actions */}
+      {/* Order Actions */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-wrap gap-3">
         <h3 className="w-full text-navy font-semibold mb-1" style={{ fontFamily: "Georgia, serif" }}>
           Order Actions
         </h3>
         {order.status === "new" && (
-          <button
-            onClick={() => updateStatus("in_progress")}
-            className="bg-yellow-100 text-yellow-700 font-semibold text-sm px-5 py-2 rounded-full hover:bg-yellow-200 transition-colors"
-          >
+          <button onClick={() => updateStatus("in_progress")}
+            className="bg-yellow-100 text-yellow-700 font-semibold text-sm px-5 py-2 rounded-full hover:bg-yellow-200 transition-colors">
             Mark In Progress
           </button>
         )}
         {(order.status === "new" || order.status === "in_progress") && (
-          <button
-            onClick={() => updateStatus("delivered")}
-            className="bg-seagreen text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-opacity"
-          >
+          <button onClick={() => updateStatus("delivered")}
+            className="bg-seagreen text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-opacity">
             Mark Delivered
           </button>
         )}
         {order.status === "delivered" && (
-          <span className="text-sm text-green-600 font-semibold py-2">
-            Report delivered.
-          </span>
+          <span className="text-sm text-green-600 font-semibold py-2">Report delivered.</span>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
+
+/** Renders old-format (plain string) content for sections that now expect structured data */
+function OldFormatFallback({ text }: { text: string }) {
+  return (
+    <p className="text-sm text-gray-500 italic leading-relaxed whitespace-pre-wrap">
+      {text}
+    </p>
+  );
+}
+
+function EditActions({ onApply, onCancel }: { onApply: () => void; onCancel: () => void }) {
+  return (
+    <div className="flex gap-2 mt-2">
+      <button
+        onClick={onApply}
+        className="text-xs bg-seafoam text-navy font-semibold px-4 py-1.5 rounded-full hover:bg-seafoam-dark transition-colors"
+      >
+        Apply Changes
+      </button>
+      <button
+        onClick={onCancel}
+        className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5 transition-colors"
+      >
+        Cancel
+      </button>
     </div>
   );
 }
@@ -427,15 +728,15 @@ function OrderDetail({
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const [authed, setAuthed]       = useState(false);
-  const [orders, setOrders]       = useState<Order[]>([]);
-  const [selected, setSelected]   = useState<Order | null>(null);
-  const [loading, setLoading]     = useState(false);
+  const [authed, setAuthed]     = useState(false);
+  const [orders, setOrders]     = useState<Order[]>([]);
+  const [selected, setSelected] = useState<Order | null>(null);
+  const [loading, setLoading]   = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/orders");
+      const res  = await fetch("/api/orders");
       const data = await res.json();
       setOrders(data);
     } finally {
@@ -451,23 +752,22 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-sand">
-      {/* Nav */}
       <header className="bg-navy text-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <span
-            className="text-xl font-bold tracking-wide"
-            style={{ fontFamily: "Georgia, serif" }}
-          >
-            Sea Glass Insights
-          </span>
-          <span className="ml-3 text-seafoam text-sm hidden sm:inline">
-            Analyst Dashboard
-          </span>
+        <div className="flex items-center gap-3">
+          <img
+            src="/images/logo.png"
+            alt="Sea Glass Insights"
+            className="h-8 w-auto"
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+          <div>
+            <span className="text-xl font-bold tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
+              Sea Glass Insights
+            </span>
+            <span className="ml-3 text-seafoam text-sm hidden sm:inline">Analyst Dashboard</span>
+          </div>
         </div>
-        <button
-          onClick={fetchOrders}
-          className="text-blue-300 hover:text-white text-sm transition-colors"
-        >
+        <button onClick={fetchOrders} className="text-blue-300 hover:text-white text-sm transition-colors">
           ↻ Refresh
         </button>
       </header>
@@ -478,10 +778,7 @@ export default function DashboardPage() {
             <div className="w-8 h-8 border-4 border-seafoam border-t-transparent rounded-full animate-spin" />
           </div>
         ) : selected ? (
-          <OrderDetail
-            order={selected}
-            onBack={() => { setSelected(null); fetchOrders(); }}
-          />
+          <OrderDetail order={selected} onBack={() => { setSelected(null); fetchOrders(); }} />
         ) : (
           <OrderList orders={orders} onSelect={setSelected} />
         )}

@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // pdfkit reads font .afm files relative to its own location.
-  // Bundling it breaks those paths — keep it as a Node.js external.
-  serverExternalPackages: ["pdfkit"],
+  // Keep these packages as native Node.js externals so webpack doesn't
+  // bundle them away from their internal file dependencies.
+  serverExternalPackages: ["pdfkit", "docx"],
 };
 
 export default nextConfig;

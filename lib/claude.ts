@@ -40,19 +40,68 @@ ${order.q9 ?? "Not provided"}
 ${order.q10 ?? "Not provided"}
 `.trim();
 
-  const systemPrompt = `You are a senior market research analyst at Sea Glass Insights, a boutique market research firm serving small businesses. Your job is to produce a professional, insightful market intelligence report based on the following business intake information.
+  const systemPrompt = `You are a senior market research analyst at Sea Glass Insights, a boutique market research firm serving small businesses. Your job is to produce a professional, insightful market intelligence report based on the intake information provided.
 
-The report must have exactly these six sections:
-1. Business Snapshot — summarize who the business is and what they do
-2. Customer Profile — identify 3-4 distinct customer segments with motivations, spend patterns, and key needs
-3. Competitive Landscape — analyze the competitors mentioned and identify the business's edges
-4. Market Positioning — assess strengths and vulnerabilities
-5. Key Insights — 4-5 numbered analyst insights, the "so what" behind the data
-6. Recommendations — exactly 4 recommendations, ordered by impact and feasibility
+Return ONLY a valid JSON object with EXACTLY this structure. No markdown. No code fences. No explanation. Raw JSON only.
 
-Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a smart person, not a consulting firm.
+{
+  "snapshot": "2-3 paragraphs summarizing who the business is, what they offer, and their market context.",
 
-Return ONLY a valid JSON object with exactly these keys: snapshot, customer_profile, competitive_landscape, positioning, insights, recommendations. No markdown, no code fences, no explanation — just the raw JSON object.`;
+  "customer_profile": [
+    {
+      "name": "Segment name (3-5 words)",
+      "desc": "One sentence describing this customer type and why they buy.",
+      "motivation": "The primary thing that motivates them to choose this business.",
+      "key_need": "The single most important thing they need from this business."
+    }
+  ],
+
+  "competitive_landscape": [
+    {
+      "name": "Competitor name or descriptor",
+      "strength": "Their main competitive advantage in one clear sentence.",
+      "edge": "How this business has a genuine, specific edge over them."
+    }
+  ],
+
+  "positioning": {
+    "strengths": [
+      "Specific strength statement.",
+      "Specific strength statement.",
+      "Specific strength statement.",
+      "Specific strength statement."
+    ],
+    "vulnerabilities": [
+      "Specific vulnerability statement.",
+      "Specific vulnerability statement.",
+      "Specific vulnerability statement."
+    ]
+  },
+
+  "insights": [
+    {
+      "title": "Short insight title (5-8 words)",
+      "body": "2-3 sentences unpacking this insight and what it means for the business."
+    }
+  ],
+
+  "recommendations": [
+    {
+      "title": "Short action-oriented title (5-8 words)",
+      "body": "2-3 sentences explaining this recommendation and why it matters now."
+    }
+  ]
+}
+
+Requirements:
+- customer_profile: 3-4 segments
+- competitive_landscape: cover every competitor mentioned (min 2, max 5)
+- positioning.strengths: exactly 4-5 items
+- positioning.vulnerabilities: exactly 3-4 items
+- insights: exactly 4-5 items
+- recommendations: exactly 4 items
+
+Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a smart person, not a consulting firm.`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-5",
@@ -69,41 +118,40 @@ Return ONLY a valid JSON object with exactly these keys: snapshot, customer_prof
   const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
   // Strip any accidental markdown fences
-  const cleaned = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
+  const cleaned = raw
+    .replace(/^```(?:json)?\n?/i, "")
+    .replace(/\n?```$/i, "")
+    .trim();
 
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    throw new Error(`Claude returned invalid JSON: ${cleaned.slice(0, 200)}`);
+    throw new Error(`Claude returned invalid JSON: ${cleaned.slice(0, 300)}`);
   }
 
-  // Normalize: Claude sometimes returns arrays for list-heavy sections.
-  // Join them into numbered strings so the rest of the app always sees strings.
-  const normalize = (v: unknown): string => {
-    if (Array.isArray(v)) {
-      return v.map((item, i) => `${i + 1}. ${item}`).join("\n\n");
-    }
-    return String(v ?? "");
-  };
+  // ── Validate structure ────────────────────────────────────────────────────
+  if (typeof parsed.snapshot !== "string" || !parsed.snapshot)
+    throw new Error("Missing or invalid: snapshot");
 
-  const draft: AIDraft = {
-    snapshot:              normalize(parsed.snapshot),
-    customer_profile:      normalize(parsed.customer_profile),
-    competitive_landscape: normalize(parsed.competitive_landscape),
-    positioning:           normalize(parsed.positioning),
-    insights:              normalize(parsed.insights),
-    recommendations:       normalize(parsed.recommendations),
-  };
+  if (!Array.isArray(parsed.customer_profile) || parsed.customer_profile.length < 2)
+    throw new Error("Missing or invalid: customer_profile");
 
-  // Validate all six keys are present and non-empty
-  const required: (keyof AIDraft)[] = [
-    "snapshot", "customer_profile", "competitive_landscape",
-    "positioning", "insights", "recommendations",
-  ];
-  for (const key of required) {
-    if (!draft[key]) throw new Error(`Missing section: ${key}`);
-  }
+  if (!Array.isArray(parsed.competitive_landscape) || parsed.competitive_landscape.length < 1)
+    throw new Error("Missing or invalid: competitive_landscape");
 
-  return draft;
+  if (
+    !parsed.positioning ||
+    typeof parsed.positioning !== "object" ||
+    !Array.isArray((parsed.positioning as Record<string, unknown>).strengths) ||
+    !Array.isArray((parsed.positioning as Record<string, unknown>).vulnerabilities)
+  ) throw new Error("Missing or invalid: positioning");
+
+  if (!Array.isArray(parsed.insights) || parsed.insights.length < 2)
+    throw new Error("Missing or invalid: insights");
+
+  if (!Array.isArray(parsed.recommendations) || parsed.recommendations.length < 1)
+    throw new Error("Missing or invalid: recommendations");
+
+  return parsed as unknown as AIDraft;
 }
