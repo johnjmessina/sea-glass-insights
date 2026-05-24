@@ -11,6 +11,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
     "@stripe/stripe-js": "^9.6.0",
+    "@supabase/supabase-js": "^2.106.1",
     "@types/pdfkit": "^0.17.6",
     "docx": "^9.6.1",
     "next": "16.2.6",
