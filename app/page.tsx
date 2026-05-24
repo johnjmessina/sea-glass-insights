@@ -13,7 +13,7 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
-const SAND  = "#FDF5E6";
+const SAND  = "#F4EADA";
 const NAVY  = "#0A2F61";
 const TEAL  = "#00CED1";
 const GRAY  = "#6B7280";
@@ -99,8 +99,9 @@ export default function Home() {
           }}
         >
           Sea Glass Insights delivers professional market research reports for
-          small businesses, written by a real analyst, informed by real
-          experience, and built to actually move the needle.
+          small businesses. AI generates the foundation. A real analyst with
+          over ten years of market research experience reviews, refines, and
+          makes sure the insights that reach you actually matter.
         </p>
         <Link
           href="/get-report"
