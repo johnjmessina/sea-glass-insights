@@ -1,148 +1,432 @@
 import Link from "next/link";
+import { Cormorant_Garamond, Montserrat } from "next/font/google";
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-cormorant",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-montserrat",
+});
+
+const SAND  = "#FDF5E6";
+const NAVY  = "#0A2F61";
+const TEAL  = "#00CED1";
+const GRAY  = "#6B7280";
+const LGRAY = "#9CA3AF";
+const WHITE = "#FFFFFF";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-full">
-      {/* ── Nav ── */}
-      <header className="bg-navy text-white px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Place your logo at public/images/logo.png */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/logo.png"
-            alt="Sea Glass Insights"
-            className="h-9 w-auto"
-          />
-          <div>
-            <span className="text-xl font-bold tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
-              Sea Glass Insights
-            </span>
-            <span className="ml-3 text-seafoam text-sm hidden sm:inline">
-              Refining the Edge.
-            </span>
-          </div>
-        </div>
-        <Link
-          href="/get-report"
-          className="bg-seafoam text-navy font-semibold text-sm px-4 py-2 rounded-full hover:bg-seafoam-dark transition-colors"
-        >
-          Get Your Report
-        </Link>
+    <div
+      className={`${cormorant.variable} ${montserrat.variable}`}
+      style={{ backgroundColor: SAND, color: NAVY }}
+    >
+
+      {/* ── 1. NAV ── */}
+      <header style={{ backgroundColor: SAND, padding: "20px 40px" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/logo.png"
+          alt="Sea Glass Insights"
+          style={{ height: "auto", maxHeight: "60px", width: "auto" }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        />
       </header>
 
-      {/* ── Hero ── */}
-      <section className="bg-navy text-white text-center px-6 py-24">
-        <p className="text-seafoam text-sm font-semibold uppercase tracking-widest mb-4">
-          Premium Market Research
-        </p>
-        <h1 className="text-4xl sm:text-5xl font-bold leading-tight max-w-2xl mx-auto mb-6">
-          Know your market.<br />Own your edge.
+      {/* ── 2. HERO ── */}
+      <section
+        style={{
+          backgroundColor: SAND,
+          textAlign: "center",
+          padding: "64px 24px 80px",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/logo.png"
+          alt="Sea Glass Insights"
+          style={{
+            maxWidth: "260px",
+            width: "100%",
+            height: "auto",
+            margin: "0 auto 40px",
+            display: "block",
+          }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        />
+        <h1
+          style={{
+            fontFamily: "var(--font-cormorant)",
+            fontSize: "clamp(2.4rem, 5vw, 3.6rem)",
+            fontWeight: 700,
+            color: NAVY,
+            lineHeight: 1.2,
+            maxWidth: "640px",
+            margin: "0 auto 24px",
+          }}
+        >
+          Know your market. Refine your edge.
         </h1>
-        <p className="text-blue-200 text-lg max-w-xl mx-auto mb-8">
-          A professionally written, analyst-reviewed market research report
-          tailored to your small business, delivered in 48–72 hours.
+        <p
+          style={{
+            fontFamily: "var(--font-montserrat)",
+            fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
+            color: GRAY,
+            maxWidth: "580px",
+            margin: "0 auto 36px",
+            lineHeight: 1.75,
+          }}
+        >
+          Sea Glass Insights delivers professional market research reports for
+          small businesses, written by a real analyst, informed by real
+          experience, and built to actually move the needle.
         </p>
-        <div className="flex items-baseline justify-center gap-3 mb-6">
-          <span className="text-blue-300 text-xl line-through">$199</span>
-          <span className="text-white text-4xl font-bold">$149</span>
-          <span className="text-seafoam text-sm font-semibold uppercase tracking-wide">Intro Price</span>
-        </div>
         <Link
           href="/get-report"
-          className="inline-block bg-seafoam text-navy font-bold text-lg px-8 py-4 rounded-full hover:bg-seafoam-dark transition-colors"
+          style={{
+            display: "inline-block",
+            backgroundColor: TEAL,
+            color: NAVY,
+            fontFamily: "var(--font-montserrat)",
+            fontWeight: 600,
+            fontSize: "1rem",
+            padding: "14px 40px",
+            borderRadius: "9999px",
+            textDecoration: "none",
+            letterSpacing: "0.02em",
+          }}
         >
-          Order Your Report
+          Start Your Report
         </Link>
+        <p
+          style={{
+            fontFamily: "var(--font-montserrat)",
+            color: LGRAY,
+            fontSize: "0.85rem",
+            marginTop: "16px",
+          }}
+        >
+          $149. Flat fee. No subscriptions required.
+        </p>
       </section>
 
-      {/* ── How it works ── */}
-      <section className="py-20 px-6 max-w-4xl mx-auto w-full">
-        <h2 className="text-3xl font-bold text-navy text-center mb-12">
-          How It Works
-        </h2>
-        <div className="grid sm:grid-cols-3 gap-10 text-center">
-          {[
-            {
-              step: "1",
-              title: "Tell Us About Your Business",
-              desc: "Answer 10 focused questions about your market, customers, and competitors. Takes about 15 minutes.",
-            },
-            {
-              step: "2",
-              title: "We Get to Work",
-              desc: "Our analyst reviews your intake and produces a custom report with real insights — not generic advice.",
-            },
-            {
-              step: "3",
-              title: "Receive Your Report",
-              desc: "A branded, professionally written PDF lands in your inbox within 48–72 hours. Ready to act on.",
-            },
-          ].map(({ step, title, desc }) => (
-            <div key={step} className="flex flex-col items-center">
-              <div className="w-14 h-14 rounded-full bg-navy text-white flex items-center justify-center text-xl font-bold mb-4">
-                {step}
-              </div>
-              <h3 className="text-navy font-semibold text-lg mb-2">{title}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{desc}</p>
-            </div>
-          ))}
+      {/* ── 3. ABOUT ── */}
+      <section
+        style={{
+          backgroundColor: WHITE,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+          <h2
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "clamp(2rem, 4vw, 2.8rem)",
+              fontWeight: 700,
+              color: NAVY,
+              marginBottom: "28px",
+            }}
+          >
+            Hi, I&rsquo;m John Messina.
+          </h2>
+          <p
+            style={{
+              fontFamily: "var(--font-montserrat)",
+              color: GRAY,
+              fontSize: "0.97rem",
+              lineHeight: 1.85,
+              marginBottom: "20px",
+            }}
+          >
+            I started Sea Glass Insights because I have over ten years of market
+            research experience and I wanted to put it to work for small
+            businesses right here on the Jersey Shore. I believe every small
+            business has an edge and I want to help you refine it.
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-montserrat)",
+              color: GRAY,
+              fontSize: "0.97rem",
+              lineHeight: 1.85,
+            }}
+          >
+            When your order comes in, I read every word you submitted. I combine
+            professional research methodology with AI intelligence to build a
+            report that is factual, grounded, and built for where your business
+            actually is right now. Every AI output is reviewed and vetted before
+            it reaches you.
+          </p>
         </div>
       </section>
 
-      {/* ── What's in the report ── */}
-      <section className="bg-white py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-navy text-center mb-12">
-            What's Inside Your Report
+      {/* ── 4. HOW IT WORKS ── */}
+      <section style={{ backgroundColor: SAND, padding: "80px 24px" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <h2
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "clamp(2rem, 4vw, 2.8rem)",
+              fontWeight: 700,
+              color: NAVY,
+              textAlign: "center",
+              marginBottom: "56px",
+            }}
+          >
+            How It Works
           </h2>
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "40px",
+            }}
+          >
             {[
-              { title: "Business Snapshot", desc: "A clear-eyed summary of who you are and what you offer." },
-              { title: "Customer Profile", desc: "3–4 distinct customer segments with motivations and spend patterns." },
-              { title: "Competitive Landscape", desc: "An honest look at your competitors and where you have the edge." },
-              { title: "Market Positioning", desc: "Your strengths, vulnerabilities, and how to play to both." },
-              { title: "Key Insights", desc: "4–5 analyst insights — the 'so what' that most businesses miss." },
-              { title: "Recommendations", desc: "Exactly 4 actions, ranked by impact and feasibility. Move fast." },
-            ].map(({ title, desc }) => (
-              <div
-                key={title}
-                className="border border-gray-200 rounded-xl p-6 hover:border-seafoam transition-colors"
-              >
-                <div className="w-2 h-6 bg-seafoam rounded mb-3" />
-                <h3 className="text-navy font-semibold text-base mb-1">{title}</h3>
-                <p className="text-gray-600 text-sm">{desc}</p>
+              {
+                num: "1",
+                title: "Tell Us About Your Business",
+                body: "Answer 10 focused questions about your market, customers, and competitors. It takes about 15 minutes. The more detail you share, the sharper your report will be. Please only share what you are comfortable sharing — your responses will be used to generate your report with the assistance of AI.",
+              },
+              {
+                num: "2",
+                title: "A Real Analyst Gets to Work",
+                body: "I personally review every submission. I dig into your market, your competitors, and your positioning, combining professional research methodology with AI intelligence to build something genuinely useful.",
+              },
+              {
+                num: "3",
+                title: "Your Report Arrives",
+                body: "A professionally written report lands in your inbox within 48-72 hours. Six sections, four recommendations, and insights you can act on immediately.",
+              },
+            ].map(({ num, title, body }) => (
+              <div key={num} style={{ textAlign: "center" }}>
+                <div
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    borderRadius: "50%",
+                    backgroundColor: NAVY,
+                    color: WHITE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-cormorant)",
+                    fontSize: "1.4rem",
+                    fontWeight: 700,
+                    margin: "0 auto 20px",
+                  }}
+                >
+                  {num}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-cormorant)",
+                    fontSize: "1.35rem",
+                    fontWeight: 600,
+                    color: NAVY,
+                    marginBottom: "12px",
+                  }}
+                >
+                  {title}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-montserrat)",
+                    color: GRAY,
+                    fontSize: "0.9rem",
+                    lineHeight: 1.8,
+                  }}
+                >
+                  {body}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="bg-seafoam text-center py-20 px-6">
-        <h2 className="text-3xl font-bold mb-4 text-navy">Ready to refine your edge?</h2>
-        <p className="text-navy/70 text-lg mb-6 max-w-md mx-auto">
-          One flat fee. No subscriptions. A report written by a real analyst who read every word you submitted.
-        </p>
-        <div className="flex items-baseline justify-center gap-3 mb-8">
-          <span className="text-navy/40 text-xl line-through">$199</span>
-          <span className="text-navy text-4xl font-bold">$149</span>
-          <span className="text-navy/60 text-sm font-semibold uppercase tracking-wide">Intro Price</span>
+      {/* ── 5. WHAT'S INSIDE ── */}
+      <section style={{ backgroundColor: WHITE, padding: "80px 24px" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <h2
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "clamp(2rem, 4vw, 2.8rem)",
+              fontWeight: 700,
+              color: NAVY,
+              textAlign: "center",
+              marginBottom: "48px",
+            }}
+          >
+            What&rsquo;s Inside Your Report
+          </h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: "24px",
+            }}
+          >
+            {[
+              {
+                title: "Business Snapshot",
+                desc: "A clear-eyed summary of who you are and what you offer.",
+              },
+              {
+                title: "Customer Profile",
+                desc: "3-4 distinct customer segments with motivations and spend patterns.",
+              },
+              {
+                title: "Competitive Landscape",
+                desc: "An honest look at your competitors and where you have the edge.",
+              },
+              {
+                title: "Market Positioning",
+                desc: "Your strengths, vulnerabilities, and how to play to both.",
+              },
+              {
+                title: "Key Insights",
+                desc: "4-5 analyst insights, the so what that most businesses miss.",
+              },
+              {
+                title: "Recommendations",
+                desc: "Exactly 4 actions, ranked by impact and feasibility.",
+              },
+            ].map(({ title, desc }) => (
+              <div
+                key={title}
+                style={{
+                  border: "1px solid #E5E7EB",
+                  borderRadius: "12px",
+                  padding: "28px 24px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "4px",
+                    height: "24px",
+                    backgroundColor: TEAL,
+                    borderRadius: "2px",
+                    marginBottom: "14px",
+                  }}
+                />
+                <h3
+                  style={{
+                    fontFamily: "var(--font-cormorant)",
+                    fontSize: "1.2rem",
+                    fontWeight: 600,
+                    color: NAVY,
+                    marginBottom: "8px",
+                  }}
+                >
+                  {title}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-montserrat)",
+                    color: GRAY,
+                    fontSize: "0.88rem",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {desc}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
+      </section>
+
+      {/* ── 6. CLOSING CTA ── */}
+      <section
+        style={{
+          backgroundColor: SAND,
+          textAlign: "center",
+          padding: "88px 24px",
+        }}
+      >
+        <h2
+          style={{
+            fontFamily: "var(--font-cormorant)",
+            fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
+            fontWeight: 700,
+            color: NAVY,
+            maxWidth: "600px",
+            margin: "0 auto 36px",
+            lineHeight: 1.3,
+          }}
+        >
+          Every small business has an edge. Let&rsquo;s refine yours.
+        </h2>
         <Link
           href="/get-report"
-          className="inline-block bg-navy text-white font-bold text-lg px-8 py-4 rounded-full hover:opacity-90 transition-opacity"
+          style={{
+            display: "inline-block",
+            backgroundColor: TEAL,
+            color: NAVY,
+            fontFamily: "var(--font-montserrat)",
+            fontWeight: 600,
+            fontSize: "1rem",
+            padding: "14px 40px",
+            borderRadius: "9999px",
+            textDecoration: "none",
+            letterSpacing: "0.02em",
+          }}
         >
           Start Your Report
         </Link>
+        <p
+          style={{
+            fontFamily: "var(--font-montserrat)",
+            color: LGRAY,
+            fontSize: "0.85rem",
+            marginTop: "16px",
+          }}
+        >
+          $149. Flat fee. No subscriptions required.
+        </p>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="bg-navy text-blue-300 text-center text-sm py-6 px-6">
-        <p className="font-semibold text-white mb-1" style={{ fontFamily: "Georgia, serif" }}>
-          Sea Glass Insights
+      {/* ── 7. FOOTER ── */}
+      <footer
+        style={{
+          backgroundColor: NAVY,
+          color: "#93C5FD",
+          textAlign: "center",
+          padding: "40px 24px",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "var(--font-cormorant)",
+            fontSize: "1.1rem",
+            fontWeight: 600,
+            color: WHITE,
+            marginBottom: "8px",
+          }}
+        >
+          Sea Glass Insights — Refining the Edge.
         </p>
-        <p>Refining the Edge. &copy; {new Date().getFullYear()} Sea Glass Insights. All rights reserved.</p>
+        <p
+          style={{
+            fontFamily: "var(--font-montserrat)",
+            fontSize: "0.82rem",
+            marginBottom: "6px",
+          }}
+        >
+          John Messina, Founder | Bradley Beach, NJ | seaglassinsights.com
+        </p>
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem" }}>
+          &copy; 2026 Sea Glass Insights. All rights reserved.
+        </p>
       </footer>
+
     </div>
   );
 }
