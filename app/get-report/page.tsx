@@ -107,29 +107,16 @@ export default function GetReportPage() {
           Tell Us About Your Business
         </h1>
         <p style={{
-          fontFamily: CORMORANT,
-          fontSize: "clamp(1.2rem, 2.5vw, 1.5rem)",
-          fontWeight: 600,
-          color: "white",
-          marginBottom: "12px",
-        }}>
-          Share what you know. We&rsquo;ll find what matters.
-        </p>
-        <p style={{
           fontFamily: MONTSERRAT,
           color: "#CBD5E1",
           maxWidth: "560px",
-          margin: "0 auto",
+          margin: "0 auto 48px",
           fontSize: "0.88rem",
           lineHeight: 1.75,
         }}>
           Please only share what you are comfortable sharing. Your responses will be used to generate
           your report with the assistance of AI.
         </p>
-
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", marginTop: "48px", marginBottom: "-2px" }}>
-          <path d="M0,20 C480,60 960,0 1440,20 L1440,60 L0,60 Z" fill="#F4EADA" />
-        </svg>
       </div>
 
       {/* ── Form ── */}
@@ -200,7 +187,7 @@ export default function GetReportPage() {
           {/* ── 10 Questions ── */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8">
             <h2 style={{ fontFamily: CORMORANT, color: NAVY, fontSize: "1.4rem", fontWeight: 700 }}>
-              The 10 Questions
+              Share what you know. We&rsquo;ll find what matters.
             </h2>
 
             {QUESTIONS.map(({ id, label }) => {
