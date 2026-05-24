@@ -37,7 +37,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Create Stripe Checkout Session with the order ID
-    const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
+    // Derive base URL from the actual request so it's correct in every environment
+    // (avoids NEXT_PUBLIC_URL being http://localhost:3000 in production live mode)
+    const proto = req.headers.get("x-forwarded-proto") ?? "http";
+    const host  = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_URL ?? `${proto}://${host}`;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
