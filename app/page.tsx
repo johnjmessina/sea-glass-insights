@@ -28,13 +28,31 @@ export default function Home() {
     >
 
       {/* ── 1. NAV ── */}
-      <header style={{ backgroundColor: SAND, padding: "20px 40px" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/logo.png"
-          alt="Sea Glass Insights"
-          style={{ height: "auto", maxHeight: "60px", width: "auto" }}
-        />
+      <header
+        style={{
+          backgroundColor: SAND,
+          padding: "20px 40px",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
+        <Link
+          href="/get-report"
+          style={{
+            fontFamily: "var(--font-montserrat)",
+            fontWeight: 600,
+            fontSize: "0.9rem",
+            color: NAVY,
+            textDecoration: "none",
+            border: `1.5px solid ${NAVY}`,
+            padding: "8px 22px",
+            borderRadius: "9999px",
+            letterSpacing: "0.02em",
+          }}
+        >
+          Get Your Report
+        </Link>
       </header>
 
       {/* ── 2. HERO ── */}
@@ -42,15 +60,15 @@ export default function Home() {
         style={{
           backgroundColor: SAND,
           textAlign: "center",
-          padding: "64px 24px 80px",
+          padding: "48px 24px 80px",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/logo.png"
+          src="/logos/logo_sand.png"
           alt="Sea Glass Insights"
           style={{
-            maxWidth: "260px",
+            maxWidth: "480px",
             width: "100%",
             height: "auto",
             margin: "0 auto 40px",
