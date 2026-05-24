@@ -79,14 +79,12 @@ export default function GetReportPage() {
       {/* ── Nav ── */}
       <header style={{ backgroundColor: NAVY, padding: "18px 32px", display: "flex", alignItems: "center" }}>
         <Link href="/" style={{ textDecoration: "none" }}>
-          <span style={{ fontFamily: CORMORANT, fontSize: "1.4rem", fontWeight: 700, color: "white", letterSpacing: "0.02em" }}>
-            Sea Glass Insights
-          </span>
+          <img src="/logos/logo_negative_transparent.png" alt="Sea Glass Insights" style={{ width: "160px", height: "auto" }} />
         </Link>
       </header>
 
       {/* ── Page header ── */}
-      <div style={{ backgroundColor: NAVY, color: "white", textAlign: "center", padding: "56px 24px 0", borderRadius: "0 0 2rem 2rem" }}>
+      <div style={{ backgroundColor: NAVY, color: "white", textAlign: "center", padding: "56px 24px 0" }}>
         <p style={{
           fontFamily: MONTSERRAT,
           color: TEAL,
@@ -96,7 +94,7 @@ export default function GetReportPage() {
           textTransform: "uppercase",
           marginBottom: "16px",
         }}>
-          Step 1 of 2 — Tell Us About Your Business
+          STEP 1 OF 2
         </p>
         <h1 style={{
           fontFamily: CORMORANT,
@@ -109,20 +107,29 @@ export default function GetReportPage() {
           Tell Us About Your Business
         </h1>
         <p style={{
+          fontFamily: CORMORANT,
+          fontSize: "clamp(1.2rem, 2.5vw, 1.5rem)",
+          fontWeight: 600,
+          color: "white",
+          marginBottom: "12px",
+        }}>
+          Share what you know. We&rsquo;ll find what matters.
+        </p>
+        <p style={{
           fontFamily: MONTSERRAT,
           color: "#CBD5E1",
-          maxWidth: "600px",
-          margin: "0 auto 40px",
-          fontSize: "0.95rem",
+          maxWidth: "560px",
+          margin: "0 auto",
+          fontSize: "0.88rem",
           lineHeight: 1.75,
         }}>
-          Answer 10 focused questions about your market, customers, and competitors.
-          The more detail you share, the more refined your report will be. Please only
-          share what you are comfortable sharing. Your responses will be used to generate
+          Please only share what you are comfortable sharing. Your responses will be used to generate
           your report with the assistance of AI.
         </p>
 
-        <div style={{ paddingBottom: "48px" }} />
+        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: "block", width: "100%", marginTop: "48px", marginBottom: "-2px" }}>
+          <path d="M0,20 C480,60 960,0 1440,20 L1440,60 L0,60 Z" fill="#F4EADA" />
+        </svg>
       </div>
 
       {/* ── Form ── */}
