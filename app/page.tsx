@@ -34,7 +34,6 @@ export default function Home() {
           src="/images/logo.png"
           alt="Sea Glass Insights"
           style={{ height: "auto", maxHeight: "60px", width: "auto" }}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
         />
       </header>
 
@@ -57,7 +56,6 @@ export default function Home() {
             margin: "0 auto 40px",
             display: "block",
           }}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
         />
         <h1
           style={{
