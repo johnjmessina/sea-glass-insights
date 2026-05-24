@@ -4,14 +4,14 @@ import { supabase } from "@/lib/supabase";
 import { generateReport } from "@/lib/reportGenerator";
 import type { Order } from "@/lib/supabase";
 
-if (!process.env.RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
-if (!process.env.RESEND_FROM_EMAIL) throw new Error("Missing RESEND_FROM_EMAIL");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM   = `Sea Glass Insights <${process.env.RESEND_FROM_EMAIL}>`;
-
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
+    if (!process.env.RESEND_FROM_EMAIL) throw new Error("Missing RESEND_FROM_EMAIL");
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const FROM   = `Sea Glass Insights <${process.env.RESEND_FROM_EMAIL}>`;
+
     const { orderId } = await req.json();
     if (!orderId)
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
