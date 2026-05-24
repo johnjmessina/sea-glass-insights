@@ -65,7 +65,7 @@ export default function Home() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logos/logo_sand.png"
+          src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
           style={{
             maxWidth: "480px",
