@@ -31,14 +31,14 @@ const SECTIONS: { key: keyof AIDraft; label: string }[] = [
 const QUESTIONS = [
   "What is your business name and what do you sell or offer?",
   "How long have you been in business, and where are you located?",
-  "Who is your ideal customer?",
-  "Who are your top 2–3 competitors?",
+  "Who is your ideal customer? (age, income, lifestyle, problem they have)",
+  "Who are your top 2–3 competitors? (names, or describe them)",
   "What makes you different from those competitors?",
   "What is the biggest challenge you are facing right now?",
   "What does success look like for you in the next 12 months?",
   "What marketing are you currently doing, if any?",
-  "What do you wish you knew about your market or customers?",
-  "Is there anything else you want the report to focus on?",
+  "What do you wish you knew about your market or customers that you don't know today?",
+  "Is there anything else you want the report to focus on or address?",
 ];
 
 // ── Login Gate ────────────────────────────────────────────────────────────────
@@ -97,9 +97,175 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
   );
 }
 
+// ── Manual Order Form ─────────────────────────────────────────────────────────
+
+type ManualForm = {
+  customerName: string; businessName: string; email: string; location: string;
+  q1: string; q2: string; q3: string; q4: string; q5: string;
+  q6: string; q7: string; q8: string; q9: string; q10: string;
+};
+
+const MANUAL_EMPTY: ManualForm = {
+  customerName: "", businessName: "", email: "", location: "",
+  q1: "", q2: "", q3: "", q4: "", q5: "",
+  q6: "", q7: "", q8: "", q9: "", q10: "",
+};
+
+function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) => void; onCancel: () => void }) {
+  const [form, setForm]       = useState<ManualForm>(MANUAL_EMPTY);
+  const [submitting, setSub]  = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+
+  function set(field: keyof ManualForm, value: string) {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.customerName.trim() || !form.businessName.trim() || !form.email.trim()) {
+      setError("Customer name, business name, and email are required.");
+      return;
+    }
+    setSub(true);
+    setError(null);
+    try {
+      // Prepend location to Q2 if provided and Q2 is blank
+      const q2Val = form.location.trim()
+        ? form.q2.trim()
+          ? `Located in ${form.location.trim()}.\n\n${form.q2}`
+          : `Located in ${form.location.trim()}.`
+        : form.q2;
+
+      const res  = await fetch("/api/manual-order", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          customerName: form.customerName,
+          businessName: form.businessName,
+          email:        form.email,
+          q1: form.q1, q2: q2Val,  q3: form.q3,
+          q4: form.q4, q5: form.q5, q6: form.q6,
+          q7: form.q7, q8: form.q8, q9: form.q9, q10: form.q10,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to create order");
+      onSuccess(data as Order);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setSub(false);
+    }
+  }
+
+  const inputCls = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam placeholder-gray-300";
+  const labelCls = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <button onClick={onCancel} className="text-sm text-gray-400 hover:text-navy transition-colors">
+          ← All Orders
+        </button>
+        <div className="h-4 w-px bg-gray-200" />
+        <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
+          Create Manual Order
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
+
+        {/* Contact info card */}
+        <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
+          <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
+            Contact Information
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Customer Name <span className="text-red-400 normal-case font-normal tracking-normal">*</span></label>
+              <input type="text" placeholder="Jane Smith" value={form.customerName}
+                onChange={e => set("customerName", e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Business Name <span className="text-red-400 normal-case font-normal tracking-normal">*</span></label>
+              <input type="text" placeholder="Acme Coffee Co." value={form.businessName}
+                onChange={e => set("businessName", e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Customer Email <span className="text-red-400 normal-case font-normal tracking-normal">*</span></label>
+              <input type="email" placeholder="jane@acmecoffee.com" value={form.email}
+                onChange={e => set("email", e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Location</label>
+              <input type="text" placeholder="Bradley Beach, NJ" value={form.location}
+                onChange={e => set("location", e.target.value)} className={inputCls} />
+              <p className="text-xs text-gray-400 mt-1">Prepended to Answer 2 automatically.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Intake answers card */}
+        <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+          <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
+            Intake Answers
+          </h3>
+          <p className="text-xs text-gray-400 -mt-2">All fields optional — fill in whatever the client shared.</p>
+
+          {(["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"] as (keyof ManualForm)[]).map((key, i) => (
+            <div key={key}>
+              <label className={labelCls}>
+                <span className="text-seafoam mr-1">Q{i + 1}</span> — {QUESTIONS[i]}
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Write as much detail as you have…"
+                value={form[key]}
+                onChange={e => set(key, e.target.value)}
+                className={`${inputCls} resize-y`}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-3 text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 pb-6">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="bg-seafoam text-navy font-semibold text-sm px-8 py-2.5 rounded-full hover:bg-seafoam-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? "Creating…" : "Create Order"}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-sm text-gray-400 hover:text-navy transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 // ── Order List ────────────────────────────────────────────────────────────────
 
-function OrderList({ orders, onSelect }: { orders: Order[]; onSelect: (o: Order) => void }) {
+function OrderList({ orders, onSelect, onCreateManual }: {
+  orders: Order[];
+  onSelect: (o: Order) => void;
+  onCreateManual: () => void;
+}) {
   const paid = orders.filter(o => o.status !== "pending_payment");
   return (
     <div>
@@ -107,9 +273,17 @@ function OrderList({ orders, onSelect }: { orders: Order[]; onSelect: (o: Order)
         <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
           Orders
         </h2>
-        <span className="text-sm text-gray-400">
-          {paid.length} paid order{paid.length !== 1 ? "s" : ""}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-400">
+            {paid.length} order{paid.length !== 1 ? "s" : ""}
+          </span>
+          <button
+            onClick={onCreateManual}
+            className="bg-navy text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-navy-dark transition-colors"
+          >
+            + Create Manual Order
+          </button>
+        </div>
       </div>
       {paid.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 p-12 text-center text-gray-400">
@@ -728,10 +902,11 @@ function EditActions({ onApply, onCancel }: { onApply: () => void; onCancel: () 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const [authed, setAuthed]     = useState(false);
-  const [orders, setOrders]     = useState<Order[]>([]);
-  const [selected, setSelected] = useState<Order | null>(null);
-  const [loading, setLoading]   = useState(false);
+  const [authed, setAuthed]           = useState(false);
+  const [orders, setOrders]           = useState<Order[]>([]);
+  const [selected, setSelected]       = useState<Order | null>(null);
+  const [showManual, setShowManual]   = useState(false);
+  const [loading, setLoading]         = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -749,6 +924,13 @@ export default function DashboardPage() {
   }, [authed, fetchOrders]);
 
   if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
+
+  function handleManualSuccess(order: Order) {
+    // Add the new order to the list and jump straight to its detail view
+    setOrders(prev => [order, ...prev]);
+    setShowManual(false);
+    setSelected(order);
+  }
 
   return (
     <div className="min-h-screen bg-sand">
@@ -777,10 +959,19 @@ export default function DashboardPage() {
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-4 border-seafoam border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : showManual ? (
+          <ManualOrderForm
+            onSuccess={handleManualSuccess}
+            onCancel={() => setShowManual(false)}
+          />
         ) : selected ? (
           <OrderDetail order={selected} onBack={() => { setSelected(null); fetchOrders(); }} />
         ) : (
-          <OrderList orders={orders} onSelect={setSelected} />
+          <OrderList
+            orders={orders}
+            onSelect={setSelected}
+            onCreateManual={() => setShowManual(true)}
+          />
         )}
       </main>
     </div>
