@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
-      return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY", detail: "env var not set" }, { status: 500 });
+      return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY" }, { status: 500 });
     }
 
     // 1. Save order to Supabase first (status: pending_payment)
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     if (dbError) {
       console.error("Supabase insert error:", dbError);
-      return NextResponse.json({ error: "Failed to save order", detail: dbError.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to save order" }, { status: 500 });
     }
 
     // 2. Build base URL from request headers
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     if (!stripeRes.ok || !stripeData.url) {
       const detail = stripeData.error?.message ?? `Stripe status ${stripeRes.status}`;
       console.error("Stripe API error:", detail);
-      return NextResponse.json({ error: "Failed to create checkout session", detail }, { status: 500 });
+      return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
     }
 
     // 4. Attach the Stripe session ID to the order
@@ -92,8 +92,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: stripeData.url });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
     console.error("Checkout session error:", err);
-    return NextResponse.json({ error: "Failed to create checkout session", detail: msg }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
   }
 }
