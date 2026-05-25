@@ -53,15 +53,22 @@ export interface AIDraft {
   recommendations:       Recommendation[];
 }
 
-// ── AnalystCommentary (kept for DB backwards-compat) ──────────────────────────
+// ── SectionMeta — per-section analyst notes + lock state ─────────────────────
+
+export interface SectionMeta {
+  notes:  string;
+  locked: boolean;
+}
+
+// ── AnalystCommentary — stored in analyst_commentary jsonb column ─────────────
 
 export interface AnalystCommentary {
-  snapshot?:              string;
-  customer_profile?:      string;
-  competitive_landscape?: string;
-  positioning?:           string;
-  insights?:              string;
-  recommendations?:       string;
+  snapshot?:              SectionMeta;
+  customer_profile?:      SectionMeta;
+  competitive_landscape?: SectionMeta;
+  positioning?:           SectionMeta;
+  insights?:              SectionMeta;
+  recommendations?:       SectionMeta;
 }
 
 // ── Order ─────────────────────────────────────────────────────────────────────
