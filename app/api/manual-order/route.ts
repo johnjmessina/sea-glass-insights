@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
         customer_name:  customerName,
         business_name:  businessName,
         email,
-        status: "new",
-        // analyst_note: "Manual Order" — re-enable after adding column to Supabase
+        status:       "new",
+        analyst_note: "Manual Order",
         q1:  q1  || null,
         q2:  q2  || null,
         q3:  q3  || null,
