@@ -96,4 +96,5 @@ export interface Order {
   ai_draft:           AIDraft | null;
   analyst_commentary: AnalystCommentary | null;
   analyst_note:       string | null;
+  executive_summary:  string | null;
 }

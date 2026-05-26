@@ -332,8 +332,9 @@ function OldFormatFallback({ text }: { text: string }) {
 function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: () => void }) {
   const [order, setOrder]           = useState<Order>(initialOrder);
   const [draft, setDraft]           = useState<AIDraft | null>(initialOrder.ai_draft);
-  const [analystNote, setAnalystNote] = useState(initialOrder.analyst_note === "Manual Order" ? "" : (initialOrder.analyst_note ?? ""));
-  const [sectionMeta, setSectionMeta] = useState<MetaMap>(() => initMeta(initialOrder));
+  const [analystNote, setAnalystNote]           = useState(initialOrder.analyst_note === "Manual Order" ? "" : (initialOrder.analyst_note ?? ""));
+  const [executiveSummary, setExecutiveSummary] = useState(initialOrder.executive_summary ?? "");
+  const [sectionMeta, setSectionMeta]           = useState<MetaMap>(() => initMeta(initialOrder));
 
   // Edit state (unified: single textarea buffer for all sections)
   const [editingSection, setEditingSection] = useState<SectionKey | null>(null);
@@ -356,16 +357,19 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   // Debounce refs
   const metaSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const noteSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const execSaveTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     return () => {
       if (metaSaveTimer.current) clearTimeout(metaSaveTimer.current);
       if (noteSaveTimer.current) clearTimeout(noteSaveTimer.current);
+      if (execSaveTimer.current) clearTimeout(execSaveTimer.current);
     };
   }, []);
 
-  const allLocked   = SECTIONS.every(({ key }) => sectionMeta[key].locked);
-  const lockedCount = SECTIONS.filter(({ key }) => sectionMeta[key].locked).length;
+  const sectionsLocked = SECTIONS.every(({ key }) => sectionMeta[key].locked);
+  const allLocked      = sectionsLocked && executiveSummary.trim() !== "";
+  const lockedCount    = SECTIONS.filter(({ key }) => sectionMeta[key].locked).length;
 
   const answers = [
     order.q1, order.q2, order.q3, order.q4, order.q5,
@@ -409,6 +413,18 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId: order.id, analyst_note: note }),
+      });
+      flashAutoSaved();
+    }, 2000);
+  }
+
+  function scheduleExecSave(text: string) {
+    if (execSaveTimer.current) clearTimeout(execSaveTimer.current);
+    execSaveTimer.current = setTimeout(async () => {
+      await fetch("/api/update-order-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, executive_summary: text }),
       });
       flashAutoSaved();
     }, 2000);
@@ -532,6 +548,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
           orderId:            order.id,
           ai_draft:           draft,
           analyst_note:       analystNote,
+          executive_summary:  executiveSummary,
           analyst_commentary: sectionMeta,
           status:             newStatus,
         }),
@@ -915,6 +932,28 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
             {/* Six sections */}
             {SECTIONS.map(({ key, label }) => renderSection(key, label))}
 
+            {/* Executive Summary */}
+            <div className="border-t-2 border-dashed border-seafoam/40 pt-6 mt-2">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1 h-5 bg-seafoam rounded-full" />
+                <h4 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                  Executive Summary
+                </h4>
+              </div>
+              <p className="text-xs text-gray-400 ml-3 mb-3 leading-relaxed">
+                2–3 sentences capturing where they stand, their biggest opportunity, and their most urgent action. Appears at the top of the report. <strong className="text-amber-600">Required to generate the final report.</strong>
+              </p>
+              <textarea
+                rows={3}
+                placeholder="e.g. Rapid Recovery Services holds a strong position in the local restoration market, built on owner accountability and fast response times that national franchises cannot match. The biggest opportunity is formalizing referral relationships with insurance adjusters — a structured incentive program could double inbound volume with minimal spend. The most urgent action is establishing a professional online presence to capture organic search traffic that currently defaults to competitors."
+                value={executiveSummary}
+                onChange={e => { setExecutiveSummary(e.target.value); scheduleExecSave(e.target.value); }}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed ${
+                  executiveSummary.trim() === "" ? "border-amber-300 bg-amber-50/40" : "border-gray-200"
+                }`}
+              />
+            </div>
+
             {/* Analyst closing note */}
             <div className="border-t-2 border-dashed border-seagreen/30 pt-6 mt-2">
               <div className="flex items-center gap-2 mb-1">
@@ -948,7 +987,9 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
                 </button>
                 {!allLocked && (
                   <p className="text-xs text-amber-600 mt-1.5 font-medium">
-                    Lock all 6 sections to enable — {lockedCount} of {SECTIONS.length} locked
+                    {!sectionsLocked
+                      ? `Lock all 6 sections to enable — ${lockedCount} of ${SECTIONS.length} locked`
+                      : "Executive Summary is required before generating the report"}
                   </p>
                 )}
               </div>

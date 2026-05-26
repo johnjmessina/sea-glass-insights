@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
-  const { orderId, status, analyst_commentary, ai_draft, analyst_note } = await req.json();
+  const { orderId, status, analyst_commentary, ai_draft, analyst_note, executive_summary } = await req.json();
 
   if (!orderId) {
     return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   if (analyst_commentary !== undefined)  updates.analyst_commentary  = analyst_commentary;
   if (ai_draft !== undefined)            updates.ai_draft            = ai_draft;
   if (analyst_note !== undefined)        updates.analyst_note        = analyst_note;
+  if (executive_summary !== undefined)   updates.executive_summary   = executive_summary;
 
   const { error } = await supabase
     .from("orders")
