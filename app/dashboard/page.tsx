@@ -1047,6 +1047,7 @@ type Observation = { label: string; title: string; body: string };
 type PulseForm = {
   businessName: string;
   location: string;
+  introText: string;
   obs: [Observation, Observation, Observation];
   ctaPrice: string;
   analystName: string;
@@ -1059,17 +1060,36 @@ const EMPTY_OBS: Observation = { label: "", title: "", body: "" };
 const PULSE_DEFAULTS: PulseForm = {
   businessName: "",
   location: "",
-  obs: [
-    { ...EMPTY_OBS },
-    { ...EMPTY_OBS },
-    { ...EMPTY_OBS },
-  ],
+  introText: "A few observations from a quick look at your market. This is a fraction of what a full Market Intelligence Report uncovers.",
+  obs: [{ ...EMPTY_OBS }, { ...EMPTY_OBS }, { ...EMPTY_OBS }],
   ctaPrice: "$199",
   analystName: "John Messina",
   phone: "",
   email: "john@seaglassinsights.com",
   website: "seaglassinsights.com",
 };
+
+// SVG logo-mark matching v4 design (overlapping circles + line chart)
+function LogoMark() {
+  return (
+    <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="17" r="10" fill="#00CED1" fillOpacity="0.45"/>
+      <circle cx="23" cy="14" r="9" fill="#1a5c8a" fillOpacity="0.65"/>
+      <circle cx="20" cy="24" r="8" fill="#00CED1" fillOpacity="0.3"/>
+      <path d="M7 30 L31 30" stroke="#00CED1" strokeWidth="1.2" strokeLinecap="round" strokeOpacity="0.35"/>
+      <path d="M11 30 L15 23 L19 27 L23 19 L28 22" stroke="#F4EADA" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.6"/>
+    </svg>
+  );
+}
+
+const BACK_SERVICES = [
+  { name: "Market Intelligence Report", price: "$199" },
+  { name: "Social Media Audit",          price: "$199" },
+  { name: "Secret Shopping",             price: "$299" },
+  { name: "Deep Dive Report",            price: "$399" },
+  { name: "Voice of Customer Survey",    price: "$499" },
+  { name: "AI Starter Kit",              price: "$99"  },
+];
 
 function BusinessPulse() {
   const [form, setForm]       = useState<PulseForm>(PULSE_DEFAULTS);
@@ -1088,18 +1108,26 @@ function BusinessPulse() {
   const inp = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam";
   const lbl = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
 
+  // Shared inline style constants for the card
+  const CG  = "'Cormorant Garamond', Georgia, serif";
+  const MT  = "'Montserrat', sans-serif";
+  const NAVY_HEX = "#0A2F61";
+  const TEAL_HEX = "#00CED1";
+  const SAND_HEX = "#F4EADA";
+
   return (
     <div>
-      {/* Print CSS — only the card renders when printing */}
+      {/* Print CSS — only #pulse-card renders when printing */}
       <style>{`
         @media print {
           body * { visibility: hidden !important; }
           #pulse-card, #pulse-card * { visibility: visible !important; }
-          #pulse-card { position: fixed !important; top: 0; left: 0; width: 100%; }
-          @page { margin: 0; size: letter portrait; }
+          #pulse-card { position: fixed !important; top: 0; left: 0; width: 100%; margin: 0; }
+          @page { margin: 0; size: 620px auto; }
         }
       `}</style>
 
+      {/* Toolbar */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-navy font-bold text-lg" style={{ fontFamily: "Georgia, serif" }}>Business Pulse</h2>
@@ -1129,7 +1157,7 @@ function BusinessPulse() {
           {/* Business info */}
           <div className="bg-white rounded-xl border border-gray-100 p-6">
             <h3 className="text-navy font-semibold text-sm mb-4" style={{ fontFamily: "Georgia, serif" }}>Business Info</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className={lbl}>Business Name</label>
                 <input className={inp} value={form.businessName} onChange={e => setField("businessName", e.target.value)} placeholder="e.g. Anchor Coffee Co." />
@@ -1138,6 +1166,10 @@ function BusinessPulse() {
                 <label className={lbl}>Location</label>
                 <input className={inp} value={form.location} onChange={e => setField("location", e.target.value)} placeholder="e.g. Asbury Park, NJ" />
               </div>
+            </div>
+            <div>
+              <label className={lbl}>Intro Text <span className="normal-case text-gray-400">(italic paragraph below the header)</span></label>
+              <textarea rows={2} className={inp + " resize-y"} value={form.introText} onChange={e => setField("introText", e.target.value)} />
             </div>
           </div>
 
@@ -1149,12 +1181,12 @@ function BusinessPulse() {
               </h3>
               <div className="space-y-3">
                 <div>
-                  <label className={lbl}>Label <span className="normal-case text-gray-400">(e.g. Customer Experience, Competitive Edge)</span></label>
+                  <label className={lbl}>Label <span className="normal-case text-gray-400">(e.g. Customer Experience)</span></label>
                   <input className={inp} value={form.obs[i].label} onChange={e => setObs(i, "label", e.target.value)} placeholder="e.g. Customer Experience" />
                 </div>
                 <div>
                   <label className={lbl}>Title</label>
-                  <input className={inp} value={form.obs[i].title} onChange={e => setObs(i, "title", e.target.value)} placeholder="e.g. A Loyal Base Drives Consistent Revenue" />
+                  <input className={inp} value={form.obs[i].title} onChange={e => setObs(i, "title", e.target.value)} placeholder="e.g. Your reviews almost never mention the product." />
                 </div>
                 <div>
                   <label className={lbl}>Body</label>
@@ -1164,7 +1196,7 @@ function BusinessPulse() {
             </div>
           ))}
 
-          {/* CTA + Back */}
+          {/* Footer + Back */}
           <div className="bg-white rounded-xl border border-gray-100 p-6">
             <h3 className="text-navy font-semibold text-sm mb-4" style={{ fontFamily: "Georgia, serif" }}>Footer & Back Panel</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1191,135 +1223,154 @@ function BusinessPulse() {
             </div>
           </div>
 
-          <button
-            onClick={() => setPreview(true)}
-            className="w-full bg-navy text-white font-semibold text-sm py-3 rounded-full hover:bg-navy-dark transition-colors"
-          >
+          <button onClick={() => setPreview(true)} className="w-full bg-navy text-white font-semibold text-sm py-3 rounded-full hover:bg-navy-dark transition-colors">
             Generate Business Pulse →
           </button>
         </div>
       ) : (
-        /* ── CARD PREVIEW ── */
-        <div id="pulse-card">
-          {/* FRONT */}
-          <div style={{
-            width: "100%",
-            maxWidth: "720px",
-            margin: "0 auto 0",
-            fontFamily: "'Montserrat', sans-serif",
-            pageBreakAfter: "always",
-            breakAfter: "page",
-          }}>
+        /* ── CARD PREVIEW — matches v4 design exactly ── */
+        <div id="pulse-card" style={{ fontFamily: MT }}>
+
+          {/* ─ FRONT ─ */}
+          <p style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#aaa", marginBottom: "14px" }}>Front</p>
+          <div style={{ width: "620px", background: NAVY_HEX, borderRadius: "3px", overflow: "hidden", marginBottom: "32px" }}>
+
             {/* Header */}
-            <div style={{ backgroundColor: "#0A2F61", padding: "28px 36px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ padding: "36px 44px 28px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "0.7rem", fontWeight: 600, color: "#00CED1", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "4px" }}>
+                <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: TEAL_HEX, marginBottom: "10px" }}>
                   Business Pulse
-                </p>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.8rem", fontWeight: 700, color: "#FFFFFF", margin: 0, lineHeight: 1.15 }}>
-                  {form.businessName || "Your Business Name"}
+                </div>
+                <h1 style={{ fontFamily: CG, fontSize: "30px", fontWeight: 700, color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                  Three things we<br />noticed about<br />
+                  <span style={{ color: TEAL_HEX }}>{form.businessName || "Your Business"}</span>
                 </h1>
+              </div>
+              <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+                <LogoMark />
+                <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                  {form.businessName || "Business Name"}
+                </div>
                 {form.location && (
-                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "#93C5FD", marginTop: "4px", fontWeight: 400 }}>
+                  <div style={{ fontFamily: MT, fontSize: "10px", color: "rgba(255,255,255,0.2)" }}>
                     {form.location}
-                  </p>
+                  </div>
                 )}
               </div>
-              <img src="/logos/logo_icon_white.png" alt="Sea Glass Insights" style={{ height: "40px", width: "auto", opacity: 0.9 }}
-                onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-              />
             </div>
 
-            {/* Observations */}
-            <div style={{ backgroundColor: "#F4EADA", padding: "0 36px" }}>
+            {/* Body */}
+            <div style={{ padding: "32px 44px", background: NAVY_HEX }}>
+              <p style={{ fontFamily: CG, fontSize: "16px", fontStyle: "italic", color: "rgba(244,234,218,0.55)", lineHeight: 1.7, marginBottom: "30px" }}>
+                {form.introText}
+              </p>
+
               {form.obs.map((obs, i) => (
-                <div key={i} style={{ padding: "22px 0", borderBottom: i < 2 ? "1px solid rgba(10,47,97,0.12)" : "none" }}>
-                  {obs.label && (
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.62rem", fontWeight: 600, color: "#00CED1", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "5px" }}>
-                      {obs.label}
-                    </p>
-                  )}
-                  {obs.title && (
-                    <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.15rem", fontWeight: 700, color: "#0A2F61", marginBottom: "7px", lineHeight: 1.25 }}>
-                      {obs.title}
-                    </h2>
-                  )}
-                  {obs.body && (
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.78rem", color: "#374151", lineHeight: 1.75 }}>
-                      {obs.body}
-                    </p>
-                  )}
-                  {!obs.label && !obs.title && !obs.body && (
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.78rem", color: "#9CA3AF", fontStyle: "italic" }}>
-                      Observation {i + 1} — fill in the form to populate this section.
-                    </p>
-                  )}
+                <div
+                  key={i}
+                  style={{ display: "flex", gap: "22px", marginBottom: i < 2 ? "26px" : 0, paddingBottom: i < 2 ? "26px" : 0, borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
+                >
+                  {/* Ghost number */}
+                  <div style={{ fontFamily: CG, fontSize: "40px", fontWeight: 700, color: "rgba(0,206,209,0.15)", lineHeight: 1, flexShrink: 0, width: "34px", marginTop: "-4px" }}>
+                    {i + 1}
+                  </div>
+                  <div>
+                    {obs.label && (
+                      <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: TEAL_HEX, marginBottom: "6px" }}>
+                        {obs.label}
+                      </div>
+                    )}
+                    {obs.title ? (
+                      <div style={{ fontFamily: CG, fontSize: "19px", fontWeight: 700, color: SAND_HEX, marginBottom: "8px", lineHeight: 1.3 }}>
+                        {obs.title}
+                      </div>
+                    ) : (
+                      <div style={{ fontFamily: CG, fontSize: "19px", color: "rgba(244,234,218,0.2)", marginBottom: "8px", fontStyle: "italic" }}>
+                        Observation {i + 1} title
+                      </div>
+                    )}
+                    {obs.body && (
+                      <div style={{ fontFamily: MT, fontSize: "12px", fontWeight: 300, color: "rgba(244,234,218,0.5)", lineHeight: 1.8 }}>
+                        {obs.body}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Footer strip */}
-            <div style={{ backgroundColor: "#0A2F61", padding: "16px 36px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {/* Footer — TEAL */}
+            <div style={{ background: TEAL_HEX, padding: "20px 44px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.65rem", color: "#93C5FD", marginBottom: "2px", letterSpacing: "0.04em" }}>
-                  Market Intelligence Report
-                </p>
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.1rem", fontWeight: 700, color: "#FFFFFF" }}>
-                  Get Yours — {form.ctaPrice}
-                </p>
+                <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(10,47,97,0.6)", marginBottom: "4px" }}>
+                  Want the full picture?
+                </div>
+                <div style={{ fontFamily: CG, fontSize: "16px", fontWeight: 700, color: NAVY_HEX }}>
+                  Market Intelligence Report — your complete edge
+                </div>
               </div>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.65rem", color: "#00CED1", fontWeight: 500 }}>
-                seaglassinsights.com
-              </p>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontFamily: MT, fontSize: "24px", fontWeight: 600, color: NAVY_HEX, lineHeight: 1 }}>
+                  {form.ctaPrice}
+                </div>
+                <div style={{ fontFamily: MT, fontSize: "9px", color: "rgba(10,47,97,0.5)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "3px" }}>
+                  Flat fee · 48–72 hrs
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* BACK */}
-          <div style={{
-            width: "100%",
-            maxWidth: "720px",
-            margin: "0 auto",
-            backgroundColor: "#F4EADA",
-            fontFamily: "'Montserrat', sans-serif",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "480px",
-            padding: "48px 36px",
-            textAlign: "center",
-          }}>
-            <img
-              src="/logos/logo_transparent_FINAL.png"
-              alt="Sea Glass Insights"
-              style={{ maxWidth: "280px", width: "100%", height: "auto", marginBottom: "20px" }}
-              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-            />
-            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", fontStyle: "italic", color: "#0A2F61", marginBottom: "28px", opacity: 0.7 }}>
-              Refining the Edge.
-            </p>
+          {/* ─ BACK ─ */}
+          <p style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
+          <div style={{ width: "620px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", display: "flex" }}>
 
-            <div style={{ width: "40px", height: "2px", backgroundColor: "#00CED1", marginBottom: "28px" }} />
+            {/* Back left — navy panel */}
+            <div style={{ background: NAVY_HEX, padding: "40px 32px", width: "210px", flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ textAlign: "center" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logos/logo_negative_transparent.png"
+                  alt="Sea Glass Insights"
+                  style={{ width: "120px", height: "auto", marginBottom: "12px" }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                />
+                <div style={{ fontFamily: CG, fontSize: "17px", fontWeight: 700, color: "#fff", lineHeight: 1.2, marginBottom: "4px" }}>
+                  Sea Glass Insights
+                </div>
+              </div>
+              <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: "rgba(244,234,218,0.45)", lineHeight: 2, textAlign: "center" }}>
+                <div>{form.analystName}</div>
+                {form.phone && <div>{form.phone}</div>}
+                <div style={{ color: TEAL_HEX }}>{form.email}</div>
+                <div style={{ color: TEAL_HEX }}>{form.website}</div>
+              </div>
+            </div>
 
-            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.4rem", fontWeight: 700, color: "#0A2F61", marginBottom: "6px" }}>
-              {form.analystName}
-            </p>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "#6B7280", marginBottom: "20px" }}>
-              Founder, Sea Glass Insights
-            </p>
+            {/* Back right — cream panel */}
+            <div style={{ padding: "40px 36px", flex: 1 }}>
+              <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: NAVY_HEX, opacity: 0.5, marginBottom: "14px" }}>
+                What we offer
+              </div>
+              <div style={{ fontFamily: CG, fontSize: "21px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.3, marginBottom: "12px" }}>
+                Professional research. Real analyst review. Flat fee.
+              </div>
+              <div style={{ fontFamily: MT, fontSize: "11px", fontWeight: 300, color: "#555", lineHeight: 1.8, marginBottom: "20px" }}>
+                Every report is reviewed by a human analyst with over ten years of market research experience before it reaches you.
+              </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "center" }}>
-              {form.phone && (
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.82rem", color: "#374151" }}>
-                  {form.phone}
-                </p>
-              )}
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.82rem", color: "#374151" }}>
-                {form.email}
-              </p>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.82rem", color: "#00CED1", fontWeight: 500 }}>
-                {form.website}
-              </p>
+              <ul style={{ listStyle: "none", padding: 0, marginBottom: "22px" }}>
+                {BACK_SERVICES.map(svc => (
+                  <li key={svc.name} style={{ display: "flex", justifyContent: "space-between", fontFamily: MT, fontSize: "11px", fontWeight: 400, color: "#333", padding: "6px 0", borderBottom: "1px solid rgba(10,47,97,0.08)" }}>
+                    <span>{svc.name}</span>
+                    <span style={{ color: NAVY_HEX, fontWeight: 600 }}>{svc.price}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div style={{ display: "inline-block", background: NAVY_HEX, padding: "10px 18px", borderRadius: "2px", fontFamily: MT, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: SAND_HEX }}>
+                seaglassinsights.com{" "}
+                <span style={{ opacity: 0.6 }}>→</span>
+              </div>
             </div>
           </div>
         </div>
