@@ -174,21 +174,6 @@ export default function Home() {
             ))}
           </div>
 
-          <div style={{ textAlign: "center" }}>
-            <Link
-              href="/services"
-              style={{
-                fontFamily: "var(--font-montserrat)",
-                fontSize: "0.88rem",
-                fontWeight: 600,
-                color: NAVY,
-                textDecoration: "underline",
-                textUnderlineOffset: "3px",
-              }}
-            >
-              View all services →
-            </Link>
-          </div>
         </div>
       </section>
 
