@@ -13,6 +13,67 @@ const GRAY  = "#6B7280";
 const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
+// Bundle tooltip text keyed by bundle name
+const BUNDLE_DETAILS: Record<string, string> = {
+  "Starter Intelligence": "Starter Intelligence: MIR + Social Media Audit — $349 (save $49)",
+  "Full Picture":         "Full Picture: MIR + Secret Shopping — $449 (save $49)",
+  "Deep Intelligence":    "Deep Intelligence: Deep Dive + Social Media Audit — $549 (save $49)",
+};
+
+/** Teal pill badge with a CSS-only hover tooltip (no JS / "use client" needed). */
+function BundleBadge({ name }: { name: keyof typeof BUNDLE_DETAILS }) {
+  return (
+    <div className="group relative inline-block">
+      <span
+        style={{
+          display: "inline-block",
+          backgroundColor: TEAL,
+          color: NAVY,
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: "0.6rem",
+          fontWeight: 700,
+          padding: "3px 9px",
+          borderRadius: "9999px",
+          letterSpacing: "0.04em",
+          whiteSpace: "nowrap",
+          cursor: "default",
+          userSelect: "none",
+        }}
+      >
+        {name}
+      </span>
+      {/* Tooltip — appears on hover via Tailwind group-hover */}
+      <div
+        className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50 pointer-events-none"
+        style={{
+          backgroundColor: NAVY,
+          color: WHITE,
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: "0.72rem",
+          padding: "8px 12px",
+          borderRadius: "8px",
+          whiteSpace: "nowrap",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
+          lineHeight: 1.5,
+        }}
+      >
+        {BUNDLE_DETAILS[name]}
+        {/* Arrow */}
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            right: "12px",
+            borderLeft: "5px solid transparent",
+            borderRight: "5px solid transparent",
+            borderTop: `5px solid ${NAVY}`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 const MIR_INCLUDES = [
   "Business Snapshot",
   "Customer Profile (3 segments)",
@@ -23,19 +84,51 @@ const MIR_INCLUDES = [
   "Analyst note",
 ];
 
-const BUNDLES = [
-  { name: "Starter Intelligence", items: "MIR + Social Media Audit",   price: "$349", savings: "save $49" },
-  { name: "Full Picture",         items: "MIR + Secret Shopping",       price: "$449", savings: "save $49" },
-  { name: "Deep Intelligence",    items: "Deep Dive + Social Media Audit", price: "$549", savings: "save $49" },
-];
+type GridSvc = {
+  name: string;
+  price: string;
+  turnaround: string;
+  desc: string;
+  bundles: (keyof typeof BUNDLE_DETAILS)[];
+};
 
-const GRID_SERVICES = [
-  { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "A scored assessment of your social media presence across seven dimensions." },
-  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way a first-time customer does." },
-  { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision." },
-  { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list." },
-  { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report." },
-  { name: "AI Starter Kit",           price: "$99",  turnaround: "48 hrs",    desc: "Custom AI prompts built specifically for your business type." },
+const GRID_SERVICES: GridSvc[] = [
+  {
+    name: "Social Media Audit",
+    price: "$199", turnaround: "48-72 hrs",
+    desc: "A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and how you stack up against competitors.",
+    bundles: ["Starter Intelligence", "Deep Intelligence"],
+  },
+  {
+    name: "Secret Shopping",
+    price: "$299", turnaround: "5-7 days",
+    desc: "A professional visit to your business, or a competitor's, scored across seven dimensions of the customer experience. You will see your business the way a first-time customer does.",
+    bundles: ["Full Picture"],
+  },
+  {
+    name: "Deep Dive Report",
+    price: "$399", turnaround: "5-7 days",
+    desc: "Everything in the MIR, but deeper. Greater rigor, more sources, more context, more analyst time spent on what each finding actually means for your business.",
+    bundles: ["Deep Intelligence"],
+  },
+  {
+    name: "Synthetic Survey Report",
+    price: "$399", turnaround: "48-72 hrs",
+    desc: "AI-generated customer personas to pressure-test your assumptions and surface directional insight, with full transparency about the methodology.",
+    bundles: [],
+  },
+  {
+    name: "Voice of Customer Survey",
+    price: "$499", turnaround: "1-2 weeks",
+    desc: "Real feedback from your real customers. We design the survey, help you send it to your existing contact list, and deliver a visual analysis report.",
+    bundles: [],
+  },
+  {
+    name: "AI Starter Kit",
+    price: "$99 / $79 add-on", turnaround: "48 hrs",
+    desc: "Five to six custom AI prompts built specifically for your business type, ready to use immediately.",
+    bundles: [],
+  },
 ];
 
 export default function ServicesPage() {
@@ -48,8 +141,11 @@ export default function ServicesPage() {
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.2rem,5vw,3.2rem)", fontWeight: 700, color: WHITE, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 16px" }}>
           Every small business has an edge. Let&rsquo;s refine yours.
         </h1>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", color: "#CBD5E1", maxWidth: "560px", margin: "0 auto", lineHeight: 1.8 }}>
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", color: "#CBD5E1", maxWidth: "540px", margin: "0 auto 12px", lineHeight: 1.8 }}>
           Professional market research for small businesses. AI generates the foundation. A real analyst reviews, refines, and makes sure the insights that reach you actually matter.
+        </p>
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.78rem", color: TEAL }}>
+          Look for bundle tags on select services to save $49.
         </p>
       </section>
 
@@ -66,11 +162,18 @@ export default function ServicesPage() {
               gridTemplateColumns: "1fr 1fr",
               gap: "52px",
               alignItems: "start",
+              position: "relative",
             }}
           >
+            {/* Bundle badges — top right */}
+            <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <BundleBadge name="Starter Intelligence" />
+              <BundleBadge name="Full Picture" />
+            </div>
+
             {/* Left column */}
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+            <div style={{ paddingRight: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                 <span style={{ backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontSize: "0.68rem", fontWeight: 700, padding: "4px 12px", borderRadius: "9999px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   Most Popular
                 </span>
@@ -117,49 +220,13 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ── BUNDLE STRIP ──────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, padding: "24px 24px 0" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div style={{ backgroundColor: NAVY, borderRadius: "12px", padding: "28px 40px" }}>
-            <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.68rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "20px", textAlign: "center" }}>
-              Bundle and save
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0" }}>
-              {BUNDLES.map((b, i) => (
-                <div
-                  key={b.name}
-                  style={{
-                    padding: "0 32px",
-                    borderRight: i < 2 ? "1px solid rgba(255,255,255,0.12)" : "none",
-                    textAlign: "center",
-                  }}
-                >
-                  <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.2rem", fontWeight: 700, color: WHITE, marginBottom: "4px" }}>
-                    {b.name}
-                  </p>
-                  <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.75rem", color: "rgba(255,255,255,0.55)", marginBottom: "10px", lineHeight: 1.5 }}>
-                    {b.items}
-                  </p>
-                  <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "1.3rem", fontWeight: 700, color: WHITE }}>{b.price}</span>
-                  <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.75rem", color: TEAL, fontWeight: 600, marginLeft: "8px" }}>{b.savings}</span>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", textAlign: "center", marginTop: "18px" }}>
-              Bundle pricing available on request.{" "}
-              <Link href="/contact" style={{ color: TEAL, textDecoration: "underline" }}>Contact us to order.</Link>
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* ── 6-SERVICE GRID ────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, padding: "32px 24px 48px" }}>
+      <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>
+          <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.4rem,2.5vw,1.8rem)", fontWeight: 700, color: NAVY, marginBottom: "20px" }}>
             More Services
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px" }}>
             {GRID_SERVICES.map(svc => (
               <Link key={svc.name} href="/contact" style={{ textDecoration: "none", display: "block" }}>
                 <div
@@ -169,14 +236,22 @@ export default function ServicesPage() {
                     borderRadius: "12px",
                     padding: "24px 26px",
                     height: "100%",
+                    position: "relative",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-                    <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.2rem", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginRight: "12px" }}>
+                  {/* Bundle badges */}
+                  {svc.bundles.length > 0 && (
+                    <div style={{ position: "absolute", top: "14px", right: "16px", display: "flex", gap: "5px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                      {svc.bundles.map(b => <BundleBadge key={b} name={b} />)}
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", paddingRight: svc.bundles.length > 0 ? "120px" : "0" }}>
+                    <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.2rem", fontWeight: 700, color: NAVY, lineHeight: 1.2 }}>
                       {svc.name}
                     </h3>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "1rem", fontWeight: 700, color: NAVY }}>{svc.price}</div>
+                    <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "12px" }}>
+                      <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.95rem", fontWeight: 700, color: NAVY }}>{svc.price}</div>
                       <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.72rem", color: LGRAY, marginTop: "2px" }}>{svc.turnaround}</div>
                     </div>
                   </div>

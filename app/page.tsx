@@ -13,14 +13,13 @@ const GRAY  = "#6B7280";
 const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
-const HOME_SERVICES = [
-  { name: "Market Intelligence Report", price: "$199", desc: "Your market, your customers, your competitors in one professionally written report.", href: "/mir" },
-  { name: "Social Media Audit",          price: "$199", desc: "A scored assessment of your social media presence across seven dimensions.",         href: "/services" },
-  { name: "Secret Shopping",             price: "$299", desc: "See your business the way a first-time customer does.",                              href: "/services" },
-  { name: "Deep Dive Report",            price: "$399", desc: "Deeper competitive intelligence for businesses facing a major decision.",             href: "/services" },
-  { name: "Synthetic Survey Report",     price: "$399", desc: "AI-generated customer personas to surface directional insight when you don't have a customer list.", href: "/services" },
-  { name: "Voice of Customer Survey",    price: "$499", desc: "Real feedback from your real customers, analyzed and delivered as a visual report.", href: "/services" },
-  { name: "AI Starter Kit",              price: "$99",  desc: "Custom AI prompts built specifically for your business type.",                       href: "/services" },
+const GRID_6 = [
+  { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "A scored assessment of your social media presence across seven dimensions." },
+  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way a first-time customer does." },
+  { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision." },
+  { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list." },
+  { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report." },
+  { name: "AI Starter Kit",           price: "$99",  turnaround: "48 hrs",    desc: "Custom AI prompts built specifically for your business type." },
 ];
 
 
@@ -84,97 +83,68 @@ export default function Home() {
         </p>
       </section>
 
-      {/* ── SERVICES GRID ── */}
+      {/* ── SERVICES ── */}
       <section style={{ backgroundColor: WHITE, padding: "72px 24px 40px" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-          <h2
-            style={{
-              fontFamily: "var(--font-cormorant)",
-              fontSize: "clamp(1.8rem, 4vw, 2.4rem)",
-              fontWeight: 700,
-              color: NAVY,
-              textAlign: "center",
-              marginBottom: "8px",
-            }}
-          >
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+          <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.8rem,4vw,2.4rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>
             What We Offer
           </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-montserrat)",
-              fontSize: "0.88rem",
-              color: LGRAY,
-              textAlign: "center",
-              marginBottom: "48px",
-            }}
-          >
+          <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.88rem", color: LGRAY, textAlign: "center", marginBottom: "40px" }}>
             Seven research and intelligence services — all analyst-reviewed.
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "16px",
-              justifyContent: "center",
-              marginBottom: "0",
-            }}
-          >
-            {HOME_SERVICES.map(svc => (
-              <Link
-                key={svc.name}
-                href={svc.href}
-                style={{ textDecoration: "none", display: "block", flex: "0 1 calc(33.333% - 11px)", minWidth: "240px" }}
-              >
-                <div
-                  style={{
-                    border: "1px solid #E5E7EB",
-                    borderRadius: "12px",
-                    padding: "22px 20px",
-                    height: "100%",
-                    transition: "border-color 0.15s",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-                    <h3
-                      style={{
-                        fontFamily: "var(--font-cormorant)",
-                        fontSize: "1.1rem",
-                        fontWeight: 700,
-                        color: NAVY,
-                        lineHeight: 1.25,
-                        marginRight: "12px",
-                      }}
-                    >
+          {/* MIR hero card */}
+          <div style={{ border: `2px solid ${NAVY}`, borderRadius: "14px", padding: "36px 44px", marginBottom: "20px", display: "grid", gridTemplateColumns: "1fr auto", gap: "40px", alignItems: "center", backgroundColor: WHITE }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+                <span style={{ backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontSize: "0.65rem", fontWeight: 700, padding: "3px 10px", borderRadius: "9999px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  Most Popular
+                </span>
+              </div>
+              <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.6rem,2.5vw,2.2rem)", fontWeight: 700, color: NAVY, marginBottom: "10px", lineHeight: 1.15 }}>
+                Market Intelligence Report
+              </h3>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "14px", marginBottom: "14px", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$199</span>
+                <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.8rem", color: LGRAY }}>48-72 hr delivery</span>
+                <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.8rem", color: LGRAY }}>Flat fee</span>
+              </div>
+              <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.9rem", color: GRAY, lineHeight: 1.75, marginBottom: "0" }}>
+                Your market, your customers, your competitors in one professionally written report. AI generates the research foundation. A real analyst reviews, refines, and makes sure every insight is relevant to your business.
+              </p>
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              <Link href="/get-report" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.9rem", padding: "12px 28px", borderRadius: "9999px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                Get My Report →
+              </Link>
+            </div>
+          </div>
+
+          {/* 6-service grid 2×3 */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px", marginBottom: "28px" }}>
+            {GRID_6.map(svc => (
+              <Link key={svc.name} href="/services" style={{ textDecoration: "none", display: "block" }}>
+                <div style={{ border: "1px solid #E5E7EB", borderRadius: "12px", padding: "22px 24px", height: "100%", backgroundColor: WHITE }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+                    <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginRight: "10px" }}>
                       {svc.name}
                     </h3>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-montserrat)",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        color: NAVY,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {svc.price}
-                    </span>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", fontWeight: 700, color: NAVY }}>{svc.price}</div>
+                      <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.71rem", color: LGRAY, marginTop: "2px" }}>{svc.turnaround}</div>
+                    </div>
                   </div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-montserrat)",
-                      fontSize: "0.82rem",
-                      color: GRAY,
-                      lineHeight: 1.65,
-                    }}
-                  >
-                    {svc.desc}
-                  </p>
+                  <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", color: GRAY, lineHeight: 1.65 }}>{svc.desc}</p>
                 </div>
               </Link>
             ))}
           </div>
 
+          <div style={{ textAlign: "center" }}>
+            <Link href="/services" style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.88rem", fontWeight: 600, color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>
+              View all services →
+            </Link>
+          </div>
         </div>
       </section>
 
