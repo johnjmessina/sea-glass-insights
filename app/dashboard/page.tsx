@@ -1087,6 +1087,7 @@ const BACK_SERVICES = [
   { name: "Social Media Audit",          price: "$199", desc: "A scored assessment of your social presence." },
   { name: "Secret Shopping",             price: "$299", desc: "See your business through a customer's eyes." },
   { name: "Deep Dive Report",            price: "$399", desc: "Deeper competitive intelligence for major decisions." },
+  { name: "Synthetic Survey Report",     price: "$399", desc: "AI-generated customer personas for directional insight." },
   { name: "Voice of Customer Survey",    price: "$499", desc: "Real feedback from your real customers." },
   { name: "AI Starter Kit",              price: "$99",  desc: "Custom AI prompts built for your business type." },
 ];
@@ -1248,37 +1249,58 @@ function BusinessPulse() {
       </div>
 
       <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
-      {/* ── Back panel — cream, mirrors home page hero ── */}
-      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", padding: "36px 44px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      {/* ── Back panel — cream hero ── */}
+      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", padding: "32px 40px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
-        {/* TOP — hero: logo + headline + subtext */}
-        <div>
+        {/* TOP — logo centered + two-line headline + subtext centered */}
+        <div style={{ textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/logo_transparent_FINAL.png" alt="Sea Glass Insights" style={{ width: "220px", height: "auto", display: "block", marginBottom: "16px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-          <div style={{ fontFamily: CG, fontSize: "20px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.2, marginBottom: "10px" }}>
-            Know your market. Refine your edge.
+          <img src="/logos/logo_transparent_FINAL.png" alt="Sea Glass Insights" style={{ width: "300px", height: "auto", display: "block", margin: "0 auto 18px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+          <div style={{ fontFamily: CG, fontSize: "22px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.3, marginBottom: "10px" }}>
+            Know your market.<br />Refine your edge.
           </div>
-          <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.75 }}>
+          <div style={{ fontFamily: MT, fontSize: "9px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.75, opacity: 0.75, maxWidth: "460px", margin: "0 auto" }}>
             Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore and beyond. AI generates the foundation. A real analyst with over ten years of experience reviews, refines, and makes sure the insights that reach you actually matter.
           </div>
         </div>
 
-        {/* MIDDLE — 2-col services grid, all navy, no teal */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 28px" }}>
-          {BACK_SERVICES.map(svc => (
-            <div key={svc.name}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "3px" }}>
-                <span style={{ fontFamily: MT, fontSize: "10.5px", fontWeight: 600, color: NAVY_HEX }}>{svc.name}</span>
+        {/* MIDDLE — 7 services, 2-col grid; MIR hero; AI Starter Kit centered in last row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "13px 24px" }}>
+          {BACK_SERVICES.slice(0, 6).map((svc, i) => (
+            <div
+              key={svc.name}
+              style={i === 0 ? {
+                borderLeft: "2px solid rgba(0,206,209,0.65)",
+                paddingLeft: "10px",
+                backgroundColor: "rgba(10,47,97,0.035)",
+                borderRadius: "3px",
+                padding: "6px 6px 6px 10px",
+              } : {}}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
+                <span style={{ fontFamily: MT, fontSize: i === 0 ? "11px" : "10px", fontWeight: 600, color: NAVY_HEX }}>{svc.name}</span>
                 <span style={{ fontFamily: MT, fontSize: "10px", fontWeight: 700, color: NAVY_HEX, flexShrink: 0, marginLeft: "8px" }}>{svc.price}</span>
               </div>
-              <div style={{ fontFamily: MT, fontSize: "9px", fontWeight: 300, color: "rgba(10,47,97,0.55)", lineHeight: 1.5 }}>
+              <div style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: "rgba(10,47,97,0.55)", lineHeight: 1.5 }}>
                 {svc.desc}
               </div>
             </div>
           ))}
+          {/* AI Starter Kit — centered spanning both columns */}
+          <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "center" }}>
+            <div style={{ width: "calc(50% - 12px)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
+                <span style={{ fontFamily: MT, fontSize: "10px", fontWeight: 600, color: NAVY_HEX }}>{BACK_SERVICES[6].name}</span>
+                <span style={{ fontFamily: MT, fontSize: "10px", fontWeight: 700, color: NAVY_HEX, flexShrink: 0, marginLeft: "8px" }}>{BACK_SERVICES[6].price}</span>
+              </div>
+              <div style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: "rgba(10,47,97,0.55)", lineHeight: 1.5 }}>
+                {BACK_SERVICES[6].desc}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* BOTTOM — contact (left) + QR (right), all navy on cream */}
+        {/* BOTTOM — contact (left) + QR (right) */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.9, opacity: 0.75 }}>
             <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 600, color: NAVY_HEX, opacity: 1, marginBottom: "2px" }}>{form.analystName}</div>
