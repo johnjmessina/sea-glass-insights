@@ -1105,7 +1105,7 @@ function BusinessPulse() {
     import("qrcode").then(QRCode =>
       QRCode.default.toDataURL("https://www.seaglassinsights.com", {
         width: 80, margin: 1,
-        color: { dark: "#F4EADA", light: "#0A2F61" },
+        color: { dark: "#0A2F61", light: "#F4EADA" },
       }).then(setQrDataUrl)
     );
   }, []);
@@ -1248,37 +1248,40 @@ function BusinessPulse() {
       </div>
 
       <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
-      {/* ── Back panel — full navy ── */}
-      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: NAVY_HEX, borderRadius: "3px", overflow: "hidden", padding: "36px 44px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      {/* ── Back panel — cream, mirrors home page hero ── */}
+      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", padding: "36px 44px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
-        {/* TOP — logo + tagline */}
+        {/* TOP — hero: logo + headline + subtext */}
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/logo_negative_transparent.png" alt="Sea Glass Insights" style={{ width: "200px", height: "auto", display: "block", marginBottom: "10px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-          <div style={{ fontFamily: CG, fontSize: "13px", fontStyle: "italic", color: SAND_HEX }}>
-            Refining the Edge.
+          <img src="/logos/logo_transparent_FINAL.png" alt="Sea Glass Insights" style={{ width: "220px", height: "auto", display: "block", marginBottom: "16px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+          <div style={{ fontFamily: CG, fontSize: "20px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.2, marginBottom: "10px" }}>
+            Know your market. Refine your edge.
+          </div>
+          <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.75 }}>
+            Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore and beyond. AI generates the foundation. A real analyst with over ten years of experience reviews, refines, and makes sure the insights that reach you actually matter.
           </div>
         </div>
 
-        {/* MIDDLE — 2-col services grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px 32px" }}>
+        {/* MIDDLE — 2-col services grid, all navy, no teal */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 28px" }}>
           {BACK_SERVICES.map(svc => (
             <div key={svc.name}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "3px" }}>
-                <span style={{ fontFamily: MT, fontSize: "11px", fontWeight: 500, color: "#fff" }}>{svc.name}</span>
-                <span style={{ fontFamily: MT, fontSize: "10px", fontWeight: 600, color: TEAL_HEX, flexShrink: 0, marginLeft: "8px" }}>{svc.price}</span>
+                <span style={{ fontFamily: MT, fontSize: "10.5px", fontWeight: 600, color: NAVY_HEX }}>{svc.name}</span>
+                <span style={{ fontFamily: MT, fontSize: "10px", fontWeight: 700, color: NAVY_HEX, flexShrink: 0, marginLeft: "8px" }}>{svc.price}</span>
               </div>
-              <div style={{ fontFamily: MT, fontSize: "9px", fontWeight: 300, color: "rgba(244,234,218,0.6)", lineHeight: 1.5 }}>
+              <div style={{ fontFamily: MT, fontSize: "9px", fontWeight: 300, color: "rgba(10,47,97,0.55)", lineHeight: 1.5 }}>
                 {svc.desc}
               </div>
             </div>
           ))}
         </div>
 
-        {/* BOTTOM — contact (left) + QR (right) */}
+        {/* BOTTOM — contact (left) + QR (right), all navy on cream */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: "rgba(244,234,218,0.7)", lineHeight: 1.9 }}>
-            <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 600, color: "rgba(244,234,218,0.9)", marginBottom: "2px" }}>{form.analystName}</div>
+          <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.9, opacity: 0.75 }}>
+            <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 600, color: NAVY_HEX, opacity: 1, marginBottom: "2px" }}>{form.analystName}</div>
             {form.phone && <div>{form.phone}</div>}
             <div>{form.email}</div>
             <div>{form.website}</div>
@@ -1288,7 +1291,7 @@ function BusinessPulse() {
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={qrDataUrl} alt="QR code — seaglassinsights.com" width={72} height={72} style={{ display: "block", marginBottom: "5px" }} />
             )}
-            <div style={{ fontFamily: MT, fontSize: "8px", color: "rgba(244,234,218,0.5)", letterSpacing: "0.05em" }}>
+            <div style={{ fontFamily: MT, fontSize: "8px", color: NAVY_HEX, opacity: 0.5, letterSpacing: "0.05em" }}>
               Scan to get started
             </div>
           </div>

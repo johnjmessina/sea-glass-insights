@@ -80,7 +80,7 @@ export default async function BusinessPulsePrintPage(
 
   const qrDataUrl = await QRCode.toDataURL("https://www.seaglassinsights.com", {
     width: 64, margin: 1,
-    color: { dark: "#F4EADA", light: "#0A2F61" },
+    color: { dark: "#0A2F61", light: "#F4EADA" },
   });
 
   return (
@@ -117,7 +117,7 @@ export default async function BusinessPulsePrintPage(
           .card-back {
             width: 4in;
             height: 6in;
-            background: ${NAVY};
+            background: ${SAND};
             overflow: hidden;
           }
 
@@ -231,41 +231,44 @@ export default async function BusinessPulsePrintPage(
           </div>
         </div>
 
-        {/* ────────────── BACK — full navy ────────────── */}
-        <div className="card-back" style={{ padding: "22px 26px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        {/* ────────────── BACK — cream, mirrors home page hero ────────────── */}
+        <div className="card-back" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
-          {/* TOP — logo + tagline */}
+          {/* TOP — hero: full-color logo + headline + subtext */}
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logos/logo_negative_transparent.png"
+              src="/logos/logo_transparent_FINAL.png"
               alt="Sea Glass Insights"
-              style={{ width: "130px", height: "auto", display: "block", marginBottom: "7px" }}
+              style={{ width: "140px", height: "auto", display: "block", marginBottom: "10px" }}
             />
-            <div style={{ fontFamily: CG, fontSize: "10px", fontStyle: "italic", color: SAND }}>
-              Refining the Edge.
+            <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "6px" }}>
+              Know your market. Refine your edge.
+            </div>
+            <div style={{ fontFamily: MT, fontSize: "7px", fontWeight: 300, color: NAVY, lineHeight: 1.75, opacity: 0.8 }}>
+              Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore and beyond. AI generates the foundation. A real analyst with over ten years of experience reviews, refines, and makes sure the insights that reach you actually matter.
             </div>
           </div>
 
-          {/* MIDDLE — 2-col services grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 18px" }}>
+          {/* MIDDLE — 2-col services grid, all navy, no teal */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
             {BACK_SERVICES.map(svc => (
               <div key={svc.name}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
-                  <span style={{ fontFamily: MT, fontSize: "8px", fontWeight: 500, color: WHITE }}>{svc.name}</span>
-                  <span style={{ fontFamily: MT, fontSize: "8px", fontWeight: 600, color: TEAL, flexShrink: 0, marginLeft: "5px" }}>{svc.price}</span>
+                  <span style={{ fontFamily: MT, fontSize: "7.5px", fontWeight: 600, color: NAVY }}>{svc.name}</span>
+                  <span style={{ fontFamily: MT, fontSize: "7px", fontWeight: 700, color: NAVY, flexShrink: 0, marginLeft: "4px" }}>{svc.price}</span>
                 </div>
-                <div style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 300, color: "rgba(244,234,218,0.6)", lineHeight: 1.5 }}>
+                <div style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, opacity: 0.55, lineHeight: 1.5 }}>
                   {svc.desc}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* BOTTOM — contact (left) + QR (right) */}
+          {/* BOTTOM — contact (left) + QR (right), all navy on cream */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-            <div style={{ fontFamily: MT, fontSize: "7.5px", fontWeight: 300, color: "rgba(244,234,218,0.7)", lineHeight: 1.9 }}>
-              <div style={{ fontFamily: CG, fontSize: "11px", fontWeight: 600, color: "rgba(244,234,218,0.9)", marginBottom: "2px" }}>{card.analystName}</div>
+            <div style={{ fontFamily: MT, fontSize: "7px", fontWeight: 300, color: NAVY, lineHeight: 1.9, opacity: 0.75 }}>
+              <div style={{ fontFamily: CG, fontSize: "10px", fontWeight: 600, color: NAVY, opacity: 1, marginBottom: "2px" }}>{card.analystName}</div>
               {card.phone && <div>{card.phone}</div>}
               <div>{card.email}</div>
               <div>{card.website}</div>
@@ -273,7 +276,7 @@ export default async function BusinessPulsePrintPage(
             <div style={{ textAlign: "center", flexShrink: 0 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrDataUrl} alt="QR code — seaglassinsights.com" width={52} height={52} style={{ display: "block", marginBottom: "4px" }} />
-              <div style={{ fontFamily: MT, fontSize: "6px", color: "rgba(244,234,218,0.5)", letterSpacing: "0.05em" }}>
+              <div style={{ fontFamily: MT, fontSize: "6px", color: NAVY, opacity: 0.5, letterSpacing: "0.05em" }}>
                 Scan to get started
               </div>
             </div>
