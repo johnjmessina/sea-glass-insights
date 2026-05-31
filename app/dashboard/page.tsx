@@ -1098,6 +1098,17 @@ function BusinessPulse() {
   const [regenObs, setRegenObs]     = useState<Partial<Record<number, boolean>>>({});
   const [exporting, setExporting]   = useState(false);
   const [exportErr, setExportErr]   = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl]   = useState<string>("");
+
+  // Generate QR code once on mount — URL never changes
+  useEffect(() => {
+    import("qrcode").then(QRCode =>
+      QRCode.default.toDataURL("https://www.seaglassinsights.com", {
+        width: 80, margin: 1,
+        color: { dark: "#0A2F61", light: "#F4EADA" },
+      }).then(setQrDataUrl)
+    );
+  }, []);
 
   async function exportPDF() {
     setExporting(true);
@@ -1202,10 +1213,10 @@ function BusinessPulse() {
               <span style={{ color: TEAL_HEX }}>{form.businessName || "Your Business"}</span>
             </h1>
           </div>
-          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
             <LogoMark />
-            <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{form.businessName || "Business Name"}</div>
-            {form.location && <div style={{ fontFamily: MT, fontSize: "10px", color: "rgba(255,255,255,0.2)" }}>{form.location}</div>}
+            <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginTop: "2px" }}>{form.businessName || "Business Name"}</div>
+            {form.location && <div style={{ fontFamily: MT, fontSize: "9px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.05em" }}>{form.location}</div>}
           </div>
         </div>
         <div style={{ padding: "32px 44px", background: NAVY_HEX }}>
@@ -1226,7 +1237,7 @@ function BusinessPulse() {
         </div>
         <div style={{ background: TEAL_HEX, padding: "20px 44px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(10,47,97,0.6)", marginBottom: "4px" }}>Want the full picture?</div>
+            <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(10,47,97,0.6)", marginBottom: "4px" }}>Want the complete picture?</div>
             <div style={{ fontFamily: CG, fontSize: "16px", fontWeight: 700, color: NAVY_HEX }}>Market Intelligence Report — your complete edge</div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -1250,20 +1261,32 @@ function BusinessPulse() {
             <div style={{ color: TEAL_HEX }}>{form.website}</div>
           </div>
         </div>
-        <div style={{ padding: "40px 36px", flex: 1 }}>
-          <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: NAVY_HEX, opacity: 0.5, marginBottom: "14px" }}>What we offer</div>
-          <div style={{ fontFamily: CG, fontSize: "21px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.3, marginBottom: "12px" }}>Professional research. Real analyst review. Flat fee.</div>
-          <div style={{ fontFamily: MT, fontSize: "11px", fontWeight: 300, color: "#555", lineHeight: 1.8, marginBottom: "20px" }}>Every report is reviewed by a human analyst with over ten years of market research experience before it reaches you.</div>
-          <ul style={{ listStyle: "none", padding: 0, marginBottom: "22px" }}>
+        <div style={{ padding: "32px 36px 28px", flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: NAVY_HEX, opacity: 0.5, marginBottom: "10px" }}>What we offer</div>
+          <div style={{ fontFamily: CG, fontSize: "19px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.25, marginBottom: "10px" }}>Professional research. Real analyst. Flat fee.</div>
+          <ul style={{ listStyle: "none", padding: 0, marginBottom: "14px" }}>
             {BACK_SERVICES.map(svc => (
-              <li key={svc.name} style={{ display: "flex", justifyContent: "space-between", fontFamily: MT, fontSize: "11px", color: "#333", padding: "6px 0", borderBottom: "1px solid rgba(10,47,97,0.08)" }}>
+              <li key={svc.name} style={{ display: "flex", justifyContent: "space-between", fontFamily: MT, fontSize: "10px", color: "#333", padding: "5px 0", borderBottom: "1px solid rgba(10,47,97,0.08)" }}>
                 <span>{svc.name}</span>
                 <span style={{ color: NAVY_HEX, fontWeight: 600 }}>{svc.price}</span>
               </li>
             ))}
           </ul>
-          <div style={{ display: "inline-block", background: NAVY_HEX, padding: "10px 18px", borderRadius: "2px", fontFamily: MT, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: SAND_HEX }}>
-            seaglassinsights.com <span style={{ opacity: 0.6 }}>→</span>
+          {/* Value proposition + QR */}
+          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start", marginBottom: "auto" }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: "#555", lineHeight: 1.7 }}>
+                AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
+              </p>
+            </div>
+            {qrDataUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={qrDataUrl} alt="QR code" width={72} height={72} style={{ flexShrink: 0, borderRadius: "4px" }} />
+            )}
+          </div>
+          {/* Tagline — bottom */}
+          <div style={{ fontFamily: CG, fontSize: "13px", fontStyle: "italic", color: NAVY_HEX, opacity: 0.55, textAlign: "right", marginTop: "14px" }}>
+            Refining the Edge.
           </div>
         </div>
       </div>

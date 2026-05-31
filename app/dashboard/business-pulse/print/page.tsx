@@ -3,6 +3,7 @@
 // Also usable directly in a browser for in-browser printing.
 
 import type { Metadata } from "next";
+import QRCode from "qrcode";
 
 export const metadata: Metadata = { robots: "noindex" };
 
@@ -76,6 +77,11 @@ export default async function BusinessPulsePrintPage(
 
   const CG = "'Cormorant Garamond', Georgia, serif";
   const MT = "'Montserrat', sans-serif";
+
+  const qrDataUrl = await QRCode.toDataURL("https://www.seaglassinsights.com", {
+    width: 64, margin: 1,
+    color: { dark: "#0A2F61", light: "#F4EADA" },
+  });
 
   return (
     <html lang="en">
@@ -152,6 +158,14 @@ export default async function BusinessPulsePrintPage(
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px" }}>
               <LogoMark />
+              <div style={{ fontFamily: MT, fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginTop: "3px" }}>
+                {card.businessName || "Business Name"}
+              </div>
+              {card.location && (
+                <div style={{ fontFamily: MT, fontSize: "6.5px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.05em" }}>
+                  {card.location}
+                </div>
+              )}
             </div>
           </div>
 
@@ -201,7 +215,7 @@ export default async function BusinessPulsePrintPage(
           }}>
             <div>
               <div style={{ fontFamily: MT, fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(10,47,97,0.6)", marginBottom: "3px" }}>
-                Want the full picture?
+                Want the complete picture?
               </div>
               <div style={{ fontFamily: CG, fontSize: "11px", fontWeight: 700, color: NAVY }}>
                 Market Intelligence Report
@@ -251,26 +265,23 @@ export default async function BusinessPulsePrintPage(
           </div>
 
           {/* Cream right panel */}
-          <div style={{ flex: 1, padding: "20px 16px", display: "flex", flexDirection: "column" }}>
-            <div style={{ fontFamily: MT, fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: NAVY, opacity: 0.45, marginBottom: "8px" }}>
+          <div style={{ flex: 1, padding: "16px 14px 14px", display: "flex", flexDirection: "column" }}>
+            <div style={{ fontFamily: MT, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: NAVY, opacity: 0.45, marginBottom: "6px" }}>
               What we offer
             </div>
-            <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 700, color: NAVY, lineHeight: 1.25, marginBottom: "8px" }}>
+            <div style={{ fontFamily: CG, fontSize: "11px", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "8px" }}>
               Professional research. Real analyst. Flat fee.
             </div>
-            <div style={{ fontFamily: MT, fontSize: "8px", fontWeight: 300, color: "#555", lineHeight: 1.7, marginBottom: "10px" }}>
-              Every report reviewed by a market researcher with over ten years of experience.
-            </div>
 
-            <ul style={{ listStyle: "none", flex: 1 }}>
+            <ul style={{ listStyle: "none", marginBottom: "10px" }}>
               {BACK_SERVICES.map(svc => (
                 <li key={svc.name} style={{
                   display: "flex",
                   justifyContent: "space-between",
                   fontFamily: MT,
-                  fontSize: "8px",
+                  fontSize: "7.5px",
                   color: "#333",
-                  padding: "4px 0",
+                  padding: "3.5px 0",
                   borderBottom: "1px solid rgba(10,47,97,0.07)",
                 }}>
                   <span>{svc.name}</span>
@@ -279,19 +290,18 @@ export default async function BusinessPulsePrintPage(
               ))}
             </ul>
 
-            <div style={{
-              marginTop: "10px",
-              display: "inline-block",
-              background: NAVY,
-              padding: "6px 12px",
-              borderRadius: "2px",
-              fontFamily: MT,
-              fontSize: "7px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: SAND,
-            }}>
-              seaglassinsights.com →
+            {/* Value proposition + QR code side by side */}
+            <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginBottom: "auto" }}>
+              <p style={{ flex: 1, fontFamily: MT, fontSize: "7px", fontWeight: 300, color: "#555", lineHeight: 1.65 }}>
+                AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
+              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={qrDataUrl} alt="QR code" width={56} height={56} style={{ flexShrink: 0, borderRadius: "3px" }} />
+            </div>
+
+            {/* Tagline — pinned to bottom */}
+            <div style={{ fontFamily: CG, fontSize: "10px", fontStyle: "italic", color: NAVY, opacity: 0.5, textAlign: "right", marginTop: "8px" }}>
+              Refining the Edge.
             </div>
           </div>
         </div>
