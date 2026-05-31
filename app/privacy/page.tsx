@@ -1,293 +1,110 @@
 import Link from "next/link";
 import { Montserrat } from "next/font/google";
+import SiteNav    from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
 
-const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-montserrat" });
+const montserrat = Montserrat({ subsets: ["latin"], weight: ["300","400","500","600"], variable: "--font-montserrat" });
 
 const NAVY = "#0A2F61";
+const TEAL = "#00CED1";
 const GRAY = "#374151";
-const LGRAY = "#6B7280";
 const SAND = "#F4EADA";
 const WHITE = "#FFFFFF";
-const TEAL = "#00CED1";
 
-function Section({ title, children, ...rest }: { id?: string; title: string; children: React.ReactNode }) {
-  return (
-    <section style={{ marginBottom: "40px" }} {...rest}>
-      <h2 style={{ fontFamily: "Georgia, serif", fontSize: "1.25rem", fontWeight: 700, color: NAVY, marginBottom: "14px", paddingBottom: "8px", borderBottom: `2px solid ${TEAL}` }}>
-        {title}
-      </h2>
-      <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.93rem", color: GRAY, lineHeight: 1.85 }}>
-        {children}
-      </div>
-    </section>
-  );
+function H2({ children }: { children: React.ReactNode }) {
+  return <h2 style={{ fontFamily: "Georgia, 'Cormorant Garamond', serif", fontSize: "1.2rem", fontWeight: 700, color: NAVY, marginBottom: "14px", paddingBottom: "8px", borderBottom: `2px solid ${TEAL}`, marginTop: "40px" }}>{children}</h2>;
 }
-
-function Sub({ title, children, ...rest }: { id?: string; title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: "16px" }} {...rest}>
-      <h3 style={{ fontFamily: "Georgia, serif", fontSize: "1rem", fontWeight: 700, color: NAVY, marginBottom: "8px" }}>
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
+function H3({ children, ...rest }: { id?: string; children: React.ReactNode }) {
+  return <h3 style={{ fontFamily: "Georgia, serif", fontSize: "1rem", fontWeight: 700, color: NAVY, marginBottom: "10px", marginTop: "20px" }} {...rest}>{children}</h3>;
 }
-
 function P({ children }: { children: React.ReactNode }) {
-  return <p style={{ marginBottom: "12px" }}>{children}</p>;
+  return <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.91rem", color: GRAY, lineHeight: 1.85, marginBottom: "14px" }}>{children}</p>;
 }
-
 function OL({ items }: { items: string[] }) {
-  return (
-    <ol style={{ paddingLeft: "20px", marginBottom: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-      {items.map((item, i) => <li key={i}>{item}</li>)}
-    </ol>
-  );
-}
-
-function UL({ items }: { items: string[] }) {
-  return (
-    <ul style={{ paddingLeft: "20px", marginBottom: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-      {items.map((item, i) => <li key={i}>{item}</li>)}
-    </ul>
-  );
+  return <ol style={{ paddingLeft: "20px", marginBottom: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>{items.map((t,i) => <li key={i} style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.91rem", color: GRAY, lineHeight: 1.75 }}>{t}</li>)}</ol>;
 }
 
 export default function PrivacyPage() {
   return (
-    <div className={montserrat.variable} style={{ backgroundColor: WHITE, minHeight: "100vh" }}>
+    <div className={montserrat.variable} style={{ backgroundColor: WHITE }}>
+      <SiteNav />
 
-      {/* NAV */}
-      <header style={{ backgroundColor: SAND, padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/" style={{ fontFamily: "Georgia, serif", fontWeight: 700, fontSize: "1.1rem", color: NAVY, textDecoration: "none" }}>
-          Sea Glass Insights
-        </Link>
-        <Link href="/get-report" style={{ fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.88rem", color: NAVY, textDecoration: "none", border: `1.5px solid ${NAVY}`, padding: "7px 20px", borderRadius: "9999px" }}>
-          Get Your Report
-        </Link>
-      </header>
-
-      {/* HERO */}
-      <div style={{ backgroundColor: NAVY, padding: "56px 24px 48px", textAlign: "center" }}>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(2rem, 4vw, 2.8rem)", fontWeight: 700, color: WHITE, marginBottom: "12px" }}>
-          Privacy Policy
-        </h1>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.88rem", color: "#93C5FD" }}>
-          Sea Glass Insights LLC &nbsp;|&nbsp; Effective Date: June 1, 2026
+      <section style={{ backgroundColor: NAVY, padding: "56px 24px 48px", textAlign: "center" }}>
+        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: WHITE, marginBottom: "12px" }}>Privacy Policy</h1>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "#93C5FD" }}>
+          Effective Date: June 1, 2026 &nbsp;|&nbsp; Last Updated: June 1, 2026
         </p>
-      </div>
+      </section>
 
-      {/* CONTENT */}
-      <main style={{ maxWidth: "760px", margin: "0 auto", padding: "60px 24px 80px" }}>
+      <main style={{ maxWidth: "740px", margin: "0 auto", padding: "56px 24px 80px" }}>
 
-        <Section title="1. Introduction">
-          <P>
-            Sea Glass Insights LLC (&ldquo;Sea Glass Insights,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) operates this website and provides professional market research services for small businesses. This Privacy Policy explains how we collect, use, disclose, and protect information you provide when using our website or ordering our services.
-          </P>
-          <P>
-            By using our site or placing an order, you agree to the data practices described in this policy. If you do not agree, please do not use our services.
-          </P>
-        </Section>
+        <H2>1. Introduction</H2>
+        <P>Sea Glass Insights LLC is committed to protecting your privacy and being transparent about how we work. This Privacy Policy explains how we collect, use, and safeguard your information when you visit seaglassinsights.com or purchase our services. It also explains how artificial intelligence is used in our research process and what that means for your data.</P>
 
-        <Section title="2. Information We Collect">
-          <Sub title="Provided Directly">
-            <P>When you complete our intake form or place an order, we collect:</P>
-            <UL items={[
-              "Your name and the name of your business",
-              "Your email address",
-              "Your responses to our business questionnaire (up to 10 questions about your market, customers, competitors, and goals)",
-              "Payment information (processed directly by Stripe — we do not store your card number or CVV)",
-            ]} />
-            <P>We only ask for information that is necessary to deliver your report. Please only share what you are comfortable sharing.</P>
-          </Sub>
-          <Sub title="Collected Automatically">
-            <P>When you visit our site, we may automatically receive:</P>
-            <UL items={[
-              "IP address and general geographic location",
-              "Browser type and version",
-              "Pages visited and time spent on site",
-              "Referring URL",
-              "Device type",
-            ]} />
-            <P>This information is used solely for site maintenance and improving the user experience. We do not use it for advertising targeting.</P>
-          </Sub>
-        </Section>
+        <H2>2. Information We Collect</H2>
+        <H3>Provided Directly</H3>
+        <P>Name and business name, email address, phone number, business address, payment information (processed securely through Stripe — we do not store your full card details), information provided about your business through our intake forms.</P>
+        <H3>Collected Automatically</H3>
+        <P>IP address and browser type, pages viewed and time spent on the site, referring URLs, device type and operating system. Collected through standard web analytics tools and cookies.</P>
 
-        <Section title="3. How We Use Your Information">
-          <P>We use the information we collect to:</P>
-          <UL items={[
-            "Process and fulfill your research order",
-            "Generate your report using AI-assisted analysis, reviewed by a human analyst",
-            "Communicate with you about your order status, questions, and delivery",
-            "Respond to inquiries and provide customer support",
-            "Improve our research methodology and service quality",
-            "Comply with applicable laws and regulations",
-          ]} />
-          <P>We do not use your information to send marketing emails unless you have explicitly opted in.</P>
-        </Section>
+        <H2>3. How We Use Your Information</H2>
+        <P>To deliver services purchased, generate reports and deliverables, process payments through Stripe, communicate about orders and project status, respond to inquiries, improve our website and services, comply with legal obligations. We do not sell, rent, or trade your personal information to third parties for marketing purposes.</P>
 
-        <Section id="ai-usage" title="4. How AI Is Used in Our Process">
-          <Sub title="What AI Does">
-            <P>
-              Your intake responses are transmitted to an AI language model — currently powered by Anthropic&rsquo;s Claude API — to generate an initial research draft. This draft includes customer segmentation, competitive analysis, market positioning, key insights, and strategic recommendations tailored to your business.
-            </P>
-          </Sub>
-          <Sub title="What AI Does Not Do">
-            <P>AI does not:</P>
-            <UL items={[
-              "Make final decisions about what appears in your report",
-              "Access external databases or the internet about your business beyond what you provide",
-              "Share your information with other users or businesses",
-              "Produce a report that is delivered without human review",
-            ]} />
-          </Sub>
-          <Sub title="The Analyst Review Process">
-            <P>Every report goes through the following steps before it reaches you:</P>
-            <OL items={[
-              "You complete the intake form with information about your business",
-              "Your responses are submitted to our AI system to generate an initial research draft",
-              "John Messina personally reviews every section of the AI-generated draft",
-              "The analyst edits, refines, and verifies content for accuracy and relevance",
-              "Sections are locked and approved by the analyst before report generation",
-              "The final report is delivered to you by email",
-            ]} />
-          </Sub>
-          <Sub title="Your Data and AI">
-            <P>
-              Your intake responses are transmitted to Anthropic&rsquo;s API for processing as part of the report generation workflow. Anthropic&rsquo;s handling of API data is governed by their{" "}
-              <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>
-                privacy policy
-              </a>
-              . We do not use your data to train AI models, and we have not configured our API usage to permit training on submitted content.
-            </P>
-          </Sub>
-          <Sub title="A Note on Synthetic Survey Reports" id="synthetic-surveys">
-            <P>
-              Our Synthetic Survey Report product uses AI-generated customer personas — entirely fictional, representative customer archetypes — to analyze your business assumptions and surface directional insight. No real customer data or personal information from any third party is used or created in this process.
-            </P>
-            <P>
-              All Synthetic Survey reports include a full methodology disclosure clearly identifying the AI-generated nature of the persona responses. Results represent directional, not statistically validated, findings.
-            </P>
-          </Sub>
-        </Section>
+        <H2>4. How AI Is Used in Our Process</H2>
+        <H3>What AI Does</H3>
+        <P>When you submit an intake form, that information is used to generate an initial research foundation using large language model technology, specifically Anthropic&rsquo;s Claude. AI synthesizes publicly available market and competitive information, drafts initial report sections, identifies patterns and directional insights from your responses, and generates synthetic customer personas for the Synthetic Survey Report.</P>
+        <H3>What AI Does Not Do</H3>
+        <P>AI does not make final editorial or strategic judgments without human review, replace the analyst&rsquo;s interpretation of findings, generate fabricated competitor data presented as factual, or make financial or investment recommendations.</P>
+        <H3>The Analyst Review Process</H3>
+        <OL items={[
+          "Intake — You provide information through our intake form or direct communication",
+          "AI Foundation — An initial research draft is generated using AI tools",
+          "Analyst Review — John Messina personally reviews every section, edits for accuracy, adds professional judgment, and supplements with additional research where needed",
+          "Delivery — A finalized, professionally reviewed report is delivered to you",
+        ]} />
+        <H3>Your Data and AI</H3>
+        <P>Your intake information is submitted to Anthropic&rsquo;s Claude API as part of the report generation process. By default, Anthropic does not use API-submitted data to train their models. See <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>anthropic.com/privacy</a> for details. Your business information is used solely to produce your report. It is not used to train AI models, shared with third parties for marketing purposes, or sold.</P>
+        <H3 id="synthetic-surveys">Synthetic Survey Reports</H3>
+        <P>The Synthetic Survey Report uses AI-generated customer personas to simulate how different customer types might respond to your research questions. This is a directional research tool, not a replacement for actual customer feedback. Results are clearly presented as directional insight, not statistically validated customer data, and the methodology is fully disclosed in every deliverable.</P>
 
-        <Section title="5. Payment Processing">
-          <P>
-            All payments are processed by{" "}
-            <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>Stripe, Inc.</a>
-            {" "}We do not collect, store, or process your payment card information directly. When you complete a purchase, your payment data is submitted directly to Stripe&rsquo;s secure servers.
-          </P>
-          <P>
-            We receive only a transaction confirmation, your email address, and a transaction reference ID from Stripe. Your payment data is subject to{" "}
-            <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>
-              Stripe&rsquo;s Privacy Policy
-            </a>
-            .
-          </P>
-        </Section>
+        <H2>5. Payment Processing</H2>
+        <P>All payment transactions are processed by Stripe, Inc. Your payment information is transmitted directly to Stripe and is subject to Stripe&rsquo;s Privacy Policy at <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>stripe.com/privacy</a>. Sea Glass Insights does not store your full credit card number, CVV, or bank account details.</P>
 
-        <Section title="6. How We Share Your Information">
-          <P>We do not sell your personal information to any third party. We may share information only in these circumstances:</P>
-          <UL items={[
-            "Service providers: We use Supabase (database storage), Stripe (payment processing), and Anthropic (AI processing) to operate our service. These providers are contractually required to protect your information and use it only to provide services to us.",
-            "Legal requirements: We may disclose information if required by law, court order, or to protect the rights and safety of our customers or the public.",
-            "Business transfer: If Sea Glass Insights is acquired or merges with another entity, your information may be transferred as part of that transaction. We will notify you of any material change in ownership.",
-          ]} />
-        </Section>
+        <H2>6. How We Share Your Information</H2>
+        <P>Service providers including Stripe for payments and Anthropic&rsquo;s Claude for AI-assisted research. Legal requirements if required by law. Business transfers with appropriate confidentiality protections.</P>
 
-        <Section title="7. Data Retention">
-          <P>
-            We retain your order information and intake responses for a minimum of 24 months to provide customer support, respond to inquiries, and fulfill any reasonable follow-up requests related to your report.
-          </P>
-          <P>
-            You may request deletion of your data at any time by contacting us at the address below. We will honor deletion requests within 30 days except where retention is required by law.
-          </P>
-        </Section>
+        <H2>7. Data Retention</H2>
+        <P>Retained as long as necessary to fulfill service delivery, maintain business records, and comply with legal obligations. Intake form data and report content retained for a minimum of one year. To request deletion, contact <a href="mailto:john@seaglassinsights.com" style={{ color: TEAL, textDecoration: "underline" }}>john@seaglassinsights.com</a> and we will respond within 10 business days.</P>
 
-        <Section title="8. Your Rights">
-          <P>Depending on your location, you may have the right to:</P>
-          <UL items={[
-            "Access: Request a copy of the personal information we hold about you",
-            "Correction: Request that we correct inaccurate or incomplete information",
-            "Deletion: Request that we delete your personal information",
-            "Portability: Receive your data in a structured, machine-readable format",
-            "Objection: Object to certain types of processing of your information",
-          ]} />
-          <P>
-            To exercise any of these rights, contact us at the email address listed in Section 13. We will respond within 30 days.
-          </P>
-        </Section>
+        <H2>8. Your Rights</H2>
+        <P>Access personal information we hold, request correction of inaccurate information, request deletion subject to certain exceptions, opt out of future marketing communications. Contact <a href="mailto:john@seaglassinsights.com" style={{ color: TEAL, textDecoration: "underline" }}>john@seaglassinsights.com</a> to exercise these rights.</P>
 
-        <Section title="9. Cookies">
-          <P>
-            Our site uses minimal session cookies required for basic site functionality, such as maintaining your session during the checkout process. We do not use cookies for advertising tracking, behavioral profiling, or cross-site tracking.
-          </P>
-          <P>
-            You can configure your browser to refuse cookies or alert you when cookies are being sent. If you disable cookies, some features of our site may not function correctly.
-          </P>
-        </Section>
+        <H2>9. Cookies</H2>
+        <P>Our website uses cookies to enhance your experience and analyze site traffic. You may configure your browser to refuse cookies, though some features may not function properly without them.</P>
 
-        <Section title="10. Third-Party Links">
-          <P>
-            Our website and reports may contain links to third-party websites, including resources referenced in your report&rsquo;s research. We are not responsible for the privacy practices or content of those external sites. We encourage you to review the privacy policy of any third-party site you visit.
-          </P>
-        </Section>
+        <H2>10. Third-Party Links</H2>
+        <P>Our website may contain links to third-party websites. We are not responsible for the privacy practices of those sites.</P>
 
-        <Section title="11. Children's Privacy">
-          <P>
-            Our services are directed to business owners and are not intended for individuals under 13 years of age. We do not knowingly collect personal information from children under 13. If we learn that we have inadvertently collected such information, we will delete it promptly. If you believe we may have collected information from a child, please contact us immediately.
-          </P>
-        </Section>
+        <H2>11. Children&rsquo;s Privacy</H2>
+        <P>Our services are intended for business owners and professionals. We do not knowingly collect personal information from individuals under the age of 18.</P>
 
-        <Section title="12. Changes to This Policy">
-          <P>
-            We may update this Privacy Policy from time to time to reflect changes in our practices, legal requirements, or the services we offer. Material changes will be reflected in an updated effective date at the top of this page.
-          </P>
-          <P>
-            We encourage you to review this page periodically. Continued use of our services after any changes constitutes your acceptance of the updated policy.
-          </P>
-        </Section>
+        <H2>12. Changes to This Policy</H2>
+        <P>We will update the Last Updated date when changes are made. Continued use of the site following changes constitutes acceptance of the updated policy.</P>
 
-        <Section title="13. Contact">
-          <P>If you have questions about this Privacy Policy or wish to exercise your data rights, please contact us:</P>
-          <div style={{ backgroundColor: SAND, borderRadius: "12px", padding: "24px 28px", marginTop: "8px" }}>
-            <p style={{ fontFamily: "Georgia, serif", fontWeight: 700, color: NAVY, fontSize: "1rem", marginBottom: "8px" }}>John Messina</p>
-            <p style={{ marginBottom: "4px" }}>Founder, Sea Glass Insights LLC</p>
-            <p style={{ marginBottom: "4px" }}>Bradley Beach, NJ</p>
-            <p style={{ marginBottom: "4px" }}>
-              <a href="mailto:john@seaglassinsights.com" style={{ color: TEAL, textDecoration: "underline" }}>
-                john@seaglassinsights.com
-              </a>
-            </p>
-            <p>
-              <a href="https://seaglassinsights.com" style={{ color: TEAL, textDecoration: "underline" }}>
-                seaglassinsights.com
-              </a>
-            </p>
-          </div>
-        </Section>
+        <H2>13. Contact</H2>
+        <div style={{ backgroundColor: SAND, borderRadius: "12px", padding: "24px 28px", marginTop: "8px" }}>
+          <p style={{ fontFamily: "Georgia, serif", fontWeight: 700, color: NAVY, fontSize: "1rem", marginBottom: "8px" }}>John Messina, Founder</p>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.88rem", color: GRAY, lineHeight: 2 }}>
+            Sea Glass Insights LLC<br />
+            Bradley Beach, NJ<br />
+            <a href="mailto:john@seaglassinsights.com" style={{ color: TEAL, textDecoration: "underline" }}>john@seaglassinsights.com</a><br />
+            <a href="https://seaglassinsights.com" style={{ color: TEAL, textDecoration: "underline" }}>seaglassinsights.com</a>
+          </p>
+        </div>
 
       </main>
 
-      {/* FOOTER */}
-      <footer style={{ backgroundColor: NAVY, color: "#93C5FD", textAlign: "center", padding: "40px 24px" }}>
-        <p style={{ fontFamily: "Georgia, serif", fontSize: "1.1rem", fontWeight: 600, color: WHITE, marginBottom: "8px" }}>
-          Sea Glass Insights — Refining the Edge.
-        </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", marginBottom: "6px" }}>
-          John Messina, Founder | Bradley Beach, NJ | seaglassinsights.com
-        </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", marginBottom: "6px" }}>
-          &copy; 2026 Sea Glass Insights. All rights reserved.
-        </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.78rem" }}>
-          <Link href="/privacy" style={{ color: "#93C5FD", textDecoration: "underline" }}>Privacy Policy</Link>
-          {" · "}
-          <Link href="/services" style={{ color: "#93C5FD", textDecoration: "underline" }}>Services</Link>
-        </p>
-      </footer>
-
+      <SiteFooter />
     </div>
   );
 }

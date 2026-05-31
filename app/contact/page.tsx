@@ -1,8 +1,9 @@
-import Link from "next/link";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+"use client";
 
-const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-cormorant" });
-const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-montserrat" });
+import { useState } from "react";
+import Link from "next/link";
+import SiteNav    from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
 
 const SAND  = "#F4EADA";
 const NAVY  = "#0A2F61";
@@ -10,98 +11,169 @@ const TEAL  = "#00CED1";
 const GRAY  = "#6B7280";
 const WHITE = "#FFFFFF";
 
-export default function ContactPage() {
-  return (
-    <div className={`${cormorant.variable} ${montserrat.variable}`} style={{ backgroundColor: SAND, minHeight: "100vh" }}>
+const inp  = { width: "100%", border: "1px solid #D1D5DB", borderRadius: "8px", padding: "10px 14px", fontSize: "0.93rem", color: "#111", fontFamily: "'Montserrat', sans-serif", outline: "none", boxSizing: "border-box" as const };
+const lbl  = { display: "block" as const, fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, color: GRAY, textTransform: "uppercase" as const, letterSpacing: "0.07em", marginBottom: "6px" };
 
-      {/* NAV */}
-      <header style={{ backgroundColor: SAND, padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/" style={{ fontFamily: "var(--font-cormorant)", fontWeight: 700, fontSize: "1.15rem", color: NAVY, textDecoration: "none" }}>
-          Sea Glass Insights
-        </Link>
-        <Link href="/get-report" style={{ fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.9rem", color: NAVY, textDecoration: "none", border: `1.5px solid ${NAVY}`, padding: "8px 22px", borderRadius: "9999px" }}>
-          Get Your Report
-        </Link>
-      </header>
+export default function ContactPage() {
+  const [form, setForm] = useState({ name: "", businessName: "", email: "", phone: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  function set(k: keyof typeof form, v: string) {
+    setForm(prev => ({ ...prev, [k]: v }));
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("sending");
+    setErrorMsg("");
+    try {
+      const res  = await fetch("/api/contact", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to send message.");
+      setStatus("sent");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong.");
+    }
+  }
+
+  return (
+    <div style={{ backgroundColor: WHITE, minHeight: "100vh", fontFamily: "'Montserrat', sans-serif" }}>
+      <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: NAVY, textAlign: "center", padding: "72px 24px 80px" }}>
-        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.2rem, 5vw, 3.2rem)", fontWeight: 700, color: WHITE, marginBottom: "20px" }}>
-          Let&rsquo;s Talk
+      <section style={{ backgroundColor: NAVY, textAlign: "center", padding: "64px 24px 72px" }}>
+        <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2rem,5vw,3rem)", fontWeight: 700, color: WHITE, marginBottom: "16px" }}>
+          Let&rsquo;s talk about your business.
         </h1>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "1rem", color: "#CBD5E1", maxWidth: "520px", margin: "0 auto", lineHeight: 1.8 }}>
-          Not sure which service is right for you? Have a question about the process? Reach out — John is happy to help.
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", color: "#CBD5E1", maxWidth: "500px", margin: "0 auto", lineHeight: 1.8 }}>
+          Have a question about a service, want a recommendation, or ready to get started? Reach out directly.
         </p>
       </section>
 
-      {/* CONTACT INFO */}
-      <section style={{ padding: "80px 24px", textAlign: "center" }}>
-        <div style={{ maxWidth: "560px", margin: "0 auto" }}>
-          <div style={{ backgroundColor: WHITE, borderRadius: "16px", border: "1px solid #E5E7EB", padding: "48px 40px" }}>
-            <div style={{ width: "52px", height: "4px", backgroundColor: TEAL, borderRadius: "2px", margin: "0 auto 28px" }} />
-            <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.8rem", fontWeight: 700, color: NAVY, marginBottom: "8px" }}>
-              John Messina
-            </h2>
-            <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.88rem", color: GRAY, marginBottom: "32px" }}>
-              Founder, Sea Glass Insights
-            </p>
+      {/* CONTENT */}
+      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "72px 24px 80px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "start" }}>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px", textAlign: "left" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{ fontSize: "1.1rem" }}>✉</span>
-                <a href="mailto:john@seaglassinsights.com" style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.95rem", color: TEAL, textDecoration: "none", fontWeight: 500 }}>
-                  john@seaglassinsights.com
-                </a>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{ fontSize: "1.1rem" }}>🌐</span>
-                <a href="https://seaglassinsights.com" style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.95rem", color: TEAL, textDecoration: "none", fontWeight: 500 }}>
-                  seaglassinsights.com
-                </a>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{ fontSize: "1.1rem" }}>📍</span>
-                <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.95rem", color: GRAY }}>
-                  Bradley Beach, NJ (serving the Jersey Shore & beyond)
-                </span>
-              </div>
-            </div>
+        {/* FORM */}
+        <div>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "28px" }}>
+            Send a Message
+          </h2>
 
-            <div style={{ borderTop: "1px solid #E5E7EB", marginTop: "32px", paddingTop: "28px" }}>
-              <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.85rem", color: GRAY, lineHeight: 1.7, marginBottom: "20px" }}>
-                Ready to get your report? Start with the intake form — it takes about 15 minutes and gives me everything I need to get to work.
+          {status === "sent" ? (
+            <div style={{ backgroundColor: SAND, borderRadius: "12px", padding: "32px", textAlign: "center" }}>
+              <div style={{ fontSize: "2rem", marginBottom: "12px" }}>✓</div>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.3rem", color: NAVY, marginBottom: "10px" }}>
+                Message sent!
+              </h3>
+              <p style={{ fontSize: "0.88rem", color: GRAY, lineHeight: 1.7 }}>
+                Thank you, {form.name}. I&rsquo;ll be in touch soon.
               </p>
-              <Link href="/get-report" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.9rem", padding: "12px 32px", borderRadius: "9999px", textDecoration: "none" }}>
-                Start Your Report →
-              </Link>
             </div>
+          ) : (
+            <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div>
+                  <label style={lbl}>Name <span style={{ color: "#EF4444" }}>*</span></label>
+                  <input style={inp} required value={form.name} onChange={e => set("name", e.target.value)} placeholder="Your name" />
+                </div>
+                <div>
+                  <label style={lbl}>Business Name <span style={{ color: "#EF4444" }}>*</span></label>
+                  <input style={inp} required value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="Your business" />
+                </div>
+              </div>
+              <div>
+                <label style={lbl}>Email <span style={{ color: "#EF4444" }}>*</span></label>
+                <input type="email" style={inp} required value={form.email} onChange={e => set("email", e.target.value)} placeholder="you@example.com" />
+              </div>
+              <div>
+                <label style={lbl}>Phone <span style={{ color: GRAY, fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+                <input type="tel" style={inp} value={form.phone} onChange={e => set("phone", e.target.value)} placeholder="(732) 555-0100" />
+              </div>
+              <div>
+                <label style={lbl}>Message <span style={{ color: "#EF4444" }}>*</span></label>
+                <textarea
+                  style={{ ...inp, minHeight: "140px", resize: "vertical" }}
+                  required
+                  value={form.message}
+                  onChange={e => set("message", e.target.value)}
+                  placeholder="Tell me a bit about your business and what you're looking for..."
+                />
+              </div>
+
+              {status === "error" && (
+                <p style={{ color: "#DC2626", fontSize: "0.85rem" }}>{errorMsg}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                style={{
+                  backgroundColor: status === "sending" ? "#93C5FD" : TEAL,
+                  color: NAVY,
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  padding: "13px 32px",
+                  borderRadius: "9999px",
+                  border: "none",
+                  cursor: status === "sending" ? "not-allowed" : "pointer",
+                  width: "100%",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {status === "sending" ? "Sending…" : "Send Message"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* CONTACT INFO */}
+        <div>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "28px" }}>
+            Direct Contact
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {[
+              { icon: "✉", label: "Email", val: "john@seaglassinsights.com", href: "mailto:john@seaglassinsights.com" },
+              { icon: "📞", label: "Phone", val: "(732) 518-3898", href: "tel:+17325183898" },
+              { icon: "📍", label: "Location", val: "Bradley Beach, NJ", href: null },
+            ].map(({ icon, label, val, href }) => (
+              <div key={label} style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+                <span style={{ fontSize: "1.1rem", marginTop: "1px" }}>{icon}</span>
+                <div>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.72rem", fontWeight: 600, color: GRAY, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "4px" }}>{label}</p>
+                  {href ? (
+                    <a href={href} style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.93rem", color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>{val}</a>
+                  ) : (
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.93rem", color: NAVY }}>{val}</p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
 
-          <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.83rem", color: GRAY, marginTop: "24px", lineHeight: 1.7 }}>
-            View our full{" "}
-            <Link href="/services" style={{ color: NAVY, textDecoration: "underline" }}>service menu</Link>
-            {" "}or read our{" "}
-            <Link href="/privacy" style={{ color: NAVY, textDecoration: "underline" }}>privacy policy</Link>
-            .
-          </p>
+          <div style={{ marginTop: "40px", padding: "24px", backgroundColor: SAND, borderRadius: "12px" }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: NAVY, marginBottom: "8px" }}>
+              Ready to start your report?
+            </p>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.83rem", color: GRAY, lineHeight: 1.7, marginBottom: "16px" }}>
+              Takes about 15 minutes. Flat fee. No subscriptions.
+            </p>
+            <Link href="/get-report" style={{ display: "inline-block", backgroundColor: NAVY, color: WHITE, fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.83rem", padding: "10px 24px", borderRadius: "9999px", textDecoration: "none" }}>
+              Start Your Report →
+            </Link>
+          </div>
         </div>
-      </section>
 
-      {/* FOOTER */}
-      <footer style={{ backgroundColor: NAVY, color: "#93C5FD", textAlign: "center", padding: "40px 24px" }}>
-        <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.1rem", fontWeight: 600, color: WHITE, marginBottom: "8px" }}>
-          Sea Glass Insights — Refining the Edge.
-        </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", marginBottom: "6px" }}>
-          &copy; 2026 Sea Glass Insights. All rights reserved.
-        </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.78rem" }}>
-          <Link href="/privacy" style={{ color: "#93C5FD", textDecoration: "underline" }}>Privacy Policy</Link>
-          {" · "}
-          <Link href="/services" style={{ color: "#93C5FD", textDecoration: "underline" }}>Services</Link>
-        </p>
-      </footer>
+      </main>
 
+      <SiteFooter />
     </div>
   );
 }
