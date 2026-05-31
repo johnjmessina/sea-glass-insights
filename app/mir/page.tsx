@@ -87,6 +87,42 @@ export default function MIRPage() {
         </div>
       </section>
 
+      {/* HOW IT WORKS */}
+      <section style={{ backgroundColor: WHITE, padding: "80px 24px" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "56px" }}>
+            How It Works
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "40px" }}>
+            {[
+              {
+                num: "1",
+                title: "Tell Us About Your Business",
+                body: "Answer 10 focused questions about your market, customers, and competitors. It takes about 15 minutes. The more detail you share, the sharper your report will be. Please only share what you are comfortable sharing — your responses will be used to generate your report with the assistance of AI.",
+              },
+              {
+                num: "2",
+                title: "A Real Analyst Gets to Work",
+                body: "I personally review every submission. I dig into your market, your competitors, and your positioning, combining professional research methodology with AI intelligence to build something genuinely useful.",
+              },
+              {
+                num: "3",
+                title: "Your Report Arrives",
+                body: "A professionally written report lands in your inbox within 48-72 hours. Six sections, four recommendations, and insights you can act on immediately.",
+              },
+            ].map(({ num, title, body }) => (
+              <div key={num} style={{ textAlign: "center" }}>
+                <div style={{ width: "52px", height: "52px", borderRadius: "50%", backgroundColor: NAVY, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-cormorant)", fontSize: "1.4rem", fontWeight: 700, margin: "0 auto 20px" }}>
+                  {num}
+                </div>
+                <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.3rem", fontWeight: 600, color: NAVY, marginBottom: "12px" }}>{title}</h3>
+                <p style={{ fontFamily: "var(--font-montserrat)", color: GRAY, fontSize: "0.88rem", lineHeight: 1.8 }}>{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* EXPLORE MORE */}
       <section style={{ backgroundColor: WHITE, padding: "64px 24px", textAlign: "center" }}>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.85rem", color: GRAY, marginBottom: "12px" }}>
