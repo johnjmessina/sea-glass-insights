@@ -8,9 +8,14 @@ export async function POST(req: NextRequest) {
     const cardData = await req.json();
 
     // ── Resolve the base URL so Puppeteer can navigate to the print page ──
-    const proto = req.headers.get("x-forwarded-proto") ?? "https";
-    const host  = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "localhost:3000";
-    const base  = process.env.NEXT_PUBLIC_URL ?? `${proto}://${host}`;
+    // Always derive from request headers — never from NEXT_PUBLIC_URL which
+    // may point to the wrong port in local dev (e.g. :3000 when running on :3001).
+    const proto = req.headers.get("x-forwarded-proto")
+      ?? (process.env.NODE_ENV === "development" ? "http" : "https");
+    const host  = req.headers.get("x-forwarded-host")
+      ?? req.headers.get("host")
+      ?? "localhost:3000";
+    const base  = `${proto}://${host}`;
 
     const printUrl =
       `${base}/dashboard/business-pulse/print` +
