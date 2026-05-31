@@ -76,13 +76,6 @@ export default function GetReportPage() {
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
 
-      {/* ── Nav ── */}
-      <header style={{ backgroundColor: NAVY, padding: "18px 32px", display: "flex", alignItems: "center" }}>
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <img src="/logos/logo_negative_transparent.png" alt="Sea Glass Insights" style={{ width: "160px", height: "auto" }} />
-        </Link>
-      </header>
-
       {/* ── How It Works ── */}
       <div style={{ backgroundColor: NAVY, padding: "56px 24px 48px" }}>
         <p style={{ fontFamily: MONTSERRAT, color: TEAL, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textAlign: "center", marginBottom: "36px" }}>
