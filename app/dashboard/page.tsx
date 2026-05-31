@@ -1248,7 +1248,7 @@ function BusinessPulse() {
       </div>
 
       <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
-      <div id="pulse-back" style={{ width: "620px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", display: "flex" }}>
+      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", display: "flex" }}>
         <div style={{ background: NAVY_HEX, padding: "40px 32px", width: "210px", flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1262,7 +1262,7 @@ function BusinessPulse() {
           </div>
         </div>
         {/* ── Back cream right panel: 3 evenly-spaced zones ── */}
-        <div style={{ padding: "28px 32px 24px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div style={{ padding: "28px 32px 24px", flex: 1, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
           {/* TOP — services */}
           <div>
@@ -1284,7 +1284,7 @@ function BusinessPulse() {
 
           {/* MIDDLE — pull quote */}
           <div style={{ borderLeft: "2px solid rgba(0,206,209,0.55)", paddingLeft: "12px" }}>
-            <p style={{ fontFamily: MT, fontSize: "11px", fontWeight: 400, color: NAVY_HEX, lineHeight: 1.75 }}>
+            <p style={{ fontFamily: MT, fontSize: "11px", fontWeight: 400, color: "#0A2F61", lineHeight: 1.75 }}>
               AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
             </p>
           </div>

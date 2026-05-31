@@ -265,7 +265,7 @@ export default async function BusinessPulsePrintPage(
           </div>
 
           {/* Cream right panel — 3 evenly-spaced zones */}
-          <div style={{ flex: 1, padding: "14px 12px 12px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div style={{ flex: 1, height: "100%", padding: "14px 12px 12px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
             {/* TOP — services */}
             <div>
@@ -295,7 +295,7 @@ export default async function BusinessPulsePrintPage(
 
             {/* MIDDLE — pull quote with teal left border */}
             <div style={{ borderLeft: "1.5px solid rgba(0,206,209,0.55)", paddingLeft: "8px" }}>
-              <p style={{ fontFamily: MT, fontSize: "7.5px", fontWeight: 400, color: NAVY, lineHeight: 1.75 }}>
+              <p style={{ fontFamily: MT, fontSize: "7.5px", fontWeight: 400, color: "#0A2F61", lineHeight: 1.75 }}>
                 AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
               </p>
             </div>
