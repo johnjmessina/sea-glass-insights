@@ -11,7 +11,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Business name is required." }, { status: 400 });
     }
 
-    const prompt = `You are a market researcher preparing a Business Pulse teaser card for ${businessName}, located in ${location || "an unspecified location"}. Generate 3 sharp, specific observations about this business that would resonate with the owner. Each observation should have: a short category label (2-3 words), a compelling title (one sentence that names the insight), and a body paragraph (2-3 sentences that explain the insight with specificity). Avoid em dashes. Use commas, periods, or conjunctions instead. Format as JSON only — no other text: { "observations": [{ "label": "", "title": "", "body": "" }, { "label": "", "title": "", "body": "" }, { "label": "", "title": "", "body": "" }] }`;
+    const prompt = `Generate 3 sharp, specific observations about ${businessName} located in ${location || "an unspecified location"}. Each observation must be concise and punchy, written for a small printed 4x6 card, not a report.
+
+Requirements:
+- Label: 2-3 words maximum (category name)
+- Title: One punchy sentence, 10 words maximum, specific to this business
+- Body: 2 sentences maximum, tight and specific, no filler
+
+Do not use em dashes. Use commas, periods, or conjunctions instead.
+Return JSON only, no other text: { "observations": [{ "label": "", "title": "", "body": "" }, { "label": "", "title": "", "body": "" }, { "label": "", "title": "", "body": "" }] }`;
 
     const message = await client.messages.create({
       model:      "claude-sonnet-4-5",

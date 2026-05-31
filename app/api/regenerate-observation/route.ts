@@ -11,7 +11,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "businessName and title are required." }, { status: 400 });
     }
 
-    const prompt = `You are refining an observation for a Business Pulse card for ${businessName}. Current observation: Label: ${label} Title: ${title} Body: ${body}. Analyst notes: ${notes || "(no additional notes — sharpen and improve the existing content)"}. Rewrite the observation incorporating the analyst's notes and direction. Avoid em dashes. Use commas, periods, or conjunctions instead. Return JSON only — no other text: { "label": "", "title": "", "body": "" }`;
+    const prompt = `Rewrite this Business Pulse observation for ${businessName}, incorporating the analyst's notes. The output is for a small printed 4x6 card.
+
+Current: Label: ${label} | Title: ${title} | Body: ${body}
+Analyst notes: ${notes || "(no additional notes — sharpen and improve the existing content)"}
+
+Requirements:
+- Label: 2-3 words maximum
+- Title: One punchy sentence, 10 words maximum
+- Body: 2 sentences maximum, tight and specific
+
+Do not use em dashes. Use commas, periods, or conjunctions instead.
+Return JSON only, no other text: { "label": "", "title": "", "body": "" }`;
 
     const message = await client.messages.create({
       model:      "claude-sonnet-4-5",

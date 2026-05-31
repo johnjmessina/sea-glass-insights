@@ -1092,10 +1092,39 @@ const BACK_SERVICES = [
 ];
 
 function BusinessPulse() {
-  const [form, setForm]         = useState<PulseForm>(PULSE_DEFAULTS);
+  const [form, setForm]             = useState<PulseForm>(PULSE_DEFAULTS);
   const [generating, setGenerating] = useState(false);
-  const [genError, setGenError] = useState<string | null>(null);
-  const [regenObs, setRegenObs] = useState<Partial<Record<number, boolean>>>({});
+  const [genError, setGenError]     = useState<string | null>(null);
+  const [regenObs, setRegenObs]     = useState<Partial<Record<number, boolean>>>({});
+  const [exporting, setExporting]   = useState(false);
+  const [exportErr, setExportErr]   = useState<string | null>(null);
+
+  async function exportPDF() {
+    setExporting(true);
+    setExportErr(null);
+    try {
+      const res = await fetch("/api/business-pulse/export-pdf", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error((d as { error?: string }).error ?? `Export failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `${(form.businessName || "BusinessPulse").replace(/[^a-zA-Z0-9]/g, "")}-BusinessPulse.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportErr(err instanceof Error ? err.message : "Export failed. Try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   function setField<K extends keyof PulseForm>(k: K, v: PulseForm[K]) {
     setForm(prev => ({ ...prev, [k]: v }));
@@ -1292,9 +1321,16 @@ function BusinessPulse() {
           <h2 className="text-navy font-bold text-lg" style={{ fontFamily: "Georgia, serif" }}>Business Pulse</h2>
           <p className="text-xs text-gray-400 mt-0.5">Fill in the left panel — the card updates live on the right.</p>
         </div>
-        <button onClick={() => window.print()} className="bg-seafoam text-navy text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90">
-          🖨 Print / Save PDF
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={exportPDF}
+            disabled={exporting || !form.businessName}
+            className="bg-seafoam text-navy text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {exporting ? "Generating PDF…" : "⬇ Export PDF (4×6)"}
+          </button>
+          {exportErr && <p className="text-red-500 text-xs text-right max-w-xs">{exportErr}</p>}
+        </div>
       </div>
 
       {/* TWO-PANEL LAYOUT */}
