@@ -83,40 +83,42 @@ export default function GetReportPage() {
         </Link>
       </header>
 
-      {/* ── Page header ── */}
-      <div style={{ backgroundColor: NAVY, color: "white", textAlign: "center", padding: "56px 24px 0" }}>
-        <p style={{
-          fontFamily: MONTSERRAT,
-          color: TEAL,
-          fontSize: "0.75rem",
-          fontWeight: 600,
-          letterSpacing: "0.15em",
-          textTransform: "uppercase",
-          marginBottom: "16px",
-        }}>
-          STEP 1 OF 2
+      {/* ── How It Works ── */}
+      <div style={{ backgroundColor: NAVY, padding: "56px 24px 48px" }}>
+        <p style={{ fontFamily: MONTSERRAT, color: TEAL, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textAlign: "center", marginBottom: "36px" }}>
+          How It Works
         </p>
-        <h1 style={{
-          fontFamily: CORMORANT,
-          fontSize: "clamp(2rem, 5vw, 3rem)",
-          fontWeight: 700,
-          color: "white",
-          marginBottom: "16px",
-          lineHeight: 1.2,
-        }}>
-          Tell Us About Your Business
-        </h1>
-        <p style={{
-          fontFamily: MONTSERRAT,
-          color: "#CBD5E1",
-          maxWidth: "560px",
-          margin: "0 auto 48px",
-          fontSize: "0.88rem",
-          lineHeight: 1.75,
-        }}>
-          Please only share what you are comfortable sharing. Your responses will be used to generate
-          your report with the assistance of AI.
-        </p>
+        <div style={{ maxWidth: "860px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "32px" }}>
+          {[
+            {
+              num: "1",
+              title: "Tell Us About Your Business",
+              body: "Answer a short intake form about your market, customers, and goals. Takes about 15 minutes. Please only share what you are comfortable sharing publicly — your responses will be used to generate your report with the assistance of AI.",
+            },
+            {
+              num: "2",
+              title: "A Real Analyst Gets to Work",
+              body: "I personally review every submission, combining professional research methodology with AI intelligence to provide something genuinely useful.",
+            },
+            {
+              num: "3",
+              title: "Your Report Arrives",
+              body: "A professionally written report lands in your inbox within the promised timeframe. Insights you can act on immediately.",
+            },
+          ].map(({ num, title, body }) => (
+            <div key={num} style={{ textAlign: "center" }}>
+              <div style={{ width: "44px", height: "44px", borderRadius: "50%", backgroundColor: TEAL, color: NAVY, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: CORMORANT, fontSize: "1.3rem", fontWeight: 700, margin: "0 auto 14px" }}>
+                {num}
+              </div>
+              <h3 style={{ fontFamily: CORMORANT, fontSize: "1.15rem", fontWeight: 700, color: "white", marginBottom: "8px", lineHeight: 1.25 }}>
+                {title}
+              </h3>
+              <p style={{ fontFamily: MONTSERRAT, fontSize: "0.83rem", color: "#CBD5E1", lineHeight: 1.75 }}>
+                {body}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── Form ── */}
