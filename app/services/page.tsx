@@ -165,8 +165,8 @@ export default function ServicesPage() {
               position: "relative",
             }}
           >
-            {/* Bundle badges — top right */}
-            <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {/* Bundle badges — top right, stacked vertically */}
+            <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", flexDirection: "column", gap: "5px", alignItems: "flex-end" }}>
               <BundleBadge name="Starter Intelligence" />
               <BundleBadge name="Full Picture" />
             </div>
@@ -241,12 +241,12 @@ export default function ServicesPage() {
                 >
                   {/* Bundle badges */}
                   {svc.bundles.length > 0 && (
-                    <div style={{ position: "absolute", top: "14px", right: "16px", display: "flex", gap: "5px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    <div style={{ position: "absolute", top: "14px", right: "16px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end" }}>
                       {svc.bundles.map(b => <BundleBadge key={b} name={b} />)}
                     </div>
                   )}
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", paddingRight: svc.bundles.length > 0 ? "120px" : "0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", paddingRight: svc.bundles.length > 0 ? "96px" : "0" }}>
                     <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.2rem", fontWeight: 700, color: NAVY, lineHeight: 1.2 }}>
                       {svc.name}
                     </h3>
