@@ -85,7 +85,7 @@ export default function Home() {
       </section>
 
       {/* ── SERVICES GRID ── */}
-      <section style={{ backgroundColor: WHITE, padding: "72px 24px" }}>
+      <section style={{ backgroundColor: WHITE, padding: "72px 24px 40px" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
           <h2
             style={{
@@ -113,17 +113,18 @@ export default function Home() {
 
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              display: "flex",
+              flexWrap: "wrap",
               gap: "16px",
-              marginBottom: "36px",
+              justifyContent: "center",
+              marginBottom: "0",
             }}
           >
             {HOME_SERVICES.map(svc => (
               <Link
                 key={svc.name}
                 href={svc.href}
-                style={{ textDecoration: "none", display: "block" }}
+                style={{ textDecoration: "none", display: "block", flex: "0 1 calc(33.333% - 11px)", minWidth: "240px" }}
               >
                 <div
                   style={{
@@ -178,8 +179,8 @@ export default function Home() {
       </section>
 
 
-{/* ── CLOSING CTA ── */}
-      <section style={{ backgroundColor: WHITE, textAlign: "center", padding: "88px 24px" }}>
+      {/* ── CLOSING CTA ── */}
+      <section style={{ backgroundColor: WHITE, textAlign: "center", padding: "52px 24px 80px" }}>
         <h2
           style={{
             fontFamily: "var(--font-cormorant)",

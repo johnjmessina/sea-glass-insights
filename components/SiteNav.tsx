@@ -16,19 +16,13 @@ export default function SiteNav() {
         borderBottom: "1px solid rgba(10,47,97,0.06)",
       }}
     >
-      <Link
-        href="/"
-        style={{
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontWeight: 700,
-          fontSize: "1.1rem",
-          color: NAVY,
-          textDecoration: "none",
-          letterSpacing: "0.01em",
-          flexShrink: 0,
-        }}
-      >
-        Sea Glass Insights
+      <Link href="/" style={{ flexShrink: 0, lineHeight: 0 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logos/logo_transparent_FINAL.png"
+          alt="Sea Glass Insights"
+          style={{ height: "40px", width: "auto", display: "block" }}
+        />
       </Link>
 
       <nav
