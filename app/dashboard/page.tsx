@@ -1163,8 +1163,8 @@ function BusinessPulse() {
   // ── Card preview (always visible on the right) ──────────────────────────
   const CardPreview = (
     <div id="pulse-card" style={{ fontFamily: MT }}>
-      <p style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#aaa", marginBottom: "14px" }}>Front</p>
-      <div style={{ width: "620px", background: NAVY_HEX, borderRadius: "3px", overflow: "hidden", marginBottom: "32px" }}>
+      <p id="pulse-screen-label-front" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#aaa", marginBottom: "14px" }}>Front</p>
+      <div id="pulse-front" style={{ width: "620px", background: NAVY_HEX, borderRadius: "3px", overflow: "hidden", marginBottom: "32px" }}>
         <div style={{ padding: "36px 44px 28px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: TEAL_HEX, marginBottom: "10px" }}>Business Pulse</div>
@@ -1207,13 +1207,12 @@ function BusinessPulse() {
         </div>
       </div>
 
-      <p style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
-      <div style={{ width: "620px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", display: "flex" }}>
+      <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
+      <div id="pulse-back" style={{ width: "620px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", display: "flex" }}>
         <div style={{ background: NAVY_HEX, padding: "40px 32px", width: "210px", flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/logo_negative_transparent.png" alt="Sea Glass Insights" style={{ width: "120px", height: "auto", marginBottom: "12px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-            <div style={{ fontFamily: CG, fontSize: "17px", fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>Sea Glass Insights</div>
+            <img src="/logos/logo_negative_transparent.png" alt="Sea Glass Insights" style={{ width: "140px", height: "auto" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
           </div>
           <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: "rgba(244,234,218,0.45)", lineHeight: 2, textAlign: "center" }}>
             <div>{form.analystName}</div>
@@ -1244,13 +1243,46 @@ function BusinessPulse() {
 
   return (
     <div>
-      {/* Print CSS */}
+      {/* Print CSS — two-page PDF output */}
       <style>{`
         @media print {
+          /* Hide the entire page except the card */
           body * { visibility: hidden !important; }
           #pulse-card, #pulse-card * { visibility: visible !important; }
-          #pulse-card { position: fixed !important; top: 0; left: 0; width: 100%; margin: 0; }
-          @page { margin: 0; size: 620px auto; }
+
+          /* Letter page, 0.75-inch margins on all sides */
+          @page { size: 8.5in 11in; margin: 0.75in; }
+
+          /* Card container: static flow so page breaks work */
+          #pulse-card {
+            position: static !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          /* Hide the screen-only "Front" / "— Back —" labels */
+          #pulse-screen-label-front,
+          #pulse-screen-label-back {
+            display: none !important;
+          }
+
+          /* Front: fill print width, insert page break after */
+          #pulse-front {
+            width: 100% !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            margin-bottom: 0 !important;
+            page-break-after: always !important;
+            break-after: page !important;
+          }
+
+          /* Back: fill print width, starts on a fresh page */
+          #pulse-back {
+            width: 100% !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+          }
         }
       `}</style>
 
