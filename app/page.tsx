@@ -33,10 +33,23 @@ export default function Home() {
           backgroundColor: SAND,
           padding: "20px 40px",
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           alignItems: "center",
         }}
       >
+        <Link
+          href="/services"
+          style={{
+            fontFamily: "var(--font-montserrat)",
+            fontWeight: 500,
+            fontSize: "0.88rem",
+            color: GRAY,
+            textDecoration: "none",
+            letterSpacing: "0.01em",
+          }}
+        >
+          Services
+        </Link>
         <Link
           href="/get-report"
           style={{
@@ -360,6 +373,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── 6. FULL SERVICE SUITE ── */}
+      <section style={{ backgroundColor: NAVY, padding: "80px 24px" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto" }}>
+          <p
+            style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.75rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: "12px" }}
+          >
+            The Full Service Suite
+          </p>
+          <h2
+            style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700, color: WHITE, textAlign: "center", marginBottom: "16px" }}
+          >
+            The MIR is just the beginning.
+          </h2>
+          <p
+            style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", color: "#93C5FD", textAlign: "center", maxWidth: "560px", margin: "0 auto 48px", lineHeight: 1.75 }}
+          >
+            Sea Glass Insights offers a full range of research and intelligence services — from social media audits to secret shopping, deep dive reports, and more.
+          </p>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px", marginBottom: "40px" }}
+          >
+            {[
+              { name: "Market Intelligence Report", price: "$199", href: "/get-report", highlight: true },
+              { name: "Social Media Audit",          price: "$199", href: "/services" },
+              { name: "Secret Shopping",             price: "$299", href: "/services" },
+              { name: "Deep Dive Report",            price: "$399", href: "/services" },
+              { name: "Voice of Customer Survey",    price: "$499", href: "/services" },
+              { name: "AI Starter Kit",              price: "$99",  href: "/services" },
+            ].map(svc => (
+              <Link
+                key={svc.name}
+                href={svc.href}
+                style={{ display: "block", textDecoration: "none", backgroundColor: svc.highlight ? TEAL : "rgba(255,255,255,0.07)", border: `1px solid ${svc.highlight ? TEAL : "rgba(255,255,255,0.15)"}`, borderRadius: "12px", padding: "20px 22px", transition: "opacity 0.15s" }}
+              >
+                <p
+                  style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.1rem", fontWeight: 700, color: svc.highlight ? NAVY : WHITE, marginBottom: "4px" }}
+                >
+                  {svc.name}
+                </p>
+                <p
+                  style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", fontWeight: 600, color: svc.highlight ? NAVY : "#93C5FD" }}
+                >
+                  {svc.price}
+                </p>
+              </Link>
+            ))}
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <Link
+              href="/services"
+              style={{ display: "inline-block", border: `1.5px solid ${TEAL}`, color: TEAL, fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.9rem", padding: "11px 32px", borderRadius: "9999px", textDecoration: "none", letterSpacing: "0.02em" }}
+            >
+              View All Services →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── 6. CLOSING CTA ── */}
       <section
         style={{
@@ -439,8 +510,15 @@ export default function Home() {
         >
           John Messina, Founder | Bradley Beach, NJ | seaglassinsights.com
         </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem" }}>
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", marginBottom: "6px" }}>
           &copy; 2026 Sea Glass Insights. All rights reserved.
+        </p>
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.78rem" }}>
+          <Link href="/privacy" style={{ color: "#93C5FD", textDecoration: "underline" }}>Privacy Policy</Link>
+          {" · "}
+          <Link href="/services" style={{ color: "#93C5FD", textDecoration: "underline" }}>Services</Link>
+          {" · "}
+          <Link href="/contact" style={{ color: "#93C5FD", textDecoration: "underline" }}>Contact</Link>
         </p>
       </footer>
 

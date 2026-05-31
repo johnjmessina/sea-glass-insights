@@ -1041,10 +1041,298 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   );
 }
 
+// ── Business Pulse ────────────────────────────────────────────────────────────
+
+type Observation = { label: string; title: string; body: string };
+type PulseForm = {
+  businessName: string;
+  location: string;
+  obs: [Observation, Observation, Observation];
+  ctaPrice: string;
+  analystName: string;
+  phone: string;
+  email: string;
+  website: string;
+};
+
+const EMPTY_OBS: Observation = { label: "", title: "", body: "" };
+const PULSE_DEFAULTS: PulseForm = {
+  businessName: "",
+  location: "",
+  obs: [
+    { ...EMPTY_OBS },
+    { ...EMPTY_OBS },
+    { ...EMPTY_OBS },
+  ],
+  ctaPrice: "$199",
+  analystName: "John Messina",
+  phone: "",
+  email: "john@seaglassinsights.com",
+  website: "seaglassinsights.com",
+};
+
+function BusinessPulse() {
+  const [form, setForm]       = useState<PulseForm>(PULSE_DEFAULTS);
+  const [preview, setPreview] = useState(false);
+
+  function setField<K extends keyof PulseForm>(k: K, v: PulseForm[K]) {
+    setForm(prev => ({ ...prev, [k]: v }));
+  }
+  function setObs(i: number, k: keyof Observation, v: string) {
+    setForm(prev => {
+      const obs = prev.obs.map((o, idx) => idx === i ? { ...o, [k]: v } : o) as [Observation, Observation, Observation];
+      return { ...prev, obs };
+    });
+  }
+
+  const inp = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam";
+  const lbl = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
+
+  return (
+    <div>
+      {/* Print CSS — only the card renders when printing */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #pulse-card, #pulse-card * { visibility: visible !important; }
+          #pulse-card { position: fixed !important; top: 0; left: 0; width: 100%; }
+          @page { margin: 0; size: letter portrait; }
+        }
+      `}</style>
+
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-navy font-bold text-lg" style={{ fontFamily: "Georgia, serif" }}>Business Pulse</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Build a print-ready leave-behind card for any business.</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPreview(v => !v)}
+            className="border border-navy text-navy text-sm font-semibold px-4 py-2 rounded-full hover:bg-navy hover:text-white transition-colors"
+          >
+            {preview ? "← Edit" : "Preview Card"}
+          </button>
+          {preview && (
+            <button
+              onClick={() => window.print()}
+              className="bg-seafoam text-navy text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90"
+            >
+              🖨 Print / Save PDF
+            </button>
+          )}
+        </div>
+      </div>
+
+      {!preview ? (
+        /* ── FORM ── */
+        <div className="space-y-6">
+          {/* Business info */}
+          <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <h3 className="text-navy font-semibold text-sm mb-4" style={{ fontFamily: "Georgia, serif" }}>Business Info</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={lbl}>Business Name</label>
+                <input className={inp} value={form.businessName} onChange={e => setField("businessName", e.target.value)} placeholder="e.g. Anchor Coffee Co." />
+              </div>
+              <div>
+                <label className={lbl}>Location</label>
+                <input className={inp} value={form.location} onChange={e => setField("location", e.target.value)} placeholder="e.g. Asbury Park, NJ" />
+              </div>
+            </div>
+          </div>
+
+          {/* Observations */}
+          {([0, 1, 2] as const).map(i => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-6">
+              <h3 className="text-navy font-semibold text-sm mb-4" style={{ fontFamily: "Georgia, serif" }}>
+                Observation {i + 1}
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <label className={lbl}>Label <span className="normal-case text-gray-400">(e.g. Customer Experience, Competitive Edge)</span></label>
+                  <input className={inp} value={form.obs[i].label} onChange={e => setObs(i, "label", e.target.value)} placeholder="e.g. Customer Experience" />
+                </div>
+                <div>
+                  <label className={lbl}>Title</label>
+                  <input className={inp} value={form.obs[i].title} onChange={e => setObs(i, "title", e.target.value)} placeholder="e.g. A Loyal Base Drives Consistent Revenue" />
+                </div>
+                <div>
+                  <label className={lbl}>Body</label>
+                  <textarea rows={3} className={inp + " resize-y"} value={form.obs[i].body} onChange={e => setObs(i, "body", e.target.value)} placeholder="2–3 sentences of analysis..." />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* CTA + Back */}
+          <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <h3 className="text-navy font-semibold text-sm mb-4" style={{ fontFamily: "Georgia, serif" }}>Footer & Back Panel</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={lbl}>CTA Price</label>
+                <input className={inp} value={form.ctaPrice} onChange={e => setField("ctaPrice", e.target.value)} placeholder="$199" />
+              </div>
+              <div>
+                <label className={lbl}>Analyst Name</label>
+                <input className={inp} value={form.analystName} onChange={e => setField("analystName", e.target.value)} />
+              </div>
+              <div>
+                <label className={lbl}>Phone</label>
+                <input className={inp} value={form.phone} onChange={e => setField("phone", e.target.value)} placeholder="e.g. (732) 555-0100" />
+              </div>
+              <div>
+                <label className={lbl}>Email</label>
+                <input className={inp} value={form.email} onChange={e => setField("email", e.target.value)} />
+              </div>
+              <div>
+                <label className={lbl}>Website</label>
+                <input className={inp} value={form.website} onChange={e => setField("website", e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setPreview(true)}
+            className="w-full bg-navy text-white font-semibold text-sm py-3 rounded-full hover:bg-navy-dark transition-colors"
+          >
+            Generate Business Pulse →
+          </button>
+        </div>
+      ) : (
+        /* ── CARD PREVIEW ── */
+        <div id="pulse-card">
+          {/* FRONT */}
+          <div style={{
+            width: "100%",
+            maxWidth: "720px",
+            margin: "0 auto 0",
+            fontFamily: "'Montserrat', sans-serif",
+            pageBreakAfter: "always",
+            breakAfter: "page",
+          }}>
+            {/* Header */}
+            <div style={{ backgroundColor: "#0A2F61", padding: "28px 36px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "0.7rem", fontWeight: 600, color: "#00CED1", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "4px" }}>
+                  Business Pulse
+                </p>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.8rem", fontWeight: 700, color: "#FFFFFF", margin: 0, lineHeight: 1.15 }}>
+                  {form.businessName || "Your Business Name"}
+                </h1>
+                {form.location && (
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "#93C5FD", marginTop: "4px", fontWeight: 400 }}>
+                    {form.location}
+                  </p>
+                )}
+              </div>
+              <img src="/logos/logo_icon_white.png" alt="Sea Glass Insights" style={{ height: "40px", width: "auto", opacity: 0.9 }}
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              />
+            </div>
+
+            {/* Observations */}
+            <div style={{ backgroundColor: "#F4EADA", padding: "0 36px" }}>
+              {form.obs.map((obs, i) => (
+                <div key={i} style={{ padding: "22px 0", borderBottom: i < 2 ? "1px solid rgba(10,47,97,0.12)" : "none" }}>
+                  {obs.label && (
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.62rem", fontWeight: 600, color: "#00CED1", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "5px" }}>
+                      {obs.label}
+                    </p>
+                  )}
+                  {obs.title && (
+                    <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.15rem", fontWeight: 700, color: "#0A2F61", marginBottom: "7px", lineHeight: 1.25 }}>
+                      {obs.title}
+                    </h2>
+                  )}
+                  {obs.body && (
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.78rem", color: "#374151", lineHeight: 1.75 }}>
+                      {obs.body}
+                    </p>
+                  )}
+                  {!obs.label && !obs.title && !obs.body && (
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.78rem", color: "#9CA3AF", fontStyle: "italic" }}>
+                      Observation {i + 1} — fill in the form to populate this section.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Footer strip */}
+            <div style={{ backgroundColor: "#0A2F61", padding: "16px 36px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.65rem", color: "#93C5FD", marginBottom: "2px", letterSpacing: "0.04em" }}>
+                  Market Intelligence Report
+                </p>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.1rem", fontWeight: 700, color: "#FFFFFF" }}>
+                  Get Yours — {form.ctaPrice}
+                </p>
+              </div>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.65rem", color: "#00CED1", fontWeight: 500 }}>
+                seaglassinsights.com
+              </p>
+            </div>
+          </div>
+
+          {/* BACK */}
+          <div style={{
+            width: "100%",
+            maxWidth: "720px",
+            margin: "0 auto",
+            backgroundColor: "#F4EADA",
+            fontFamily: "'Montserrat', sans-serif",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "480px",
+            padding: "48px 36px",
+            textAlign: "center",
+          }}>
+            <img
+              src="/logos/logo_transparent_FINAL.png"
+              alt="Sea Glass Insights"
+              style={{ maxWidth: "280px", width: "100%", height: "auto", marginBottom: "20px" }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            />
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", fontStyle: "italic", color: "#0A2F61", marginBottom: "28px", opacity: 0.7 }}>
+              Refining the Edge.
+            </p>
+
+            <div style={{ width: "40px", height: "2px", backgroundColor: "#00CED1", marginBottom: "28px" }} />
+
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.4rem", fontWeight: 700, color: "#0A2F61", marginBottom: "6px" }}>
+              {form.analystName}
+            </p>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "#6B7280", marginBottom: "20px" }}>
+              Founder, Sea Glass Insights
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "center" }}>
+              {form.phone && (
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.82rem", color: "#374151" }}>
+                  {form.phone}
+                </p>
+              )}
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.82rem", color: "#374151" }}>
+                {form.email}
+              </p>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.82rem", color: "#00CED1", fontWeight: 500 }}>
+                {form.website}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const [authed, setAuthed]         = useState(false);
+  const [activeTab, setActiveTab]   = useState<"orders" | "pulse">("orders");
   const [orders, setOrders]         = useState<Order[]>([]);
   const [selected, setSelected]     = useState<Order | null>(null);
   const [showManual, setShowManual] = useState(false);
@@ -1062,8 +1350,8 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (authed) fetchOrders();
-  }, [authed, fetchOrders]);
+    if (authed && activeTab === "orders") fetchOrders();
+  }, [authed, activeTab, fetchOrders]);
 
   if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
 
@@ -1090,13 +1378,35 @@ export default function DashboardPage() {
             <span className="ml-3 text-seafoam text-sm hidden sm:inline">Analyst Dashboard</span>
           </div>
         </div>
-        <button onClick={fetchOrders} className="text-blue-300 hover:text-white text-sm transition-colors">
-          ↻ Refresh
-        </button>
+        <div className="flex items-center gap-4">
+          {/* Tab navigation */}
+          <nav className="flex gap-1 bg-white/10 rounded-full p-1">
+            {(["orders", "pulse"] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => { setActiveTab(tab); setSelected(null); setShowManual(false); }}
+                className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${
+                  activeTab === tab
+                    ? "bg-white text-navy"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                {tab === "orders" ? "Orders" : "Business Pulse"}
+              </button>
+            ))}
+          </nav>
+          {activeTab === "orders" && (
+            <button onClick={fetchOrders} className="text-blue-300 hover:text-white text-sm transition-colors">
+              ↻ Refresh
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-10">
-        {loading ? (
+        {activeTab === "pulse" ? (
+          <BusinessPulse />
+        ) : loading ? (
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-4 border-seafoam border-t-transparent rounded-full animate-spin" />
           </div>

@@ -1,7 +1,6 @@
-import type { Order, AIDraft } from "./supabase";
-
-export function generateReport(
-  orderData: Order,
-  aiContent: AIDraft,
-  analystNote: string
+export declare function generateReport(
+  orderData: Record<string, unknown>,
+  aiContent: Record<string, unknown>,
+  analystNote: string,
+  executiveSummary?: string,
 ): Promise<Buffer>;
