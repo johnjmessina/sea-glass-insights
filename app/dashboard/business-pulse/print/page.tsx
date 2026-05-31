@@ -264,45 +264,56 @@ export default async function BusinessPulsePrintPage(
             </div>
           </div>
 
-          {/* Cream right panel */}
-          <div style={{ flex: 1, padding: "16px 14px 14px", display: "flex", flexDirection: "column" }}>
-            <div style={{ fontFamily: MT, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: NAVY, opacity: 0.45, marginBottom: "6px" }}>
-              What we offer
-            </div>
-            <div style={{ fontFamily: CG, fontSize: "11px", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "8px" }}>
-              Professional research. Real analyst. Flat fee.
+          {/* Cream right panel — 3 evenly-spaced zones */}
+          <div style={{ flex: 1, padding: "14px 12px 12px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+
+            {/* TOP — services */}
+            <div>
+              <div style={{ fontFamily: MT, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: NAVY, opacity: 0.45, marginBottom: "5px" }}>
+                What we offer
+              </div>
+              <div style={{ fontFamily: CG, fontSize: "10px", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "6px" }}>
+                Professional research. Real analyst. Flat fee.
+              </div>
+              <ul style={{ listStyle: "none" }}>
+                {BACK_SERVICES.map(svc => (
+                  <li key={svc.name} style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontFamily: MT,
+                    fontSize: "7px",
+                    color: "#333",
+                    padding: "3px 0",
+                    borderBottom: "1px solid rgba(10,47,97,0.07)",
+                  }}>
+                    <span>{svc.name}</span>
+                    <span style={{ color: NAVY, fontWeight: 600 }}>{svc.price}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <ul style={{ listStyle: "none", marginBottom: "10px" }}>
-              {BACK_SERVICES.map(svc => (
-                <li key={svc.name} style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: MT,
-                  fontSize: "7.5px",
-                  color: "#333",
-                  padding: "3.5px 0",
-                  borderBottom: "1px solid rgba(10,47,97,0.07)",
-                }}>
-                  <span>{svc.name}</span>
-                  <span style={{ color: NAVY, fontWeight: 600 }}>{svc.price}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Value proposition + QR code side by side */}
-            <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginBottom: "auto" }}>
-              <p style={{ flex: 1, fontFamily: MT, fontSize: "7px", fontWeight: 300, color: "#555", lineHeight: 1.65 }}>
+            {/* MIDDLE — pull quote with teal left border */}
+            <div style={{ borderLeft: "1.5px solid rgba(0,206,209,0.55)", paddingLeft: "8px" }}>
+              <p style={{ fontFamily: MT, fontSize: "7.5px", fontWeight: 400, color: NAVY, lineHeight: 1.75 }}>
                 AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
               </p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrDataUrl} alt="QR code" width={56} height={56} style={{ flexShrink: 0, borderRadius: "3px" }} />
             </div>
 
-            {/* Tagline — pinned to bottom */}
-            <div style={{ fontFamily: CG, fontSize: "10px", fontStyle: "italic", color: NAVY, opacity: 0.5, textAlign: "right", marginTop: "8px" }}>
-              Refining the Edge.
+            {/* BOTTOM — QR + tagline */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrDataUrl} alt="QR code — seaglassinsights.com" width={52} height={52} style={{ flexShrink: 0, borderRadius: "3px" }} />
+                <span style={{ fontFamily: MT, fontSize: "6.5px", color: "#6B7280", lineHeight: 1.5 }}>
+                  Scan to<br />get started
+                </span>
+              </div>
+              <div style={{ fontFamily: CG, fontSize: "9px", fontStyle: "italic", color: NAVY, opacity: 0.45, textAlign: "right" }}>
+                Refining the Edge.
+              </div>
             </div>
+
           </div>
         </div>
 

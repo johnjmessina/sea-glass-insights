@@ -1261,33 +1261,50 @@ function BusinessPulse() {
             <div style={{ color: TEAL_HEX }}>{form.website}</div>
           </div>
         </div>
-        <div style={{ padding: "32px 36px 28px", flex: 1, display: "flex", flexDirection: "column" }}>
-          <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: NAVY_HEX, opacity: 0.5, marginBottom: "10px" }}>What we offer</div>
-          <div style={{ fontFamily: CG, fontSize: "19px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.25, marginBottom: "10px" }}>Professional research. Real analyst. Flat fee.</div>
-          <ul style={{ listStyle: "none", padding: 0, marginBottom: "14px" }}>
-            {BACK_SERVICES.map(svc => (
-              <li key={svc.name} style={{ display: "flex", justifyContent: "space-between", fontFamily: MT, fontSize: "10px", color: "#333", padding: "5px 0", borderBottom: "1px solid rgba(10,47,97,0.08)" }}>
-                <span>{svc.name}</span>
-                <span style={{ color: NAVY_HEX, fontWeight: 600 }}>{svc.price}</span>
-              </li>
-            ))}
-          </ul>
-          {/* Value proposition + QR */}
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start", marginBottom: "auto" }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: MT, fontSize: "10px", fontWeight: 300, color: "#555", lineHeight: 1.7 }}>
-                AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
-              </p>
+        {/* ── Back cream right panel: 3 evenly-spaced zones ── */}
+        <div style={{ padding: "28px 32px 24px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+
+          {/* TOP — services */}
+          <div>
+            <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: NAVY_HEX, opacity: 0.45, marginBottom: "8px" }}>
+              What we offer
             </div>
-            {qrDataUrl && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={qrDataUrl} alt="QR code" width={72} height={72} style={{ flexShrink: 0, borderRadius: "4px" }} />
-            )}
+            <div style={{ fontFamily: CG, fontSize: "18px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.2, marginBottom: "10px" }}>
+              Professional research. Real analyst. Flat fee.
+            </div>
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {BACK_SERVICES.map(svc => (
+                <li key={svc.name} style={{ display: "flex", justifyContent: "space-between", fontFamily: MT, fontSize: "10px", color: "#333", padding: "4px 0", borderBottom: "1px solid rgba(10,47,97,0.07)" }}>
+                  <span>{svc.name}</span>
+                  <span style={{ color: NAVY_HEX, fontWeight: 600 }}>{svc.price}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          {/* Tagline — bottom */}
-          <div style={{ fontFamily: CG, fontSize: "13px", fontStyle: "italic", color: NAVY_HEX, opacity: 0.55, textAlign: "right", marginTop: "14px" }}>
-            Refining the Edge.
+
+          {/* MIDDLE — pull quote */}
+          <div style={{ borderLeft: "2px solid rgba(0,206,209,0.55)", paddingLeft: "12px" }}>
+            <p style={{ fontFamily: MT, fontSize: "11px", fontWeight: 400, color: NAVY_HEX, lineHeight: 1.75 }}>
+              AI generates the foundation. A real analyst with over ten years of experience makes sure every insight is worth your time.
+            </p>
           </div>
+
+          {/* BOTTOM — QR + tagline */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+              {qrDataUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={qrDataUrl} alt="QR code — seaglassinsights.com" width={68} height={68} style={{ flexShrink: 0, borderRadius: "4px" }} />
+              )}
+              <span style={{ fontFamily: MT, fontSize: "9px", color: "#6B7280", lineHeight: 1.4 }}>
+                Scan to<br />get started
+              </span>
+            </div>
+            <div style={{ fontFamily: CG, fontSize: "13px", fontStyle: "italic", color: NAVY_HEX, opacity: 0.45, textAlign: "right" }}>
+              Refining the Edge.
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
