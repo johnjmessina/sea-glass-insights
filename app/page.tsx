@@ -47,7 +47,7 @@ export default function Home() {
             margin: "0 auto 24px",
           }}
         >
-          Know your market. Refine your edge.
+          Know your market.<br />Refine your edge.
         </h1>
         <p
           style={{

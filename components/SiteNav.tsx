@@ -54,7 +54,7 @@ export default function SiteNav() {
         ))}
 
         <Link
-          href="/get-report"
+          href="/services"
           style={{
             fontFamily: "'Montserrat', sans-serif",
             fontWeight: 600,
@@ -68,7 +68,7 @@ export default function SiteNav() {
             whiteSpace: "nowrap",
           }}
         >
-          Start Your Report
+          Get Started
         </Link>
       </nav>
     </header>
