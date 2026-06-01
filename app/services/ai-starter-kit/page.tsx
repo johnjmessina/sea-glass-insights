@@ -4,7 +4,8 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
-import SiteFooter from "@/components/SiteFooter";
+import SiteFooter       from "@/components/SiteFooter";
+import ServiceFormField from "@/components/ServiceFormField";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -52,20 +53,6 @@ export default function AIStarterKitPage() {
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
-  function Field({ id, label, required, hint, placeholder, rows }: { id: keyof FormData; label: string; required?: boolean; hint?: string; placeholder: string; rows?: number; }) {
-    return (
-      <div>
-        <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: hint ? "3px" : "6px" }}>
-          {label}{required && <span style={{ color: "#EF4444" }}> *</span>}
-          {!required && <span style={{ fontFamily: MT, fontSize: "0.75rem", fontWeight: 400, color: LGRAY }}> (optional)</span>}
-        </label>
-        {hint && <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginBottom: "6px" }}>{hint}</p>}
-        {rows ? <textarea rows={rows} placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={`${cls(id)} resize-y`} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />
-               : <input type="text" placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={cls(id)} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />}
-        {errors[id] && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors[id]}</p>}
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
@@ -119,20 +106,20 @@ export default function AIStarterKitPage() {
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <Field id="customerName" label="Your Name" required placeholder="Jane Smith" />
-                <Field id="email" label="Email Address" required placeholder="jane@yourbusiness.com" />
-                <Field id="businessName" label="Business Name" required placeholder="Acme Coffee Co." />
+                <ServiceFormField label="Your Name" required placeholder="Jane Smith"  value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
+                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com"  value={form.email} error={errors.email} onChange={v => set("email", v)} />
+                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co."  value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
               </div>
             </div>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <Field id="q1" label="1. What is your business name and what do you do?" required placeholder="e.g. Anchor Coffee Co. — we run a specialty coffee shop and roastery in Bradley Beach, NJ." rows={2} />
-                <Field id="q2" label="2. Where are you located and who are your customers?" required placeholder="e.g. Bradley Beach, NJ. Our customers are mostly locals, 25-50, who value quality and community. Tourists in summer." rows={2} />
-                <Field id="q3" label="3. What AI tool are you planning to use?" required hint="e.g. ChatGPT, Claude, Gemini, Copilot, or other." placeholder="e.g. ChatGPT — I have a Plus subscription and have tried it a few times but don't know how to get good results." />
-                <Field id="q4" label="4. What are the top 3 tasks you want AI to help you with?" required hint="e.g. writing social posts, responding to reviews, drafting emails, creating promotions, writing product descriptions." placeholder="e.g. 1. Instagram captions that sound like us, 2. Responding to Google reviews professionally, 3. Monthly email newsletter drafts." rows={3} />
-                <Field id="q5" label="5. What is the tone of your brand?" required hint="How do you sound when you talk to customers? Friendly and casual? Professional? Local and personal? Something else?" placeholder="e.g. Warm and local. We know most of our regulars by name. We're not corporate at all — we want to sound like a person, not a brand." rows={2} />
-                <Field id="q6" label="6. Anything specific about your business or customers we should know when writing your prompts?" hint="Seasonal business? Specific sensitivities? Things you never want to say? Anything that would help us get the tone exactly right." placeholder="e.g. We're very community-focused and never do aggressive sales language. We also have a lot of dog owners as customers — that's a big part of our identity." rows={3} />
+                <ServiceFormField label="1. What is your business name and what do you do?" required placeholder="e.g. Anchor Coffee Co. — we run a specialty coffee shop and roastery in Bradley Beach, NJ." rows={2}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
+                <ServiceFormField label="2. Where are you located and who are your customers?" required placeholder="e.g. Bradley Beach, NJ. Our customers are mostly locals, 25-50, who value quality and community. Tourists in summer." rows={2}  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
+                <ServiceFormField label="3. What AI tool are you planning to use?" required hint="e.g. ChatGPT, Claude, Gemini, Copilot, or other." placeholder="e.g. ChatGPT — I have a Plus subscription and have tried it a few times but don't know how to get good results."  value={form.q3} error={errors.q3} onChange={v => set("q3", v)} />
+                <ServiceFormField label="4. What are the top 3 tasks you want AI to help you with?" required hint="e.g. writing social posts, responding to reviews, drafting emails, creating promotions, writing product descriptions." placeholder="e.g. 1. Instagram captions that sound like us, 2. Responding to Google reviews professionally, 3. Monthly email newsletter drafts." rows={3}  value={form.q4} error={errors.q4} onChange={v => set("q4", v)} />
+                <ServiceFormField label="5. What is the tone of your brand?" required hint="How do you sound when you talk to customers? Friendly and casual? Professional? Local and personal? Something else?" placeholder="e.g. Warm and local. We know most of our regulars by name. We're not corporate at all — we want to sound like a person, not a brand." rows={2}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
+                <ServiceFormField label="6. Anything specific about your business or customers we should know when writing your prompts?" hint="Seasonal business? Specific sensitivities? Things you never want to say? Anything that would help us get the tone exactly right." placeholder="e.g. We're very community-focused and never do aggressive sales language. We also have a lot of dog owners as customers — that's a big part of our identity." rows={3}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
               </div>
             </div>
             <div style={{ textAlign: "center" }}>

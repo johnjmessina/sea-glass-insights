@@ -4,7 +4,8 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
-import SiteFooter from "@/components/SiteFooter";
+import SiteFooter       from "@/components/SiteFooter";
+import ServiceFormField from "@/components/ServiceFormField";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -53,20 +54,6 @@ export default function SyntheticSurveyReportPage() {
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
-  function Field({ id, label, required, hint, placeholder, rows }: { id: keyof FormData; label: string; required?: boolean; hint?: string; placeholder: string; rows?: number; }) {
-    return (
-      <div>
-        <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: hint ? "3px" : "6px" }}>
-          {label}{required && <span style={{ color: "#EF4444" }}> *</span>}
-          {!required && <span style={{ fontFamily: MT, fontSize: "0.75rem", fontWeight: 400, color: LGRAY }}> (optional)</span>}
-        </label>
-        {hint && <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginBottom: "6px" }}>{hint}</p>}
-        {rows ? <textarea rows={rows} placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={`${cls(id)} resize-y`} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />
-               : <input type="text" placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={cls(id)} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />}
-        {errors[id] && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors[id]}</p>}
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
@@ -123,25 +110,25 @@ export default function SyntheticSurveyReportPage() {
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <Field id="customerName" label="Your Name" required placeholder="Jane Smith" />
-                <Field id="email" label="Email Address" required placeholder="jane@yourbusiness.com" />
-                <Field id="businessName" label="Business Name" required placeholder="Acme Coffee Co." />
+                <ServiceFormField label="Your Name" required placeholder="Jane Smith"  value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
+                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com"  value={form.email} error={errors.email} onChange={v => set("email", v)} />
+                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co."  value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
               </div>
             </div>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "8px" }}>Your Business and Research Goals</h3>
               <p style={{ fontFamily: MT, fontSize: "0.82rem", color: LGRAY, marginBottom: "24px" }}>Questions 5 and 6 are the most important. The more precise your assumptions and research questions, the sharper the persona responses will be.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <Field id="q1" label="1. What is your business name and what do you sell or offer?" required placeholder="e.g. Anchor Coffee Co. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={3} />
-                <Field id="q2" label="2. How long have you been in business, and where are you located?" required placeholder="e.g. 2 years, launching a second location in Asbury Park this spring." />
-                <Field id="q3" label="3. Who is your ideal customer?" required hint="Age, income, lifestyle, and what they need from a business like yours." placeholder="e.g. 28-45, value quality and local authenticity, willing to pay a premium, want a community-feel coffee shop rather than a chain." rows={3} />
-                <Field id="q4" label="4. Who are your top 2–3 competitors?" required hint="Names, or describe them if you don't know exact names." placeholder="e.g. Starbucks on Main St, a newer indie shop called The Grind, and the bagel shop that also sells coffee." rows={2} />
-                <Field id="q5" label="5. What assumptions about your customers do you want to test?" required hint="What do you believe to be true about your customers that you haven't confirmed?" placeholder="e.g. We assume our customers primarily value atmosphere over price. We assume people who buy our retail beans are different from our cafe customers." rows={4} />
-                <Field id="q6" label="6. What are the 3-5 most important questions you want answered about your customers?" required hint="Be as specific as possible — these drive the persona research questions." placeholder="e.g. Would our customers pay $18 for a retail bag of single-origin coffee? What would make them choose us over the new shop that just opened?" rows={4} />
-                <Field id="q7" label="7. What does your current pricing look like and how do customers typically find you?" required placeholder="e.g. Drip coffee $3.50, espresso drinks $5-7, retail bags $14-16. Most customers find us via word of mouth or walking by." rows={3} />
-                <Field id="q8" label="8. What marketing are you currently doing, if any?" required placeholder="e.g. Instagram 3x per week, no paid ads, occasional email to a list of about 400. Google Business profile is active." rows={3} />
-                <Field id="q9" label="9. Is there a specific product, service, or decision you want customer reactions to?" placeholder="e.g. We're considering launching a monthly coffee subscription at $35/month and want to know if our core customer type would value it." rows={3} />
-                <Field id="q10" label="10. Is there anything else you want the personas to focus on or address?" placeholder="e.g. We'd like the personas to react to our brand name and logo description if possible." rows={3} />
+                <ServiceFormField label="1. What is your business name and what do you sell or offer?" required placeholder="e.g. Anchor Coffee Co. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={3}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
+                <ServiceFormField label="2. How long have you been in business, and where are you located?" required placeholder="e.g. 2 years, launching a second location in Asbury Park this spring."  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
+                <ServiceFormField label="3. Who is your ideal customer?" required hint="Age, income, lifestyle, and what they need from a business like yours." placeholder="e.g. 28-45, value quality and local authenticity, willing to pay a premium, want a community-feel coffee shop rather than a chain." rows={3}  value={form.q3} error={errors.q3} onChange={v => set("q3", v)} />
+                <ServiceFormField label="4. Who are your top 2–3 competitors?" required hint="Names, or describe them if you don't know exact names." placeholder="e.g. Starbucks on Main St, a newer indie shop called The Grind, and the bagel shop that also sells coffee." rows={2}  value={form.q4} error={errors.q4} onChange={v => set("q4", v)} />
+                <ServiceFormField label="5. What assumptions about your customers do you want to test?" required hint="What do you believe to be true about your customers that you haven't confirmed?" placeholder="e.g. We assume our customers primarily value atmosphere over price. We assume people who buy our retail beans are different from our cafe customers." rows={4}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
+                <ServiceFormField label="6. What are the 3-5 most important questions you want answered about your customers?" required hint="Be as specific as possible — these drive the persona research questions." placeholder="e.g. Would our customers pay $18 for a retail bag of single-origin coffee? What would make them choose us over the new shop that just opened?" rows={4}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
+                <ServiceFormField label="7. What does your current pricing look like and how do customers typically find you?" required placeholder="e.g. Drip coffee $3.50, espresso drinks $5-7, retail bags $14-16. Most customers find us via word of mouth or walking by." rows={3}  value={form.q7} error={errors.q7} onChange={v => set("q7", v)} />
+                <ServiceFormField label="8. What marketing are you currently doing, if any?" required placeholder="e.g. Instagram 3x per week, no paid ads, occasional email to a list of about 400. Google Business profile is active." rows={3}  value={form.q8} error={errors.q8} onChange={v => set("q8", v)} />
+                <ServiceFormField label="9. Is there a specific product, service, or decision you want customer reactions to?" placeholder="e.g. We're considering launching a monthly coffee subscription at $35/month and want to know if our core customer type would value it." rows={3}  value={form.q9} error={errors.q9} onChange={v => set("q9", v)} />
+                <ServiceFormField label="10. Is there anything else you want the personas to focus on or address?" placeholder="e.g. We'd like the personas to react to our brand name and logo description if possible." rows={3}  value={form.q10} error={errors.q10} onChange={v => set("q10", v)} />
               </div>
             </div>
             <div style={{ textAlign: "center" }}>

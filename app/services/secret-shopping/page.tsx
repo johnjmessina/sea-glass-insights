@@ -3,8 +3,9 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import SiteNav    from "@/components/SiteNav";
-import SiteFooter from "@/components/SiteFooter";
+import SiteNav          from "@/components/SiteNav";
+import SiteFooter        from "@/components/SiteFooter";
+import ServiceFormField  from "@/components/ServiceFormField";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -51,20 +52,6 @@ export default function SecretShoppingPage() {
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
-  function Field({ id, label, required, hint, placeholder, rows }: { id: keyof FormData; label: string; required?: boolean; hint?: string; placeholder: string; rows?: number; }) {
-    return (
-      <div>
-        <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: hint ? "3px" : "6px" }}>
-          {label}{required && <span style={{ color: "#EF4444" }}> *</span>}
-          {!required && <span style={{ fontFamily: MT, fontSize: "0.75rem", fontWeight: 400, color: LGRAY }}> (optional)</span>}
-        </label>
-        {hint && <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginBottom: "6px" }}>{hint}</p>}
-        {rows ? <textarea rows={rows} placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={`${cls(id)} resize-y`} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />
-               : <input type="text" placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={cls(id)} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />}
-        {errors[id] && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors[id]}</p>}
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
@@ -118,21 +105,21 @@ export default function SecretShoppingPage() {
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <Field id="customerName" label="Your Name" required placeholder="Jane Smith" />
-                <Field id="email" label="Email Address" required placeholder="jane@yourbusiness.com" />
+                <ServiceFormField label="Your Name" required placeholder="Jane Smith" value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
+                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com" value={form.email} error={errors.email} onChange={v => set("email", v)} />
               </div>
             </div>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Business</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <Field id="businessName" label="Business Name" required placeholder="Acme Coffee Co." />
-                <Field id="businessAddress" label="Business Address" required placeholder="123 Main St, Bradley Beach, NJ 07720" />
-                <Field id="industry" label="Industry / Business Type" required placeholder="e.g. Coffee Shop, Retail Boutique, Restaurant, Fitness Studio" />
-                <Field id="hours" label="Hours of Operation" required placeholder="e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm" />
-                <Field id="typicalInteraction" label="What does a typical customer interaction look like?" required hint="Walk us through what happens from the moment a customer arrives to the moment they leave." placeholder="e.g. Customer walks in, browses for a few minutes, orders at the counter, waits for their drink, finds a seat." rows={4} />
-                <Field id="dimensions" label="Specific experience dimensions you want evaluated?" hint="e.g. greeting, wait time, product knowledge, cleanliness, upsell behavior, problem resolution" placeholder="e.g. We want to focus on whether staff proactively engage customers and whether the restroom is being maintained during peak hours." rows={3} />
-                <Field id="competitorShop" label="Would you like a competitor location shopped as well?" hint="An additional fee applies for competitor shops. If yes, we'll follow up to confirm details and pricing before scheduling." placeholder="e.g. Yes — The Java House, 456 Ocean Ave, Belmar, NJ" />
-                <Field id="focus" label="Anything specific you're concerned about or want us to focus on?" required placeholder="e.g. We've had a few Google reviews mentioning slow service during lunch. We want to know if it's a staffing issue or a process issue." rows={4} />
+                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co." value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
+                <ServiceFormField label="Business Address" required placeholder="123 Main St, Bradley Beach, NJ 07720" value={form.businessAddress} error={errors.businessAddress} onChange={v => set("businessAddress", v)} />
+                <ServiceFormField label="Industry / Business Type" required placeholder="e.g. Coffee Shop, Retail Boutique, Restaurant, Fitness Studio" value={form.industry} error={errors.industry} onChange={v => set("industry", v)} />
+                <ServiceFormField label="Hours of Operation" required placeholder="e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm" value={form.hours} error={errors.hours} onChange={v => set("hours", v)} />
+                <ServiceFormField label="What does a typical customer interaction look like?" required hint="Walk us through what happens from the moment a customer arrives to the moment they leave." placeholder="e.g. Customer walks in, browses for a few minutes, orders at the counter, waits for their drink, finds a seat." rows={4} value={form.typicalInteraction} error={errors.typicalInteraction} onChange={v => set("typicalInteraction", v)} />
+                <ServiceFormField label="Specific experience dimensions you want evaluated?" hint="e.g. greeting, wait time, product knowledge, cleanliness, upsell behavior, problem resolution" placeholder="e.g. We want to focus on whether staff proactively engage customers and whether the restroom is being maintained during peak hours." rows={3} value={form.dimensions} error={errors.dimensions} onChange={v => set("dimensions", v)} />
+                <ServiceFormField label="Would you like a competitor location shopped as well?" hint="An additional fee applies for competitor shops. If yes, we'll follow up to confirm details and pricing before scheduling." placeholder="e.g. Yes — The Java House, 456 Ocean Ave, Belmar, NJ" value={form.competitorShop} error={errors.competitorShop} onChange={v => set("competitorShop", v)} />
+                <ServiceFormField label="Anything specific you're concerned about or want us to focus on?" required placeholder="e.g. We've had a few Google reviews mentioning slow service during lunch. We want to know if it's a staffing issue or a process issue." rows={4} value={form.focus} error={errors.focus} onChange={v => set("focus", v)} />
               </div>
             </div>
             {/* BUNDLE CALLOUT */}

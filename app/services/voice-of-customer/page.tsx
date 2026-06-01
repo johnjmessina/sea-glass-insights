@@ -4,7 +4,8 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
-import SiteFooter from "@/components/SiteFooter";
+import SiteFooter       from "@/components/SiteFooter";
+import ServiceFormField from "@/components/ServiceFormField";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -54,20 +55,6 @@ export default function VoiceOfCustomerPage() {
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
-  function Field({ id, label, required, hint, placeholder, rows }: { id: keyof FormData; label: string; required?: boolean; hint?: string; placeholder: string; rows?: number; }) {
-    return (
-      <div>
-        <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: hint ? "3px" : "6px" }}>
-          {label}{required && <span style={{ color: "#EF4444" }}> *</span>}
-          {!required && <span style={{ fontFamily: MT, fontSize: "0.75rem", fontWeight: 400, color: LGRAY }}> (optional)</span>}
-        </label>
-        {hint && <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginBottom: "6px" }}>{hint}</p>}
-        {rows ? <textarea rows={rows} placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={`${cls(id)} resize-y`} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />
-               : <input type="text" placeholder={placeholder} value={form[id]} onChange={e => set(id, e.target.value)} className={cls(id)} style={{ fontFamily: MT }} data-error={errors[id] ? true : undefined} />}
-        {errors[id] && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors[id]}</p>}
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
@@ -124,21 +111,21 @@ export default function VoiceOfCustomerPage() {
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <Field id="customerName" label="Your Name" required placeholder="Jane Smith" />
-                <Field id="email" label="Email Address" required placeholder="jane@yourbusiness.com" />
-                <Field id="businessName" label="Business Name" required placeholder="Acme Coffee Co." />
+                <ServiceFormField label="Your Name" required placeholder="Jane Smith"  value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
+                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com"  value={form.email} error={errors.email} onChange={v => set("email", v)} />
+                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co."  value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
               </div>
             </div>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business and Customers</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <Field id="q1" label="1. Business name and location" required placeholder="e.g. Anchor Coffee Co., Bradley Beach NJ — specialty coffee shop and roastery." />
-                <Field id="q2" label="2. Industry / business type" required placeholder="e.g. Food & Beverage — independent coffee shop, retail and cafe." />
-                <Field id="q3" label="3. Approximately how many customer contacts do you have?" required hint="An estimate is fine. This helps us understand response rate expectations." placeholder="e.g. Around 400 email addresses collected through our loyalty program and online orders." />
-                <Field id="q4" label="4. How were these contacts collected?" required hint="Past purchases, loyalty program, website signups, in-store collection, etc." placeholder="e.g. Mostly through our Square loyalty program. About 80 from an email signup form on our website." rows={2} />
-                <Field id="q5" label="5. What do you most want to learn from your customers?" required hint="Be as specific as possible — this drives the survey question design." placeholder="e.g. Why they choose us over competitors, what would make them come more often, and whether they'd value a monthly coffee subscription." rows={4} />
-                <Field id="q6" label="6. Have you surveyed your customers before? If so, what did you find?" placeholder="e.g. We ran a short Google Form survey 2 years ago. About 30 responses — customers loved the atmosphere but mentioned wanting faster service during morning rush." rows={3} />
-                <Field id="q7" label="7. What decision will this research inform?" required placeholder="e.g. Whether to expand our hours, add a subscription model, or open a second location. We want to understand our customers before committing." rows={3} />
+                <ServiceFormField label="1. Business name and location" required placeholder="e.g. Anchor Coffee Co., Bradley Beach NJ — specialty coffee shop and roastery."  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
+                <ServiceFormField label="2. Industry / business type" required placeholder="e.g. Food & Beverage — independent coffee shop, retail and cafe."  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
+                <ServiceFormField label="3. Approximately how many customer contacts do you have?" required hint="An estimate is fine. This helps us understand response rate expectations." placeholder="e.g. Around 400 email addresses collected through our loyalty program and online orders."  value={form.q3} error={errors.q3} onChange={v => set("q3", v)} />
+                <ServiceFormField label="4. How were these contacts collected?" required hint="Past purchases, loyalty program, website signups, in-store collection, etc." placeholder="e.g. Mostly through our Square loyalty program. About 80 from an email signup form on our website." rows={2}  value={form.q4} error={errors.q4} onChange={v => set("q4", v)} />
+                <ServiceFormField label="5. What do you most want to learn from your customers?" required hint="Be as specific as possible — this drives the survey question design." placeholder="e.g. Why they choose us over competitors, what would make them come more often, and whether they'd value a monthly coffee subscription." rows={4}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
+                <ServiceFormField label="6. Have you surveyed your customers before? If so, what did you find?" placeholder="e.g. We ran a short Google Form survey 2 years ago. About 30 responses — customers loved the atmosphere but mentioned wanting faster service during morning rush." rows={3}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
+                <ServiceFormField label="7. What decision will this research inform?" required placeholder="e.g. Whether to expand our hours, add a subscription model, or open a second location. We want to understand our customers before committing." rows={3}  value={form.q7} error={errors.q7} onChange={v => set("q7", v)} />
               </div>
             </div>
             <div style={{ textAlign: "center" }}>
