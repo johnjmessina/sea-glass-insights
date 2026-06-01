@@ -254,7 +254,7 @@ export default async function BusinessPulsePrintPage(
         </div>
 
         {/* ────────────── BACK — cream hero ────────────── */}
-        <div className="card-back" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="card-back" style={{ padding: "18px 20px 24px", display: "flex", flexDirection: "column", gap: "12px" }}>
 
           {/* TOP — logo + headline + subtext, centered */}
           <div style={{ textAlign: "center" }}>
@@ -268,7 +268,7 @@ export default async function BusinessPulsePrintPage(
               Know your market.<br />Refine your edge.
             </div>
             <div style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, lineHeight: 1.65, opacity: 0.72 }}>
-              Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore and beyond. AI generates the foundation. A real analyst with over ten years of experience reviews, refines, and makes sure the insights that reach you actually matter.
+              Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore. From competitive analysis and customer research to secret shopping, surveys, and AI-powered tools, every service is reviewed by a local analyst and built to give you a real edge.
             </div>
           </div>
 
@@ -283,9 +283,6 @@ export default async function BusinessPulsePrintPage(
             </div>
             <div style={{ fontFamily: MT, fontSize: "6px", color: "rgba(10,47,97,0.5)", marginBottom: "4px" }}>
               48-72 hr delivery · Flat fee
-            </div>
-            <div style={{ fontFamily: MT, fontSize: "7px", fontWeight: 300, color: NAVY, lineHeight: 1.6, opacity: 0.75, marginBottom: "5px" }}>
-              Your market, your customers, your competitors in one professionally written report. AI generates the research foundation. A real analyst reviews, refines, and makes sure every insight is relevant to your business.
             </div>
             {BACK_SERVICES[0].checklist.map(item => (
               <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
@@ -319,7 +316,7 @@ export default async function BusinessPulsePrintPage(
 
           {/* BOTTOM — contact (left) + QR (right), pinned to bottom */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "auto" }}>
-            <div style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 300, color: NAVY, lineHeight: 1.85, opacity: 0.72 }}>
+            <div style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, lineHeight: 1.7, opacity: 0.72 }}>
               <div style={{ fontFamily: CG, fontSize: "9px", fontWeight: 600, color: NAVY, opacity: 1, marginBottom: "2px" }}>{card.analystName}</div>
               {card.phone && <div>{card.phone}</div>}
               <div>{card.email}</div>

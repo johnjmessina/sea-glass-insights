@@ -1281,7 +1281,7 @@ function BusinessPulse() {
             Know your market.<br />Refine your edge.
           </div>
           <div style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.7, opacity: 0.7, maxWidth: "440px", margin: "0 auto" }}>
-            Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore and beyond. AI generates the foundation. A real analyst with over ten years of experience reviews, refines, and makes sure the insights that reach you actually matter.
+            Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore. From competitive analysis and customer research to secret shopping, surveys, and AI-powered tools, every service is reviewed by a local analyst and built to give you a real edge.
           </div>
         </div>
 
@@ -1296,9 +1296,6 @@ function BusinessPulse() {
           </div>
           <div style={{ fontFamily: MT, fontSize: "8px", color: "rgba(10,47,97,0.5)", marginBottom: "6px" }}>
             48-72 hr delivery · Flat fee
-          </div>
-          <div style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.65, opacity: 0.75, marginBottom: "7px" }}>
-            Your market, your customers, your competitors in one professionally written report. AI generates the research foundation. A real analyst reviews, refines, and makes sure every insight is relevant to your business.
           </div>
           {BACK_SERVICES[0].checklist.map(item => (
             <div key={item} style={{ display: "flex", gap: "5px", alignItems: "flex-start", marginBottom: "2px" }}>
