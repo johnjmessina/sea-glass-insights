@@ -127,7 +127,7 @@ const GRID_SERVICES: GridSvc[] = [
     price: "$499", turnaround: "1-2 weeks",
     desc: "Real feedback from your real customers. We design the survey, help you send it to your existing contact list, and deliver a visual analysis report.",
     bundles: [],
-    href: "/contact",
+    href: "/services/voice-of-customer",
   },
   {
     name: "AI Starter Kit",
