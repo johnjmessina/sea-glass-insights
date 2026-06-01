@@ -18,20 +18,37 @@ const SERVICE_CONFIG: Record<string, { unitAmount: string; productName: string; 
     productName: "Sea Glass Insights — Social Media Audit",
     cancelPath:  "/services/social-media-audit",
   },
+  "secret-shopping": {
+    unitAmount:  "29900",
+    productName: "Sea Glass Insights — Secret Shopping",
+    cancelPath:  "/services/secret-shopping",
+  },
 };
 const DEFAULT_SERVICE = "market-intelligence-report";
+
+// ── Map service-specific fields into q1-q10 storage slots ────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildQSlots(service: string, b: Record<string, any>) {
+  const nil = null;
+  if (service === "social-media-audit") {
+    return { q1: b.location, q2: b.industry, q3: b.facebook, q4: b.instagram,
+             q5: b.otherPlatforms, q6: b.competitors, q7: b.challenge,
+             q8: nil, q9: nil, q10: nil };
+  }
+  if (service === "secret-shopping") {
+    return { q1: b.businessAddress, q2: b.industry, q3: b.hours,
+             q4: b.typicalInteraction, q5: b.dimensions, q6: b.competitorShop,
+             q7: b.focus, q8: nil, q9: nil, q10: nil };
+  }
+  // Default: MIR passes q1-q10 directly
+  return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5,
+           q6: b.q6, q7: b.q7, q8: b.q8, q9: b.q9, q10: b.q10 };
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const {
-      service,
-      customerName, businessName, email,
-      // MIR fields
-      q1, q2, q3, q4, q5, q6, q7, q8, q9, q10,
-      // SMA-specific fields (mapped to q slots for storage)
-      location, industry, facebook, instagram, otherPlatforms, competitors, challenge,
-    } = body;
+    const { service, customerName, businessName, email } = body;
 
     if (!customerName || !businessName || !email) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -42,22 +59,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY" }, { status: 500 });
     }
 
-    const svc = SERVICE_CONFIG[service ?? DEFAULT_SERVICE] ?? SERVICE_CONFIG[DEFAULT_SERVICE];
-
-    // Build q-slot values — MIR uses q1-q10 directly; SMA maps its fields
-    const isSMA = service === "social-media-audit";
-    const qSlots = isSMA
-      ? {
-          q1:  location       ?? null,
-          q2:  industry       ?? null,
-          q3:  facebook       ?? null,
-          q4:  instagram      ?? null,
-          q5:  otherPlatforms ?? null,
-          q6:  competitors    ?? null,
-          q7:  challenge      ?? null,
-          q8:  null, q9: null, q10: null,
-        }
-      : { q1, q2, q3, q4, q5, q6, q7, q8, q9, q10 };
+    const svc     = SERVICE_CONFIG[service ?? DEFAULT_SERVICE] ?? SERVICE_CONFIG[DEFAULT_SERVICE];
+    const qSlots  = buildQSlots(service ?? DEFAULT_SERVICE, body);
 
     // 1. Save order to Supabase first (status: pending_payment)
     const { data: order, error: dbError } = await supabase

@@ -106,7 +106,7 @@ const GRID_SERVICES: GridSvc[] = [
     price: "$299", turnaround: "5-7 days",
     desc: "A professional visit to your business, or a competitor's, scored across seven dimensions of the customer experience. You will see your business the way a first-time customer does.",
     bundles: ["Full Picture"],
-    href: "/contact",
+    href: "/services/secret-shopping",
   },
   {
     name: "Deep Dive Report",
