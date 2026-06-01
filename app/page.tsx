@@ -14,12 +14,12 @@ const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
 const GRID_6 = [
-  { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "A scored assessment of your social media presence across seven dimensions." },
-  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way a first-time customer does." },
-  { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision." },
-  { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list." },
-  { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report." },
-  { name: "AI Starter Kit",           price: "$99 / $79 add-on", turnaround: "48 hrs",    desc: "Custom AI prompts built specifically for your business type." },
+  { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "A scored assessment of your social media presence across seven dimensions.",         href: "/services/social-media-audit" },
+  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way a first-time customer does.",                              href: "/services" },
+  { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision.",                                 href: "/services" },
+  { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list.", href: "/services" },
+  { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report.",                   href: "/services" },
+  { name: "AI Starter Kit",           price: "$99 / $79 add-on", turnaround: "48 hrs", desc: "Custom AI prompts built specifically for your business type.",                                href: "/services" },
 ];
 
 
@@ -123,7 +123,7 @@ export default function Home() {
           {/* 6-service grid 2×3 */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px", marginBottom: "28px" }}>
             {GRID_6.map(svc => (
-              <Link key={svc.name} href="/services" style={{ textDecoration: "none", display: "block" }}>
+              <Link key={svc.name} href={svc.href} style={{ textDecoration: "none", display: "block" }}>
                 <div style={{ border: "1px solid #E5E7EB", borderRadius: "12px", padding: "22px 24px", height: "100%", backgroundColor: WHITE }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                     <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginRight: "10px" }}>

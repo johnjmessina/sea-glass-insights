@@ -90,6 +90,7 @@ type GridSvc = {
   turnaround: string;
   desc: string;
   bundles: (keyof typeof BUNDLE_DETAILS)[];
+  href: string;
 };
 
 const GRID_SERVICES: GridSvc[] = [
@@ -98,36 +99,42 @@ const GRID_SERVICES: GridSvc[] = [
     price: "$199", turnaround: "48-72 hrs",
     desc: "A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and how you stack up against competitors.",
     bundles: ["Starter Intelligence", "Deep Intelligence"],
+    href: "/services/social-media-audit",
   },
   {
     name: "Secret Shopping",
     price: "$299", turnaround: "5-7 days",
     desc: "A professional visit to your business, or a competitor's, scored across seven dimensions of the customer experience. You will see your business the way a first-time customer does.",
     bundles: ["Full Picture"],
+    href: "/contact",
   },
   {
     name: "Deep Dive Report",
     price: "$399", turnaround: "5-7 days",
     desc: "Everything in the MIR, but deeper. Greater rigor, more sources, more context, more analyst time spent on what each finding actually means for your business.",
     bundles: ["Deep Intelligence"],
+    href: "/contact",
   },
   {
     name: "Synthetic Survey Report",
     price: "$399", turnaround: "48-72 hrs",
     desc: "AI-generated customer personas to pressure-test your assumptions and surface directional insight, with full transparency about the methodology.",
     bundles: [],
+    href: "/contact",
   },
   {
     name: "Voice of Customer Survey",
     price: "$499", turnaround: "1-2 weeks",
     desc: "Real feedback from your real customers. We design the survey, help you send it to your existing contact list, and deliver a visual analysis report.",
     bundles: [],
+    href: "/contact",
   },
   {
     name: "AI Starter Kit",
     price: "$99 / $79 add-on", turnaround: "48 hrs",
     desc: "Five to six custom AI prompts built specifically for your business type, ready to use immediately.",
     bundles: [],
+    href: "/contact",
   },
 ];
 
@@ -228,7 +235,7 @@ export default function ServicesPage() {
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px" }}>
             {GRID_SERVICES.map(svc => (
-              <Link key={svc.name} href="/contact" style={{ textDecoration: "none", display: "block" }}>
+              <Link key={svc.name} href={svc.href} style={{ textDecoration: "none", display: "block" }}>
                 <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "12px", padding: "24px 26px", height: "100%" }}>
 
                   {/* Name + price row — no absolute overlaps */}
