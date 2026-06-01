@@ -158,17 +158,6 @@ export default function ContactPage() {
             ))}
           </div>
 
-          <div style={{ marginTop: "40px", padding: "24px", backgroundColor: SAND, borderRadius: "12px" }}>
-            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: NAVY, marginBottom: "8px" }}>
-              Ready to start your report?
-            </p>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.83rem", color: GRAY, lineHeight: 1.7, marginBottom: "16px" }}>
-              Takes about 15 minutes. Flat fee. No subscriptions.
-            </p>
-            <Link href="/get-report" style={{ display: "inline-block", backgroundColor: NAVY, color: WHITE, fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.83rem", padding: "10px 24px", borderRadius: "9999px", textDecoration: "none" }}>
-              Start Your Report →
-            </Link>
-          </div>
         </div>
 
       </main>
