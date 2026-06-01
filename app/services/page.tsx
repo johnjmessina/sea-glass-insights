@@ -94,7 +94,7 @@ const GRID_SERVICES: GridSvc[] = [
     name: "Secret Shopping",
     price: "$299", turnaround: "5-7 days",
     desc: "A professional visit to your business, or a competitor's, scored across seven dimensions of the customer experience. You will see your business the way a first-time customer does.",
-    bundles: ["The Field Report"],
+    bundles: ["The Field Report", "Complete Shopper Experience"],
     href: "/services/secret-shopping",
   },
   {
@@ -165,6 +165,7 @@ export default function ServicesPage() {
             <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", flexDirection: "column", gap: "5px", alignItems: "flex-end" }}>
               <BundleBadge name="Starter Intelligence" />
               <BundleBadge name="The Field Report" />
+              <BundleBadge name="Market & Mind" />
             </div>
 
             {/* Left column */}
