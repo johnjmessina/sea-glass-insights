@@ -290,7 +290,7 @@ export default function SyntheticSurveyReportPage() {
         <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY, marginBottom: "10px" }}>
           Want feedback from your actual customers instead?
         </p>
-        <Link href="/services/voice-of-customer-survey" style={{ fontFamily: MT, fontWeight: 600, fontSize: "0.9rem", color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>
+        <Link href="/services/voice-of-customer" style={{ fontFamily: MT, fontWeight: 600, fontSize: "0.9rem", color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>
           See the Voice of Customer Survey →
         </Link>
       </section>
