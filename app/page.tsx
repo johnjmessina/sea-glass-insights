@@ -15,7 +15,7 @@ const WHITE = "#FFFFFF";
 
 const GRID_6 = [
   { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "A scored assessment of your social media presence across seven dimensions.",         href: "/services/social-media-audit" },
-  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way a first-time customer does.",                              href: "/services/secret-shopping" },
+  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way your customers do.",                              href: "/services/secret-shopping" },
   { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision.",                                 href: "/services/deep-dive-report" },
   { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list.", href: "/services/synthetic-survey-report" },
   { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report.",                   href: "/services/voice-of-customer" },
