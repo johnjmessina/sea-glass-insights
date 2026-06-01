@@ -16,6 +16,7 @@ const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
 const CHECKLIST = [
+  "Executive Summary",
   "Business Snapshot",
   "Customer Profile (3 segments)",
   "Competitive Landscape (up to 3 competitors)",

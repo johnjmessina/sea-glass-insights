@@ -75,6 +75,7 @@ function BundleBadge({ name }: { name: keyof typeof BUNDLE_DETAILS }) {
 }
 
 const MIR_INCLUDES = [
+  "Executive Summary",
   "Business Snapshot",
   "Customer Profile (3 segments)",
   "Competitive Landscape (up to 3 competitors)",
