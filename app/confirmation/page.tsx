@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -101,7 +101,7 @@ function ContactListUpload({ orderId }: { orderId: string }) {
 
 // ── Confirmation page ─────────────────────────────────────────────────────────
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const sessionId    = searchParams.get("session_id");
 
@@ -212,5 +212,25 @@ export default function ConfirmationPage() {
         <p>Refining the Edge. &copy; {new Date().getFullYear()} Sea Glass Insights. All rights reserved.</p>
       </footer>
     </div>
+  );
+}
+
+// useSearchParams() requires a Suspense boundary in Next.js App Router.
+// ConfirmationContent is the inner component that calls it; the default
+// export wraps it so the page can be statically pre-rendered.
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col min-h-full">
+        <header className="bg-navy text-white px-6 py-4">
+          <span style={{ fontFamily: "Georgia, serif" }} className="text-xl font-bold tracking-wide">Sea Glass Insights</span>
+        </header>
+        <main className="flex-1 bg-sand flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-seafoam border-t-transparent rounded-full animate-spin" />
+        </main>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
   );
 }
