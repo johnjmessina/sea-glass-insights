@@ -127,7 +127,7 @@ export default function GetReportPage() {
 
       {/* ── TWO-COLUMN: WHAT'S INCLUDED | HOW IT WORKS ── */}
       <section style={{ backgroundColor: WHITE, padding: "56px 24px" }}>
-        <div style={{ maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "48px", alignItems: "start" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "48px", alignItems: "start" }}>
           <div>
             <h2 style={{ fontFamily: CG, fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>What&rsquo;s Included</h2>
             <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -206,7 +206,7 @@ export default function GetReportPage() {
           )}
 
           <div className="text-center pb-4">
-            <p className="text-gray-500 text-sm mb-4" style={{ fontFamily: MT }}>You will be taken to a secure checkout page to complete your $149 payment.</p>
+            <p className="text-gray-500 text-sm mb-4" style={{ fontFamily: MT }}>You will be taken to a secure checkout page to complete your $199 payment.</p>
             <button type="submit" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "14px 40px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
               Proceed to Payment →
             </button>

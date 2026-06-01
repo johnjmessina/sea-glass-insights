@@ -154,9 +154,9 @@ export default function ServicesPage() {
               border: `2px solid ${NAVY}`,
               borderRadius: "16px",
               padding: "44px 52px",
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "52px",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "40px",
               alignItems: "start",
               position: "relative",
             }}
@@ -169,7 +169,7 @@ export default function ServicesPage() {
             </div>
 
             {/* Left column */}
-            <div style={{ paddingRight: "8px" }}>
+            <div style={{ flex: 1, minWidth: "260px", paddingRight: "8px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                 <span style={{ backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontSize: "0.68rem", fontWeight: 700, padding: "4px 12px", borderRadius: "9999px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   Most Popular
@@ -195,7 +195,7 @@ export default function ServicesPage() {
             </div>
 
             {/* Right column — includes */}
-            <div>
+            <div style={{ flex: 1, minWidth: "260px" }}>
               <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.72rem", fontWeight: 600, color: NAVY, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "16px" }}>
                 What&rsquo;s Included
               </p>
@@ -223,7 +223,7 @@ export default function ServicesPage() {
           <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.4rem,2.5vw,1.8rem)", fontWeight: 700, color: NAVY, marginBottom: "20px" }}>
             More Services
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
             {GRID_SERVICES.map(svc => (
               <Link key={svc.name} href={svc.href} style={{ textDecoration: "none", display: "block" }}>
                 <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "12px", padding: "24px 26px", height: "100%" }}>

@@ -94,8 +94,8 @@ export default function Home() {
           </p>
 
           {/* MIR hero card */}
-          <div style={{ border: `2px solid ${NAVY}`, borderRadius: "14px", padding: "36px 44px", marginBottom: "20px", display: "grid", gridTemplateColumns: "1fr auto", gap: "40px", alignItems: "center", backgroundColor: WHITE }}>
-            <div>
+          <div style={{ border: `2px solid ${NAVY}`, borderRadius: "14px", padding: "36px 44px", marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "28px", alignItems: "center", backgroundColor: WHITE }}>
+            <div style={{ flex: 1, minWidth: "240px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
                 <span style={{ backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontSize: "0.65rem", fontWeight: 700, padding: "3px 10px", borderRadius: "9999px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   Most Popular
@@ -121,7 +121,7 @@ export default function Home() {
           </div>
 
           {/* 6-service grid 2×3 */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px", marginBottom: "28px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginBottom: "28px" }}>
             {GRID_6.map(svc => (
               <Link key={svc.name} href={svc.href} style={{ textDecoration: "none", display: "block" }}>
                 <div style={{ border: "1px solid #E5E7EB", borderRadius: "12px", padding: "22px 24px", height: "100%", backgroundColor: WHITE }}>
