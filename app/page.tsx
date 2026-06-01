@@ -149,43 +149,6 @@ export default function Home() {
       </section>
 
 
-      {/* ── CLOSING CTA ── */}
-      <section style={{ backgroundColor: WHITE, textAlign: "center", padding: "52px 24px 80px" }}>
-        <h2
-          style={{
-            fontFamily: "var(--font-cormorant)",
-            fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-            fontWeight: 700,
-            color: NAVY,
-            maxWidth: "600px",
-            margin: "0 auto 36px",
-            lineHeight: 1.3,
-          }}
-        >
-          Every small business has an edge. Let&rsquo;s refine yours.
-        </h2>
-        <Link
-          href="/services"
-          style={{
-            display: "inline-block",
-            backgroundColor: TEAL,
-            color: NAVY,
-            fontFamily: "var(--font-montserrat)",
-            fontWeight: 600,
-            fontSize: "1rem",
-            padding: "14px 40px",
-            borderRadius: "9999px",
-            textDecoration: "none",
-            letterSpacing: "0.02em",
-          }}
-        >
-          View Our Services
-        </Link>
-        <p style={{ fontFamily: "var(--font-montserrat)", color: LGRAY, fontSize: "0.83rem", marginTop: "16px" }}>
-          Flat fee. No subscriptions. No retainers.
-        </p>
-      </section>
-
       <SiteFooter />
     </div>
   );
