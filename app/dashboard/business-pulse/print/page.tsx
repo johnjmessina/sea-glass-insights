@@ -66,7 +66,7 @@ const BACK_SERVICES = [
     checklist: ["Custom survey design (up to 10 questions)", "Response collection and analysis", "Visual report with findings and themes", "Requires existing customer contact list"],
   },
   {
-    name: "AI Starter Kit", price: "$99",
+    name: "AI Starter Kit", price: "$99 / $79 add-on",
     checklist: ["5-6 custom prompts for your business type", "Ready for ChatGPT, Claude, or any AI tool", "Marketing copy, responses, social captions", "One round of revisions included"],
   },
 ];
