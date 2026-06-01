@@ -41,13 +41,34 @@ const FALLBACK: CardData = {
 };
 
 const BACK_SERVICES = [
-  { name: "Market Intelligence Report", price: "$199", desc: "Your market, customers, and competitors in one report." },
-  { name: "Social Media Audit",         price: "$199", desc: "A scored assessment of your social presence." },
-  { name: "Secret Shopping",            price: "$299", desc: "See your business through a customer's eyes." },
-  { name: "Deep Dive Report",           price: "$399", desc: "Deeper competitive intelligence for major decisions." },
-  { name: "Synthetic Survey Report",    price: "$399", desc: "AI-generated customer personas for directional insight." },
-  { name: "Voice of Customer Survey",   price: "$499", desc: "Real feedback from your real customers." },
-  { name: "AI Starter Kit",             price: "$99",  desc: "Custom AI prompts built for your business type." },
+  {
+    name: "Market Intelligence Report", price: "$199",
+    checklist: ["Business Snapshot", "Customer Profile (3 segments)", "Competitive Landscape (up to 3 competitors)", "Market Positioning analysis", "Key Insights", "Actionable Recommendations"],
+  },
+  {
+    name: "Social Media Audit", price: "$199",
+    checklist: ["Profile and Setup review", "Content Quality and Engagement scoring", "Brand Consistency evaluation", "Competitive Social Comparison"],
+  },
+  {
+    name: "Secret Shopping", price: "$299",
+    checklist: ["In-person visit by trained researcher", "Scored across 7 experience dimensions", "Narrative notes and Analyst Observations", "Formatted deliverable report"],
+  },
+  {
+    name: "Deep Dive Report", price: "$399",
+    checklist: ["Everything in the MIR, but deeper", "Greater competitive rigor per competitor", "Expanded customer segments", "Priority action framework"],
+  },
+  {
+    name: "Synthetic Survey Report", price: "$399",
+    checklist: ["AI-generated customer personas", "3-5 customer type responses", "Thematic analysis and recommendations", "Full methodology disclosure"],
+  },
+  {
+    name: "Voice of Customer Survey", price: "$499",
+    checklist: ["Custom survey design (up to 10 questions)", "Response collection and analysis", "Visual report with findings and themes", "Requires existing customer contact list"],
+  },
+  {
+    name: "AI Starter Kit", price: "$99",
+    checklist: ["5-6 custom prompts for your business type", "Ready for ChatGPT, Claude, or any AI tool", "Marketing copy, responses, social captions", "One round of revisions included"],
+  },
 ];
 
 // SVG logo-mark (overlapping circles + line chart, matches v4 design)
@@ -263,22 +284,31 @@ export default async function BusinessPulsePrintPage(
             <div style={{ fontFamily: MT, fontSize: "6px", color: "rgba(10,47,97,0.5)", marginBottom: "4px" }}>
               48-72 hr delivery · Flat fee
             </div>
-            <div style={{ fontFamily: MT, fontSize: "7px", fontWeight: 300, color: NAVY, lineHeight: 1.6, opacity: 0.75 }}>
+            <div style={{ fontFamily: MT, fontSize: "7px", fontWeight: 300, color: NAVY, lineHeight: 1.6, opacity: 0.75, marginBottom: "5px" }}>
               Your market, your customers, your competitors in one professionally written report. AI generates the research foundation. A real analyst reviews, refines, and makes sure every insight is relevant to your business.
             </div>
+            {BACK_SERVICES[0].checklist.map(item => (
+              <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
+                <span style={{ fontFamily: MT, fontSize: "7px", fontWeight: 700, color: NAVY, flexShrink: 0, lineHeight: 1.2 }}>✓</span>
+                <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 300, color: NAVY, opacity: 0.65, lineHeight: 1.35 }}>{item}</span>
+              </div>
+            ))}
           </div>
 
-          {/* 6-SERVICE COMPACT GRID — 2×3 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px" }}>
+          {/* 6-SERVICE COMPACT GRID — 2×3 with checklists */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 12px" }}>
             {BACK_SERVICES.slice(1).map(svc => (
               <div key={svc.name}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "1px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
                   <span style={{ fontFamily: MT, fontSize: "7px", fontWeight: 600, color: NAVY }}>{svc.name}</span>
                   <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 700, color: NAVY, flexShrink: 0, marginLeft: "4px" }}>{svc.price}</span>
                 </div>
-                <div style={{ fontFamily: MT, fontSize: "5.5px", fontWeight: 300, color: NAVY, opacity: 0.5, lineHeight: 1.4 }}>
-                  {svc.desc}
-                </div>
+                {svc.checklist.map(item => (
+                  <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
+                    <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 700, color: NAVY, flexShrink: 0, lineHeight: 1.2 }}>✓</span>
+                    <span style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, opacity: 0.6, lineHeight: 1.35 }}>{item}</span>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
