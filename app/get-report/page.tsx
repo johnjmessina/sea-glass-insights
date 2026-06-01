@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import SiteNav from "@/components/SiteNav";
 
 const CORMORANT = "'Cormorant Garamond', Georgia, serif";
 const MONTSERRAT = "'Montserrat', system-ui, sans-serif";
@@ -75,6 +76,8 @@ export default function GetReportPage() {
 
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
+
+      <SiteNav />
 
       {/* ── How It Works ── */}
       <div style={{ backgroundColor: NAVY, padding: "56px 24px 48px" }}>
