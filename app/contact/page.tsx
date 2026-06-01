@@ -57,7 +57,7 @@ export default function ContactPage() {
       </section>
 
       {/* CONTENT */}
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "72px 24px 80px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "start" }}>
+      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "72px 24px 80px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "60px", alignItems: "start" }}>
 
         {/* FORM */}
         <div>

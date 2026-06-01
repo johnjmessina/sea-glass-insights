@@ -161,12 +161,6 @@ export default function ServicesPage() {
               position: "relative",
             }}
           >
-            {/* Bundle badges — top right, stacked vertically */}
-            <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", flexDirection: "column", gap: "5px", alignItems: "flex-end" }}>
-              <BundleBadge name="Starter Intelligence" />
-              <BundleBadge name="The Field Report" />
-              <BundleBadge name="Market & Mind" />
-            </div>
 
             {/* Left column */}
             <div style={{ flex: 1, minWidth: "260px", paddingRight: "8px" }}>

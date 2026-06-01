@@ -20,6 +20,18 @@ const inputErr  = "border-red-400 bg-red-50";
 
 function validateEmail(e: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
+// Chevron icon for expand/collapse
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="20" height="20" viewBox="0 0 20 20" fill="none"
+      style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
+    >
+      <path d="M5 7.5L10 12.5L15 7.5" stroke={NAVY} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 function BundleHero({ id, name, price, savings, service1, price1, service2, price2, desc, formId }: {
   id: string; name: string; price: string; savings: string;
   service1: string; price1: string; service2: string; price2: string;
@@ -35,9 +47,6 @@ function BundleHero({ id, name, price, savings, service1, price1, service2, pric
             <span style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: TEAL }}>{savings}</span>
           </div>
         </div>
-        <a href={`#${formId}`} style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "0.9rem", padding: "11px 28px", borderRadius: "9999px", textDecoration: "none", flexShrink: 0 }}>
-          Get Started →
-        </a>
       </div>
       <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
         {[[service1, price1], [service2, price2]].map(([svc, p]) => (
@@ -56,6 +65,9 @@ function BundleHero({ id, name, price, savings, service1, price1, service2, pric
 
 export default function BundlesPage() {
   const router = useRouter();
+  // Which bundle section is expanded (only one at a time; null = all collapsed)
+  const [expanded, setExpanded] = useState<string | null>(null);
+  function toggle(id: string) { setExpanded(prev => prev === id ? null : id); }
 
   // ── Starter Intelligence state ──────────────────────────────────────────────
   const [si, setSi] = useState({ customerName:"",email:"",businessName:"",q1:"",q2:"",q3:"",q4:"",q5:"",q6:"",q7:"",q8:"",q9:"",q10:"",q11:"",q12:"",q13:"" });
@@ -159,7 +171,27 @@ export default function BundlesPage() {
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "56px 24px", display: "flex", flexDirection: "column", gap: "80px", width: "100%" }}>
 
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
-        <div>
+        <div id="starter-intelligence">
+          {/* Collapsed header — always visible */}
+          <button
+            onClick={() => toggle('starter-intelligence')}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            aria-expanded={expanded === 'starter-intelligence'}
+          >
+            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Starter Intelligence</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$349</span>
+                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
+                </div>
+              </div>
+              <Chevron open={expanded === 'starter-intelligence'} />
+            </div>
+          </button>
+          {/* Expanded content */}
+          {expanded === 'starter-intelligence' && (
+          <div>
           <BundleHero id="starter-intelligence" name="Starter Intelligence" price="$349" savings="save $49"
             service1="Market Intelligence Report" price1="$199" service2="Social Media Audit" price2="$199"
             desc="Understand your market and see exactly how your social presence stacks up against it. The essential starting point for any small business ready to compete."
@@ -199,13 +231,38 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          <div style={{ textAlign: "center", paddingTop: "8px" }}>
-            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
+          </div>
+          )}
+          <div style={{ textAlign: 'center', paddingTop: '12px' }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+               style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
+              ↑ Back to top
+            </a>
           </div>
         </div>
 
         {/* ── THE FIELD REPORT ──────────────────────────────────────────────── */}
-        <div>
+        <div id="the-field-report">
+          {/* Collapsed header — always visible */}
+          <button
+            onClick={() => toggle('the-field-report')}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            aria-expanded={expanded === 'the-field-report'}
+          >
+            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>The Field Report</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$449</span>
+                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
+                </div>
+              </div>
+              <Chevron open={expanded === 'the-field-report'} />
+            </div>
+          </button>
+          {/* Expanded content */}
+          {expanded === 'the-field-report' && (
+          <div>
           <BundleHero id="the-field-report" name="The Field Report" price="$449" savings="save $49"
             service1="Market Intelligence Report" price1="$199" service2="Secret Shopping" price2="$299"
             desc="Know your market from the outside and your customer experience from the inside. Market intelligence meets boots-on-the-ground research."
@@ -248,13 +305,38 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          <div style={{ textAlign: "center", paddingTop: "8px" }}>
-            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
+          </div>
+          )}
+          <div style={{ textAlign: 'center', paddingTop: '12px' }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+               style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
+              ↑ Back to top
+            </a>
           </div>
         </div>
 
         {/* ── MARKET & MIND ────────────────────────────────────────────────── */}
-        <div>
+        <div id="market-and-mind">
+          {/* Collapsed header — always visible */}
+          <button
+            onClick={() => toggle('market-and-mind')}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            aria-expanded={expanded === 'market-and-mind'}
+          >
+            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Market & Mind</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$549</span>
+                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
+                </div>
+              </div>
+              <Chevron open={expanded === 'market-and-mind'} />
+            </div>
+          </button>
+          {/* Expanded content */}
+          {expanded === 'market-and-mind' && (
+          <div>
           <BundleHero id="market-and-mind" name="Market & Mind" price="$549" savings="save $49"
             service1="Market Intelligence Report" price1="$199" service2="Synthetic Survey Report" price2="$399"
             desc="Understand your market and your customer without needing an existing contact list. Two research streams working together to give you the full picture."
@@ -296,13 +378,38 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          <div style={{ textAlign: "center", paddingTop: "8px" }}>
-            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
+          </div>
+          )}
+          <div style={{ textAlign: 'center', paddingTop: '12px' }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+               style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
+              ↑ Back to top
+            </a>
           </div>
         </div>
 
         {/* ── COMPLETE SHOPPER EXPERIENCE ───────────────────────────────────── */}
-        <div>
+        <div id="complete-shopper-experience">
+          {/* Collapsed header — always visible */}
+          <button
+            onClick={() => toggle('complete-shopper-experience')}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            aria-expanded={expanded === 'complete-shopper-experience'}
+          >
+            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Complete Shopper Experience</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$699</span>
+                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $99</span>
+                </div>
+              </div>
+              <Chevron open={expanded === 'complete-shopper-experience'} />
+            </div>
+          </button>
+          {/* Expanded content */}
+          {expanded === 'complete-shopper-experience' && (
+          <div>
           <BundleHero id="complete-shopper-experience" name="Complete Shopper Experience" price="$699" savings="save $99"
             service1="Secret Shopping" price1="$299" service2="Voice of Customer Survey" price2="$499"
             desc="See what your customers experience walking through your door, then hear what they actually think. The most complete view of your customer experience available."
@@ -345,8 +452,13 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          <div style={{ textAlign: "center", paddingTop: "8px" }}>
-            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
+          </div>
+          )}
+          <div style={{ textAlign: 'center', paddingTop: '12px' }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+               style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
+              ↑ Back to top
+            </a>
           </div>
         </div>
 
