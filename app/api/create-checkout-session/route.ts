@@ -28,6 +28,11 @@ const SERVICE_CONFIG: Record<string, { unitAmount: string; productName: string; 
     productName: "Sea Glass Insights — Deep Dive Report",
     cancelPath:  "/services/deep-dive-report",
   },
+  "synthetic-survey-report": {
+    unitAmount:  "39900",
+    productName: "Sea Glass Insights — Synthetic Survey Report",
+    cancelPath:  "/services/synthetic-survey-report",
+  },
 };
 const DEFAULT_SERVICE = "market-intelligence-report";
 

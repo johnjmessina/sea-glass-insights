@@ -120,7 +120,7 @@ const GRID_SERVICES: GridSvc[] = [
     price: "$399", turnaround: "48-72 hrs",
     desc: "AI-generated customer personas to pressure-test your assumptions and surface directional insight, with full transparency about the methodology.",
     bundles: [],
-    href: "/contact",
+    href: "/services/synthetic-survey-report",
   },
   {
     name: "Voice of Customer Survey",
