@@ -13,18 +13,27 @@ const GRAY  = "#6B7280";
 const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
-// Bundle tooltip text keyed by bundle name
-const BUNDLE_DETAILS: Record<string, string> = {
-  "Starter Intelligence": "Starter Intelligence: MIR + Social Media Audit — $349 (save $49)",
-  "Full Picture":         "Full Picture: MIR + Secret Shopping — $449 (save $49)",
-  "Deep Intelligence":    "Deep Intelligence: Deep Dive + Social Media Audit — $549 (save $49)",
+// Bundle name → anchor on /bundles
+const BUNDLE_LINKS: Record<string, string> = {
+  "Starter Intelligence":        "/bundles#starter-intelligence",
+  "The Field Report":            "/bundles#the-field-report",
+  "Market & Mind":               "/bundles#market-and-mind",
+  "Complete Shopper Experience": "/bundles#complete-shopper-experience",
 };
 
-/** Teal pill badge with a CSS-only hover tooltip (no JS / "use client" needed). */
+const BUNDLE_DETAILS: Record<string, string> = {
+  "Starter Intelligence":        "MIR + Social Media Audit — $349 (save $49)",
+  "The Field Report":            "MIR + Secret Shopping — $449 (save $49)",
+  "Market & Mind":               "MIR + Synthetic Survey — $549 (save $49)",
+  "Complete Shopper Experience": "Secret Shopping + Voice of Customer — $699 (save $99)",
+};
+
+/** Clickable teal pill badge that links to the correct bundle anchor. */
 function BundleBadge({ name }: { name: keyof typeof BUNDLE_DETAILS }) {
   return (
     <div className="group relative inline-block">
-      <span
+      <Link
+        href={BUNDLE_LINKS[name] ?? "/bundles"}
         style={{
           display: "inline-block",
           backgroundColor: TEAL,
@@ -36,39 +45,18 @@ function BundleBadge({ name }: { name: keyof typeof BUNDLE_DETAILS }) {
           borderRadius: "9999px",
           letterSpacing: "0.04em",
           whiteSpace: "nowrap",
-          cursor: "default",
-          userSelect: "none",
+          textDecoration: "none",
         }}
       >
         {name}
-      </span>
-      {/* Tooltip — appears on hover via Tailwind group-hover */}
+      </Link>
+      {/* Tooltip */}
       <div
         className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50 pointer-events-none"
-        style={{
-          backgroundColor: NAVY,
-          color: WHITE,
-          fontFamily: "'Montserrat', sans-serif",
-          fontSize: "0.72rem",
-          padding: "8px 12px",
-          borderRadius: "8px",
-          whiteSpace: "nowrap",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
-          lineHeight: 1.5,
-        }}
+        style={{ backgroundColor: NAVY, color: WHITE, fontFamily: "'Montserrat', sans-serif", fontSize: "0.72rem", padding: "8px 12px", borderRadius: "8px", whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", lineHeight: 1.5 }}
       >
         {BUNDLE_DETAILS[name]}
-        {/* Arrow */}
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            right: "12px",
-            borderLeft: "5px solid transparent",
-            borderRight: "5px solid transparent",
-            borderTop: `5px solid ${NAVY}`,
-          }}
-        />
+        <div style={{ position: "absolute", top: "100%", right: "12px", borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: `5px solid ${NAVY}` }} />
       </div>
     </div>
   );
@@ -99,35 +87,35 @@ const GRID_SERVICES: GridSvc[] = [
     name: "Social Media Audit",
     price: "$199", turnaround: "48-72 hrs",
     desc: "A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and how you stack up against competitors.",
-    bundles: ["Starter Intelligence", "Deep Intelligence"],
+    bundles: ["Starter Intelligence"],
     href: "/services/social-media-audit",
   },
   {
     name: "Secret Shopping",
     price: "$299", turnaround: "5-7 days",
     desc: "A professional visit to your business, or a competitor's, scored across seven dimensions of the customer experience. You will see your business the way a first-time customer does.",
-    bundles: ["Full Picture"],
+    bundles: ["The Field Report"],
     href: "/services/secret-shopping",
   },
   {
     name: "Deep Dive Report",
     price: "$399", turnaround: "5-7 days",
     desc: "Everything in the MIR, but deeper. Greater rigor, more sources, more context, more analyst time spent on what each finding actually means for your business.",
-    bundles: ["Deep Intelligence"],
+    bundles: [],
     href: "/services/deep-dive-report",
   },
   {
     name: "Synthetic Survey Report",
     price: "$399", turnaround: "48-72 hrs",
     desc: "AI-generated customer personas to pressure-test your assumptions and surface directional insight, with full transparency about the methodology.",
-    bundles: [],
+    bundles: ["Market & Mind"],
     href: "/services/synthetic-survey-report",
   },
   {
     name: "Voice of Customer Survey",
     price: "$499", turnaround: "1-2 weeks",
     desc: "Real feedback from your real customers. We design the survey, help you send it to your existing contact list, and deliver a visual analysis report.",
-    bundles: [],
+    bundles: ["Complete Shopper Experience"],
     href: "/services/voice-of-customer",
   },
   {
@@ -176,7 +164,7 @@ export default function ServicesPage() {
             {/* Bundle badges — top right, stacked vertically */}
             <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", flexDirection: "column", gap: "5px", alignItems: "flex-end" }}>
               <BundleBadge name="Starter Intelligence" />
-              <BundleBadge name="Full Picture" />
+              <BundleBadge name="The Field Report" />
             </div>
 
             {/* Left column */}

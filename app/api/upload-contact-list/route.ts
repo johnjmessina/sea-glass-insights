@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (orderErr || !order) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }
-    if (order.analyst_note !== "voice-of-customer") {
+    if (order.analyst_note !== "voice-of-customer" && !order.analyst_note?.startsWith("complete-shopper-experience")) {
       return NextResponse.json({ error: "This order does not support contact list upload." }, { status: 400 });
     }
 

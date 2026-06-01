@@ -34,6 +34,7 @@ export default function SiteNav() {
       >
         {[
           { label: "Services", href: "/services" },
+          { label: "Bundles",  href: "/bundles"  },
           { label: "About",    href: "/about"    },
           { label: "Contact",  href: "/contact"  },
         ].map(({ label, href }) => (

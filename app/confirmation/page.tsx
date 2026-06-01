@@ -118,7 +118,7 @@ function ConfirmationContent() {
         if (data.analyst_note) {
           const svc = data.analyst_note.split("|")[0].trim();
           setService(svc);
-          if (svc === "voice-of-customer")    setTimeline("Within 1-2 weeks of receiving your contact list");
+          if (svc === "voice-of-customer" || svc === "complete-shopper-experience") setTimeline("Within 1-2 weeks of receiving your contact list");
           if (svc === "secret-shopping")      setTimeline("Within 5-7 days of the shop visit");
           if (svc === "deep-dive-report")     setTimeline("Within 5-7 days");
         }
@@ -126,7 +126,7 @@ function ConfirmationContent() {
       .catch(() => {/* non-blocking */});
   }, [sessionId]);
 
-  const isVoC = service === "voice-of-customer";
+  const isVoC = service === "voice-of-customer" || service === "complete-shopper-experience";
 
   return (
     <div className="flex flex-col min-h-full">
