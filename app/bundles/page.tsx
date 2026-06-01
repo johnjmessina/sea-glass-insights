@@ -199,6 +199,9 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
+          <div style={{ textAlign: "center", paddingTop: "8px" }}>
+            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
+          </div>
         </div>
 
         {/* ── THE FIELD REPORT ──────────────────────────────────────────────── */}
@@ -245,6 +248,9 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
+          <div style={{ textAlign: "center", paddingTop: "8px" }}>
+            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
+          </div>
         </div>
 
         {/* ── MARKET & MIND ────────────────────────────────────────────────── */}
@@ -289,6 +295,9 @@ export default function BundlesPage() {
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Synthetic Survey results presented as directional insight, not statistically validated data. Please only share what you are comfortable sharing.</p>
               </div>
             </form>
+          </div>
+          <div style={{ textAlign: "center", paddingTop: "8px" }}>
+            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
           </div>
         </div>
 
@@ -335,6 +344,9 @@ export default function BundlesPage() {
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
               </div>
             </form>
+          </div>
+          <div style={{ textAlign: "center", paddingTop: "8px" }}>
+            <a href="#" style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, textDecoration: "none" }}>↑ Back to top</a>
           </div>
         </div>
 
