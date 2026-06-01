@@ -229,24 +229,10 @@ export default function ServicesPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "16px" }}>
             {GRID_SERVICES.map(svc => (
               <Link key={svc.name} href="/contact" style={{ textDecoration: "none", display: "block" }}>
-                <div
-                  style={{
-                    backgroundColor: WHITE,
-                    border: "1px solid #E5E7EB",
-                    borderRadius: "12px",
-                    padding: "24px 26px",
-                    height: "100%",
-                    position: "relative",
-                  }}
-                >
-                  {/* Bundle badges */}
-                  {svc.bundles.length > 0 && (
-                    <div style={{ position: "absolute", top: "14px", right: "16px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end" }}>
-                      {svc.bundles.map(b => <BundleBadge key={b} name={b} />)}
-                    </div>
-                  )}
+                <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "12px", padding: "24px 26px", height: "100%" }}>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", paddingRight: svc.bundles.length > 0 ? "96px" : "0" }}>
+                  {/* Name + price row — no absolute overlaps */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
                     <h3 style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.2rem", fontWeight: 700, color: NAVY, lineHeight: 1.2 }}>
                       {svc.name}
                     </h3>
@@ -255,6 +241,14 @@ export default function ServicesPage() {
                       <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.72rem", color: LGRAY, marginTop: "2px" }}>{svc.turnaround}</div>
                     </div>
                   </div>
+
+                  {/* Bundle badges — inline flow, below name/price */}
+                  {svc.bundles.length > 0 && (
+                    <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "8px" }}>
+                      {svc.bundles.map(b => <BundleBadge key={b} name={b} />)}
+                    </div>
+                  )}
+
                   <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.83rem", color: GRAY, lineHeight: 1.65 }}>
                     {svc.desc}
                   </p>
