@@ -23,6 +23,11 @@ const SERVICE_CONFIG: Record<string, { unitAmount: string; productName: string; 
     productName: "Sea Glass Insights — Secret Shopping",
     cancelPath:  "/services/secret-shopping",
   },
+  "deep-dive-report": {
+    unitAmount:  "39900",
+    productName: "Sea Glass Insights — Deep Dive Report",
+    cancelPath:  "/services/deep-dive-report",
+  },
 };
 const DEFAULT_SERVICE = "market-intelligence-report";
 
@@ -39,6 +44,16 @@ function buildQSlots(service: string, b: Record<string, any>) {
     return { q1: b.businessAddress, q2: b.industry, q3: b.hours,
              q4: b.typicalInteraction, q5: b.dimensions, q6: b.competitorShop,
              q7: b.focus, q8: nil, q9: nil, q10: nil };
+  }
+  if (service === "deep-dive-report") {
+    // q10-q12 combined: q10 (catch-all) + q11 (specific decision) + q12 (prior research)
+    const extra = [
+      b.q10  ? b.q10 : nil,
+      b.q11  ? `Specific decision/problem: ${b.q11}` : nil,
+      b.q12  ? `Prior research: ${b.q12}` : nil,
+    ].filter(Boolean).join("\n\n");
+    return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5,
+             q6: b.q6, q7: b.q7, q8: b.q8, q9: b.q9, q10: extra || nil };
   }
   // Default: MIR passes q1-q10 directly
   return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5,

@@ -113,7 +113,7 @@ const GRID_SERVICES: GridSvc[] = [
     price: "$399", turnaround: "5-7 days",
     desc: "Everything in the MIR, but deeper. Greater rigor, more sources, more context, more analyst time spent on what each finding actually means for your business.",
     bundles: ["Deep Intelligence"],
-    href: "/contact",
+    href: "/services/deep-dive-report",
   },
   {
     name: "Synthetic Survey Report",
