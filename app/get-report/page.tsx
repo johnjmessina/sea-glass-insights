@@ -3,7 +3,8 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import SiteNav from "@/components/SiteNav";
+import SiteNav    from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
 
 const CORMORANT = "'Cormorant Garamond', Georgia, serif";
 const MONTSERRAT = "'Montserrat', system-ui, sans-serif";
@@ -244,15 +245,7 @@ export default function GetReportPage() {
         </form>
       </main>
 
-      {/* ── Footer ── */}
-      <footer style={{ backgroundColor: NAVY, color: "#93C5FD", textAlign: "center", padding: "32px 24px" }}>
-        <p style={{ fontFamily: CORMORANT, fontSize: "1.05rem", fontWeight: 600, color: "white", marginBottom: "6px" }}>
-          Sea Glass Insights — Refining the Edge.
-        </p>
-        <p style={{ fontFamily: MONTSERRAT, fontSize: "0.8rem" }}>
-          &copy; {new Date().getFullYear()} Sea Glass Insights. All rights reserved.
-        </p>
-      </footer>
+      <SiteFooter />
 
     </div>
   );
