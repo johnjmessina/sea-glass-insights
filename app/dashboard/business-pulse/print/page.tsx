@@ -289,7 +289,9 @@ export default async function BusinessPulsePrintPage(
             </div>
             {BACK_SERVICES[0].checklist.map(item => (
               <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
-                <span style={{ fontFamily: MT, fontSize: "7px", fontWeight: 700, color: NAVY, flexShrink: 0, lineHeight: 1.2 }}>✓</span>
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "1px" }}>
+                  <path d="M1 4L3 6L7 2" stroke="#0A2F61" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 300, color: NAVY, opacity: 0.65, lineHeight: 1.35 }}>{item}</span>
               </div>
             ))}
@@ -305,7 +307,9 @@ export default async function BusinessPulsePrintPage(
                 </div>
                 {svc.checklist.map(item => (
                   <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
-                    <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 700, color: NAVY, flexShrink: 0, lineHeight: 1.2 }}>✓</span>
+                    <svg width="7" height="7" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "1px" }}>
+                      <path d="M1 4L3 6L7 2" stroke="#0A2F61" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                     <span style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, opacity: 0.6, lineHeight: 1.35 }}>{item}</span>
                   </div>
                 ))}
