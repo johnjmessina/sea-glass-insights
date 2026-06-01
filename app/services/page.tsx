@@ -141,7 +141,7 @@ export default function ServicesPage() {
           Professional market research for small businesses. AI generates the foundation. A real analyst reviews, refines, and makes sure the insights that reach you actually matter.
         </p>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.78rem", color: TEAL }}>
-          Look for bundle tags on select services to save $49.
+          Look for bundle tags on select services to save.
         </p>
       </section>
 
