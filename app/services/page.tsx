@@ -134,7 +134,7 @@ const GRID_SERVICES: GridSvc[] = [
     price: "$99 / $79 add-on", turnaround: "48 hrs",
     desc: "Five to six custom AI prompts built specifically for your business type, ready to use immediately.",
     bundles: [],
-    href: "/contact",
+    href: "/services/ai-starter-kit",
   },
 ];
 

@@ -19,7 +19,7 @@ const GRID_6 = [
   { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision.",                                 href: "/services/deep-dive-report" },
   { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list.", href: "/services/synthetic-survey-report" },
   { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report.",                   href: "/services/voice-of-customer" },
-  { name: "AI Starter Kit",           price: "$99 / $79 add-on", turnaround: "48 hrs", desc: "Custom AI prompts built specifically for your business type.",                                href: "/services" },
+  { name: "AI Starter Kit",           price: "$99 / $79 add-on", turnaround: "48 hrs", desc: "Custom AI prompts built specifically for your business type.",                                href: "/services/ai-starter-kit" },
 ];
 
 

@@ -38,6 +38,11 @@ const SERVICE_CONFIG: Record<string, { unitAmount: string; productName: string; 
     productName: "Sea Glass Insights — Voice of Customer Survey",
     cancelPath:  "/services/voice-of-customer",
   },
+  "ai-starter-kit": {
+    unitAmount:  "9900",
+    productName: "Sea Glass Insights — AI Starter Kit",
+    cancelPath:  "/services/ai-starter-kit",
+  },
 };
 const DEFAULT_SERVICE = "market-intelligence-report";
 
@@ -68,6 +73,10 @@ function buildQSlots(service: string, b: Record<string, any>) {
   if (service === "voice-of-customer") {
     return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5,
              q6: b.q6, q7: b.q7, q8: nil, q9: nil, q10: nil };
+  }
+  if (service === "ai-starter-kit") {
+    return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5,
+             q6: b.q6, q7: nil, q8: nil, q9: nil, q10: nil };
   }
   // Default: MIR passes q1-q10 directly
   return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5,
