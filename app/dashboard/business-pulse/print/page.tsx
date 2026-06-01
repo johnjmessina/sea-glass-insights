@@ -233,7 +233,7 @@ export default async function BusinessPulsePrintPage(
         </div>
 
         {/* ────────────── BACK — cream hero ────────────── */}
-        <div className="card-back" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className="card-back" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
 
           {/* TOP — logo + headline + subtext, centered */}
           <div style={{ textAlign: "center" }}>
@@ -283,8 +283,8 @@ export default async function BusinessPulsePrintPage(
             ))}
           </div>
 
-          {/* BOTTOM — contact (left) + QR (right) */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+          {/* BOTTOM — contact (left) + QR (right), pinned to bottom */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "auto" }}>
             <div style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 300, color: NAVY, lineHeight: 1.85, opacity: 0.72 }}>
               <div style={{ fontFamily: CG, fontSize: "9px", fontWeight: 600, color: NAVY, opacity: 1, marginBottom: "2px" }}>{card.analystName}</div>
               {card.phone && <div>{card.phone}</div>}

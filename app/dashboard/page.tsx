@@ -1250,7 +1250,7 @@ function BusinessPulse() {
 
       <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
       {/* ── Back panel — cream, services page layout ── */}
-      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", padding: "26px 36px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", padding: "26px 36px", display: "flex", flexDirection: "column", gap: "14px" }}>
 
         {/* TOP — logo + headline + subtext, centered */}
         <div style={{ textAlign: "center" }}>
@@ -1296,8 +1296,8 @@ function BusinessPulse() {
           ))}
         </div>
 
-        {/* BOTTOM — contact (left) + QR (right) */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        {/* BOTTOM — contact (left) + QR (right), pinned to bottom */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "auto" }}>
           <div style={{ fontFamily: MT, fontSize: "9.5px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.85, opacity: 0.72 }}>
             <div style={{ fontFamily: CG, fontSize: "12px", fontWeight: 600, color: NAVY_HEX, opacity: 1, marginBottom: "2px" }}>{form.analystName}</div>
             {form.phone && <div>{form.phone}</div>}
