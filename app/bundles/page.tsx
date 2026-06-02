@@ -38,7 +38,7 @@ function BundleHero({ id, name, price, savings, service1, price1, service2, pric
   desc: string; formId: string;
 }) {
   return (
-    <div id={id} style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: "16px", padding: "36px 40px", marginBottom: "0" }}>
+    <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: "16px", padding: "36px 40px", marginBottom: "0" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
         <div>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: NAVY, marginBottom: "6px" }}>{name}</h2>
@@ -171,7 +171,7 @@ export default function BundlesPage() {
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "56px 24px", display: "flex", flexDirection: "column", gap: "80px", width: "100%" }}>
 
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
-        <div id="starter-intelligence">
+        <div id="starter-intelligence" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
           <button
             onClick={() => toggle('starter-intelligence')}
@@ -242,7 +242,7 @@ export default function BundlesPage() {
         </div>
 
         {/* ── THE FIELD REPORT ──────────────────────────────────────────────── */}
-        <div id="the-field-report">
+        <div id="the-field-report" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
           <button
             onClick={() => toggle('the-field-report')}
@@ -316,7 +316,7 @@ export default function BundlesPage() {
         </div>
 
         {/* ── MARKET & MIND ────────────────────────────────────────────────── */}
-        <div id="market-and-mind">
+        <div id="market-and-mind" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
           <button
             onClick={() => toggle('market-and-mind')}
@@ -389,7 +389,7 @@ export default function BundlesPage() {
         </div>
 
         {/* ── COMPLETE SHOPPER EXPERIENCE ───────────────────────────────────── */}
-        <div id="complete-shopper-experience">
+        <div id="complete-shopper-experience" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
           <button
             onClick={() => toggle('complete-shopper-experience')}
