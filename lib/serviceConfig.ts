@@ -205,3 +205,179 @@ export function getQuestionLabels(type: ServiceType): string[] {
     default:                        return MIR_QUESTIONS;
   }
 }
+
+// ── Manual Order Form — per-service question configs ──────────────────────────
+
+export interface ManualIntakeQuestion {
+  /** Display label */
+  label: string;
+  /** Optional placeholder text */
+  placeholder?: string;
+  /** Textarea rows (default 3) */
+  rows?: number;
+}
+
+/** Service-specific intake questions for the Create Manual Order form.
+ *  Each array entry corresponds to q1, q2, … q10.
+ *  Shorter arrays = fewer questions rendered.
+ *  Bundles fall back to their primary service questions.
+ */
+export const MANUAL_INTAKE_QUESTIONS: Record<ServiceType, ManualIntakeQuestion[]> = {
+  market_intelligence_report: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop in Bradley Beach NJ" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 3 years, Bradley Beach NJ" },
+    { label: "Who is your ideal customer? (age, income, lifestyle, problem they have)",          placeholder: "e.g. 28-45, dual income, values quality over price, wants local authenticity" },
+    { label: "Top 2–3 competitors (names, or describe them)",                                    placeholder: "e.g. Starbucks on Main St, The Grind (new indie shop), bagel shop with coffee" },
+    { label: "What makes you different from those competitors?",                                 placeholder: "e.g. We roast in-house, staff knows the product deeply, loyal local following" },
+    { label: "Biggest challenge right now",                                                      placeholder: "e.g. New competitor opened across town and is pulling our afternoon regulars" },
+    { label: "What does success look like in the next 12 months?",                              placeholder: "e.g. Stabilize customer base, grow revenue 20%, clear off-season strategy" },
+    { label: "What marketing are you currently doing, if any?",                                  placeholder: "e.g. Instagram 3x/week, no paid ads, email list of 400 people rarely used" },
+    { label: "What do you wish you knew about your market or customers?",                        placeholder: "e.g. Why lunch traffic is weaker than morning, whether there's an untapped segment" },
+    { label: "Anything else you want the report to focus on or address?",                        placeholder: "e.g. Considering a second location, want context on whether the market can support it" },
+  ],
+
+  social_media_audit: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 3 years, Bradley Beach NJ" },
+    { label: "Which social media platforms are you currently using?",                            placeholder: "e.g. Instagram, Facebook — we have TikTok but never post on it" },
+    { label: "How often do you post on each platform?",                                          placeholder: "e.g. Instagram 3x/week, Facebook once a week or less" },
+    { label: "Who is your target audience on social media?",                                     placeholder: "e.g. 28-45 locals and seasonal visitors, coffee enthusiasts, people looking for a community spot" },
+    { label: "Top 1–2 social media competitors (names, or describe them)",                       placeholder: "e.g. The Grind — they have great Reels, The Bagel Shop — very active on Facebook" },
+    { label: "Biggest challenge with social media right now",                                    placeholder: "e.g. Low engagement, inconsistent posting, not sure what content works" },
+    { label: "What are you hoping to improve or learn from this audit?",                         placeholder: "e.g. What content drives the most engagement, whether we're missing any platforms" },
+    { label: "Links to your social profiles (Instagram, Facebook, TikTok, etc.)",               placeholder: "e.g. instagram.com/anchorcoffeebb, facebook.com/anchorcoffeebb" },
+    { label: "Anything specific you want us to evaluate or focus on?",                           placeholder: "e.g. Whether our Stories are performing, how our bio looks, content mix" },
+  ],
+
+  secret_shopping: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "Business address",                                                                  placeholder: "e.g. 123 Main Ave, Bradley Beach NJ 07720" },
+    { label: "Industry / business type",                                                          placeholder: "e.g. Coffee Shop, Retail Boutique, Restaurant, Fitness Studio" },
+    { label: "Hours of operation (when should we visit?)",                                       placeholder: "e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm. Best time: weekday morning 9-11am" },
+    { label: "What does a typical customer interaction look like? (from arrival to departure)",   placeholder: "e.g. Customer walks in, browses, orders at the counter, waits for drink, finds a seat", rows: 4 },
+    { label: "Are there specific experience dimensions you want evaluated?",                      placeholder: "e.g. Greeting, wait time, product knowledge, restroom cleanliness during peak hours", rows: 3 },
+    { label: "Would you like a competitor location shopped as well? If yes, which one?",         placeholder: "e.g. Yes — The Java House, 456 Ocean Ave, Belmar NJ (additional fee applies)" },
+    { label: "What are you most concerned about or want us to focus on?",                        placeholder: "e.g. We've had Google reviews mentioning slow service at lunch. Is it staffing or process?", rows: 4 },
+  ],
+
+  deep_dive_report: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop and retail roastery" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 4 years, Bradley Beach NJ. Seasonal location with year-round operations" },
+    { label: "Who is your ideal customer? (age, income, lifestyle, problem they have)",          placeholder: "e.g. 28-45, dual income, values quality over price, wants a community-feel third place" },
+    { label: "Top 2–3 competitors (names, or describe them)",                                    placeholder: "e.g. Starbucks, The Grind (newer indie shop), bagel shop with coffee counter" },
+    { label: "What makes you different from those competitors?",                                 placeholder: "e.g. We roast in-house, staff knowledge, local loyalty, event programming" },
+    { label: "Biggest challenge right now",                                                      placeholder: "e.g. New competitor opened and is pulling afternoon regulars, off-season revenue drops" },
+    { label: "What does success look like in the next 12 months?",                              placeholder: "e.g. Stabilize customer base, grow 20%, build off-season strategy" },
+    { label: "What marketing are you currently doing, if any?",                                  placeholder: "e.g. Instagram 3x/week, occasional Facebook, email list of 400 rarely used" },
+    { label: "What do you wish you knew about your market or customers?",                        placeholder: "e.g. Why lunch traffic is weak, whether there's an untapped segment we're missing" },
+    { label: "Anything else you want the report to focus on or address?",                        placeholder: "e.g. Possible second location, competitive threat response" },
+  ],
+
+  synthetic_survey_report: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 2 years, launching a second location in Asbury Park this spring" },
+    { label: "Who is your ideal customer? (age, income, lifestyle)",                             placeholder: "e.g. 28-45, values quality and local authenticity, willing to pay a premium" },
+    { label: "Top 2–3 competitors (names, or describe them)",                                    placeholder: "e.g. Starbucks on Main St, The Grind, the bagel shop that also sells coffee" },
+    { label: "What assumptions about your customers do you want to test?",                       placeholder: "e.g. We assume customers value atmosphere over price. We assume retail buyers are different from cafe customers.", rows: 4 },
+    { label: "3–5 most important questions you want answered about your customers",              placeholder: "e.g. Would customers pay $18 for a retail bag? What would make them choose us over the new shop?", rows: 4 },
+    { label: "Current pricing and how customers typically find you",                              placeholder: "e.g. Drip $3.50, espresso $5-7, retail $14-16. Most find us word-of-mouth or walking by" },
+    { label: "What marketing are you currently doing, if any?",                                  placeholder: "e.g. Instagram 3x/week, no paid ads, occasional email to ~400 people" },
+    { label: "A specific product, service, or decision you want customer reactions to?",         placeholder: "e.g. Considering a $35/month coffee subscription — would our core customer type value it?", rows: 3 },
+    { label: "Anything else you want the personas to focus on or address?",                      placeholder: "e.g. We'd like personas to react to our brand name and logo description if possible" },
+  ],
+
+  voice_of_customer_survey: [
+    { label: "Business name and location",                                                        placeholder: "e.g. Anchor Coffee Co., Bradley Beach NJ" },
+    { label: "Industry / business type",                                                          placeholder: "e.g. Food & Beverage — independent coffee shop, retail and cafe" },
+    { label: "Approximately how many customer contacts do you have?",                            placeholder: "e.g. Around 400 email addresses from loyalty program and online orders" },
+    { label: "How were these contacts collected?",                                               placeholder: "e.g. Square loyalty program, website email signup form" },
+    { label: "What do you most want to learn from your customers?",                              placeholder: "e.g. Why they choose us over competitors, what would make them come more often", rows: 4 },
+    { label: "Have you surveyed your customers before? If so, what did you find?",               placeholder: "e.g. Google Form 2 years ago, ~30 responses — loved the atmosphere, mentioned slow morning rush service", rows: 3 },
+    { label: "What decision will this research inform?",                                          placeholder: "e.g. Whether to expand hours, add a subscription model, or open a second location", rows: 3 },
+  ],
+
+  ai_starter_kit: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 3 years, Bradley Beach NJ" },
+    { label: "Who is your ideal customer?",                                                       placeholder: "e.g. 28-45 locals and visitors, value quality, want a community feel" },
+    { label: "What are the top 2–3 marketing or content tasks you spend time on each week?",    placeholder: "e.g. Writing Instagram captions, responding to Google reviews, designing promotions" },
+    { label: "Have you used any AI tools (ChatGPT, Claude, etc.) before? What for?",            placeholder: "e.g. Used ChatGPT once to write an email, but found it too generic to be useful" },
+    { label: "What tasks do you wish you had more time for or more help with?",                 placeholder: "e.g. Writing emails, brainstorming seasonal promotions, responding to negative reviews" },
+    { label: "Biggest challenge with marketing or customer communication right now",             placeholder: "e.g. Keeping up with consistent Instagram content during busy season" },
+    { label: "Types of content you want to create more of (social posts, emails, responses…)",  placeholder: "e.g. More Reels, better email newsletters, faster review responses" },
+  ],
+
+  // Bundles — use primary service questions as the base
+  starter_intelligence_bundle: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 3 years, Bradley Beach NJ" },
+    { label: "Who is your ideal customer?",                                                       placeholder: "e.g. 28-45, values quality and local authenticity" },
+    { label: "Top 2–3 competitors",                                                               placeholder: "e.g. Starbucks on Main St, The Grind, bagel shop" },
+    { label: "What makes you different from those competitors?",                                 placeholder: "e.g. In-house roasting, deep staff knowledge, loyal local following" },
+    { label: "Biggest challenge right now",                                                      placeholder: "e.g. New competitor opened and is pulling afternoon regulars" },
+    { label: "What does success look like in the next 12 months?",                              placeholder: "e.g. Stabilize customer base, grow revenue 20%" },
+    { label: "Which social platforms are you currently using and how often?",                    placeholder: "e.g. Instagram 3x/week, Facebook once a week or less" },
+    { label: "Links to your social profiles",                                                     placeholder: "e.g. instagram.com/anchorcoffeebb" },
+    { label: "Anything else to focus on or address?",                                             placeholder: "e.g. Want to understand if our Instagram content is working for us" },
+  ],
+
+  field_report_bundle: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 3 years, Bradley Beach NJ" },
+    { label: "Who is your ideal customer?",                                                       placeholder: "e.g. 28-45, values quality, wants local authenticity" },
+    { label: "Top 2–3 competitors",                                                               placeholder: "e.g. Starbucks, The Grind, bagel shop with coffee counter" },
+    { label: "What makes you different from those competitors?",                                 placeholder: "e.g. In-house roasting, staff knowledge, loyal following" },
+    { label: "Biggest challenge right now",                                                      placeholder: "e.g. Inconsistent service quality, new competitor drawing regulars" },
+    { label: "Business address (for the secret shop)",                                           placeholder: "e.g. 123 Main Ave, Bradley Beach NJ 07720" },
+    { label: "Hours of operation and best time to visit",                                        placeholder: "e.g. Mon-Fri 7am-6pm. Best visit: weekday morning 9-11am" },
+    { label: "What do you most want evaluated during the shop?",                                 placeholder: "e.g. Staff greeting, wait time at peak hours, product knowledge" },
+    { label: "Anything else to focus on?",                                                       placeholder: "e.g. We've had reviews mentioning slow service — want to understand if it's staffing or process" },
+  ],
+
+  market_mind_bundle: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "How long in business, and where are you located?",                                 placeholder: "e.g. 2 years, Bradley Beach NJ" },
+    { label: "Who is your ideal customer?",                                                       placeholder: "e.g. 28-45, values quality over price, wants a community feel" },
+    { label: "Top 2–3 competitors",                                                               placeholder: "e.g. Starbucks, The Grind, bagel shop" },
+    { label: "What makes you different from those competitors?",                                 placeholder: "e.g. In-house roasting, loyal local following, event programming" },
+    { label: "What assumptions about your customers do you want to test?",                       placeholder: "e.g. We assume customers value atmosphere over price", rows: 4 },
+    { label: "Most important questions you want answered about your customers",                  placeholder: "e.g. Would they pay $18 for a retail bag? What would make them come more often?", rows: 4 },
+    { label: "What marketing are you currently doing, if any?",                                  placeholder: "e.g. Instagram 3x/week, occasional email to ~400 people" },
+    { label: "What does success look like in the next 12 months?",                              placeholder: "e.g. Stabilize customer base, grow revenue 20%, build off-season strategy" },
+    { label: "Anything else to focus on or address?",                                             placeholder: "e.g. Considering a $35/month coffee subscription — customer reactions helpful" },
+  ],
+
+  complete_shopper_experience_bundle: [
+    { label: "Business name and what you sell or offer",                                         placeholder: "e.g. Anchor Coffee Co., specialty coffee shop" },
+    { label: "Business address",                                                                  placeholder: "e.g. 123 Main Ave, Bradley Beach NJ 07720" },
+    { label: "Industry / business type",                                                          placeholder: "e.g. Coffee Shop, Retail Boutique, Restaurant" },
+    { label: "Hours of operation and best time to visit",                                        placeholder: "e.g. Mon-Fri 7am-6pm. Best visit: weekday morning 9-11am" },
+    { label: "What does a typical customer interaction look like?",                              placeholder: "e.g. Walk in, order at counter, wait for drink, find a seat", rows: 3 },
+    { label: "Specific experience dimensions to evaluate during the shop",                       placeholder: "e.g. Greeting, wait time, product knowledge, restroom upkeep" },
+    { label: "How many customer contacts do you have for the survey?",                           placeholder: "e.g. ~400 email addresses from our loyalty program" },
+    { label: "What do you most want to learn from your customers?",                              placeholder: "e.g. Why they choose us, what would make them come more often", rows: 3 },
+    { label: "What are you most concerned about or want us to focus on in the shop?",           placeholder: "e.g. Google reviews mention slow service at lunch — want to understand root cause" },
+    { label: "What decision will the customer survey inform?",                                    placeholder: "e.g. Whether to expand hours, add a subscription model" },
+  ],
+};
+
+/** Deep Dive extra questions (Q11 and Q12) — stored in service_data, not q1-q10 */
+export const DEEP_DIVE_EXTRA_QUESTIONS: ManualIntakeQuestion[] = [
+  {
+    label: "11. What specific decision are you trying to make or problem are you trying to solve with this report?",
+    placeholder: "e.g. Deciding whether to sign a lease on a second location in Asbury Park by end of Q3. Need to know if the market can support it and whether our brand positioning translates.",
+    rows: 4,
+  },
+  {
+    label: "12. Have you done any market research before? If so, what did you learn?",
+    placeholder: "e.g. Customer survey two years ago — ~30 responses. People come for atmosphere as much as coffee. Haven't done anything formal since.",
+    rows: 3,
+  },
+];
+
+/** Whether to show the Location helper field (prepends to Q2) */
+export function showLocationHelper(type: ServiceType): boolean {
+  // SS uses Q2 for full address; VoC Q1 already includes location; bundles containing SS skip it
+  const noHelper: ServiceType[] = ["secret_shopping", "voice_of_customer_survey", "complete_shopper_experience_bundle", "field_report_bundle"];
+  return !noHelper.includes(type);
+}

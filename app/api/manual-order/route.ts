@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Customer name, business name, and email are required." }, { status: 400 });
     }
 
+    const { extraServiceData } = body as { extraServiceData?: Record<string, unknown> };
+
     const { data, error } = await supabase
       .from("orders")
       .insert({
@@ -22,6 +24,7 @@ export async function POST(req: NextRequest) {
         status:         "new",
         analyst_note:   "Manual Order",
         service_type:   serviceType ?? "market_intelligence_report",
+        service_data:   extraServiceData ?? null,
         q1:  q1  || null,
         q2:  q2  || null,
         q3:  q3  || null,

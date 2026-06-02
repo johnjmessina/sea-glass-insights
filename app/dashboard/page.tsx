@@ -5,6 +5,7 @@ import type { Order, AIDraft, Insight, Recommendation } from "@/lib/supabase";
 import {
   SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
   getEffectiveServiceType, isBundle, type ServiceType,
+  MANUAL_INTAKE_QUESTIONS, DEEP_DIVE_EXTRA_QUESTIONS, showLocationHelper,
 } from "@/lib/serviceConfig";
 import GenericServiceDetail from "@/app/dashboard/components/GenericServiceDetail";
 import SecretShoppingDetail from "@/app/dashboard/components/SecretShoppingDetail";
@@ -146,6 +147,8 @@ type ManualForm = {
   serviceType: ServiceType;
   q1: string; q2: string; q3: string; q4: string; q5: string;
   q6: string; q7: string; q8: string; q9: string; q10: string;
+  // Deep Dive extras — stored in service_data
+  dd_q11: string; dd_q12: string;
 };
 
 const MANUAL_EMPTY: ManualForm = {
@@ -153,6 +156,7 @@ const MANUAL_EMPTY: ManualForm = {
   serviceType: "market_intelligence_report",
   q1: "", q2: "", q3: "", q4: "", q5: "",
   q6: "", q7: "", q8: "", q9: "", q10: "",
+  dd_q11: "", dd_q12: "",
 };
 
 const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
@@ -163,10 +167,10 @@ const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
   { value: "synthetic_survey_report",           label: "Synthetic Survey Report" },
   { value: "voice_of_customer_survey",          label: "Voice of Customer Survey" },
   { value: "ai_starter_kit",                    label: "AI Starter Kit" },
-  { value: "starter_intelligence_bundle",       label: "Starter Intelligence Bundle" },
-  { value: "field_report_bundle",               label: "Field Report Bundle" },
-  { value: "market_mind_bundle",                label: "Market & Mind Bundle" },
-  { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience Bundle" },
+  { value: "starter_intelligence_bundle",       label: "Starter Intelligence — Bundle" },
+  { value: "field_report_bundle",               label: "The Field Report — Bundle" },
+  { value: "market_mind_bundle",                label: "Market & Mind — Bundle" },
+  { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience — Bundle" },
 ];
 
 function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) => void; onCancel: () => void }) {
@@ -178,6 +182,18 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
+  // When service type changes, clear intake answers so old answers don't bleed in
+  function setServiceType(st: ServiceType) {
+    setForm(prev => ({
+      ...MANUAL_EMPTY,
+      customerName: prev.customerName,
+      businessName: prev.businessName,
+      email:        prev.email,
+      location:     prev.location,
+      serviceType:  st,
+    }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.customerName.trim() || !form.businessName.trim() || !form.email.trim()) {
@@ -186,22 +202,30 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
     }
     setSub(true);
     setError(null);
+
     try {
-      const q2Val = form.location.trim()
+      const useLocation = showLocationHelper(form.serviceType);
+      const q2Val = useLocation && form.location.trim()
         ? form.q2.trim()
           ? `Located in ${form.location.trim()}.\n\n${form.q2}`
           : `Located in ${form.location.trim()}.`
         : form.q2;
 
+      // Deep Dive: pass extra questions as service_data
+      const extraServiceData = form.serviceType === "deep_dive_report"
+        ? { deep_dive_extra: { q11: form.dd_q11, q12: form.dd_q12 } }
+        : undefined;
+
       const res = await fetch("/api/manual-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerName: form.customerName,
-          businessName: form.businessName,
-          email:        form.email,
-          serviceType:  form.serviceType,
-          q1: form.q1, q2: q2Val,  q3: form.q3,
+          customerName:    form.customerName,
+          businessName:    form.businessName,
+          email:           form.email,
+          serviceType:     form.serviceType,
+          extraServiceData,
+          q1: form.q1, q2: q2Val,   q3: form.q3,
           q4: form.q4, q5: form.q5, q6: form.q6,
           q7: form.q7, q8: form.q8, q9: form.q9, q10: form.q10,
         }),
@@ -219,6 +243,12 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
   const inputCls = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam placeholder-gray-300";
   const labelCls = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
 
+  const questions = MANUAL_INTAKE_QUESTIONS[form.serviceType] ?? MANUAL_INTAKE_QUESTIONS.market_intelligence_report;
+  const qKeys = (["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"] as (keyof ManualForm)[]).slice(0, questions.length);
+  const useLocation = showLocationHelper(form.serviceType);
+  const isDeepDive  = form.serviceType === "deep_dive_report";
+  const tagColor    = SERVICE_TAG_COLORS[form.serviceType];
+
   return (
     <div>
       <div className="flex items-center gap-4 mb-8">
@@ -232,6 +262,7 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        {/* Contact + Service */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
           <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Contact Information</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -250,37 +281,80 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
               <input type="email" placeholder="jane@acmecoffee.com" value={form.email}
                 onChange={e => set("email", e.target.value)} className={inputCls} />
             </div>
-            <div>
-              <label className={labelCls}>Location</label>
-              <input type="text" placeholder="Bradley Beach, NJ" value={form.location}
-                onChange={e => set("location", e.target.value)} className={inputCls} />
-              <p className="text-xs text-gray-400 mt-1">Prepended to Answer 2 automatically.</p>
-            </div>
-            <div className="col-span-2">
+            {useLocation && (
+              <div>
+                <label className={labelCls}>Location</label>
+                <input type="text" placeholder="Bradley Beach, NJ" value={form.location}
+                  onChange={e => set("location", e.target.value)} className={inputCls} />
+                <p className="text-xs text-gray-400 mt-1">Prepended to Q2 automatically.</p>
+              </div>
+            )}
+            <div className={useLocation ? "col-span-2" : "col-span-2"}>
               <label className={labelCls}>Service Type <span className="text-red-400 normal-case font-normal tracking-normal">*</span></label>
-              <select value={form.serviceType} onChange={e => set("serviceType", e.target.value as ServiceType)}
-                className={inputCls + " bg-white"}>
-                {SERVICE_TYPE_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-3">
+                <select value={form.serviceType}
+                  onChange={e => setServiceType(e.target.value as ServiceType)}
+                  className={inputCls + " bg-white flex-1"}>
+                  {SERVICE_TYPE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full shrink-0 ${tagColor}`}>
+                  {SERVICE_DISPLAY_NAMES[form.serviceType]}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Intake questions — service-specific */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
-          <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Intake Answers</h3>
-          <p className="text-xs text-gray-400 -mt-2">All fields optional — fill in whatever the client shared.</p>
-          {(["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"] as (keyof ManualForm)[]).map((key, i) => (
-            <div key={key}>
-              <label className={labelCls}>
-                <span className="text-seafoam mr-1">Q{i + 1}</span> — {QUESTIONS[i]}
-              </label>
-              <textarea rows={3} placeholder="Write as much detail as you have…"
-                value={form[key]} onChange={e => set(key, e.target.value)}
-                className={`${inputCls} resize-y`} />
-            </div>
-          ))}
+          <div>
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Intake Answers</h3>
+            <p className="text-xs text-gray-400 mt-1">All fields optional — fill in whatever the client shared.</p>
+          </div>
+          {qKeys.map((key, i) => {
+            const q = questions[i];
+            return (
+              <div key={key}>
+                <label className={labelCls}>
+                  <span className="text-seafoam mr-1">Q{i + 1}</span> — {q.label}
+                </label>
+                <textarea
+                  rows={q.rows ?? 3}
+                  placeholder={q.placeholder ?? "Write as much detail as you have…"}
+                  value={form[key] as string}
+                  onChange={e => set(key, e.target.value)}
+                  className={`${inputCls} resize-y`}
+                />
+              </div>
+            );
+          })}
+
+          {/* Deep Dive only: Q11 + Q12 stored in service_data */}
+          {isDeepDive && (
+            <>
+              <div className="border-t border-dashed border-gray-200 pt-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+                  Deep Dive specifics — stored separately
+                </p>
+                {DEEP_DIVE_EXTRA_QUESTIONS.map((q, i) => (
+                  <div key={i} className={i > 0 ? "mt-5" : ""}>
+                    <label className={labelCls}>
+                      <span className="text-indigo-400 mr-1">Extra</span> — {q.label}
+                    </label>
+                    <textarea
+                      rows={q.rows ?? 3}
+                      placeholder={q.placeholder ?? ""}
+                      value={i === 0 ? form.dd_q11 : form.dd_q12}
+                      onChange={e => set(i === 0 ? "dd_q11" : "dd_q12", e.target.value)}
+                      className={`${inputCls} resize-y`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {error && (
@@ -304,59 +378,160 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
 
 // ── Order List ────────────────────────────────────────────────────────────────
 
-function OrderList({ orders, onSelect, onCreateManual }: {
-  orders: Order[];
-  onSelect: (o: Order) => void;
-  onCreateManual: () => void;
+function OrderList({
+  orders, archivedOrders, showArchived, onSelect, onCreateManual,
+  onToggleArchived, onArchive, onRestore, onDelete,
+}: {
+  orders:          Order[];
+  archivedOrders:  Order[];
+  showArchived:    boolean;
+  onSelect:        (o: Order) => void;
+  onCreateManual:  () => void;
+  onToggleArchived:() => void;
+  onArchive:       (id: string) => void;
+  onRestore:       (id: string) => void;
+  onDelete:        (id: string) => void;
 }) {
-  const paid = orders.filter(o => o.status !== "pending_payment");
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>Orders</h2>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400">{paid.length} order{paid.length !== 1 ? "s" : ""}</span>
-          <button onClick={onCreateManual}
-            className="bg-navy text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-navy-dark transition-colors">
-            + Create Manual Order
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const active   = orders.filter(o => o.status !== "pending_payment");
+  const displayed = showArchived ? archivedOrders : active;
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!openMenu) return;
+    function close() { setOpenMenu(null); }
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [openMenu]);
+
+  function OrderCard({ order, archived = false }: { order: Order; archived?: boolean }) {
+    const st       = getEffectiveServiceType(order.service_type as ServiceType | null);
+    const menuOpen = openMenu === order.id;
+
+    return (
+      <div className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3.5 flex items-center gap-3 hover:border-seafoam/60 hover:shadow-sm transition-all text-left group relative">
+
+        {/* Clickable main area */}
+        <button
+          onClick={() => onSelect(order)}
+          className="flex-1 text-left min-w-0"
+        >
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-navy group-hover:text-seafoam transition-colors text-sm">
+              {order.business_name}
+            </span>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${SERVICE_TAG_COLORS[st]}`}>
+              {SERVICE_DISPLAY_NAMES[st]}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 mt-0.5 truncate">{order.customer_name} · {order.email}</p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            {order.analyst_note === "Manual Order" && (
+              <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-medium">Manual</span>
+            )}
+          </p>
+        </button>
+
+        {/* Status badge */}
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${STATUS_COLORS[order.status] ?? STATUS_COLORS.new}`}>
+          {STATUS_LABELS[order.status] ?? order.status}
+        </span>
+
+        {/* ⋯ menu */}
+        <div className="relative shrink-0">
+          <button
+            onClick={e => { e.stopPropagation(); setOpenMenu(menuOpen ? null : order.id); }}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors text-lg leading-none"
+            title="Order options"
+          >
+            ···
           </button>
+          {menuOpen && (
+            <div
+              onClick={e => e.stopPropagation()}
+              className="absolute right-0 top-9 z-20 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 min-w-[140px]"
+            >
+              {archived ? (
+                <button
+                  onClick={() => { setOpenMenu(null); onRestore(order.id); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-navy transition-colors"
+                >
+                  ↩ Restore Order
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setOpenMenu(null); onArchive(order.id); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-navy transition-colors"
+                >
+                  Archive
+                </button>
+              )}
+              <div className="my-1 border-t border-gray-100" />
+              <button
+                onClick={() => {
+                  setOpenMenu(null);
+                  if (confirm(`Permanently delete the order for "${order.business_name}"? This cannot be undone.`)) {
+                    onDelete(order.id);
+                  }
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+              >
+                Delete permanently
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      {paid.length === 0 ? (
+    );
+  }
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
+            {showArchived ? "Archived Orders" : "Orders"}
+          </h2>
+          <span className="text-sm text-gray-400">
+            {displayed.length} order{displayed.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleArchived}
+            className={`text-xs font-semibold px-4 py-2 rounded-full border transition-colors ${
+              showArchived
+                ? "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+                : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
+            }`}
+          >
+            {showArchived ? "← Active Orders" : "Archived"}
+          </button>
+          {!showArchived && (
+            <button
+              onClick={onCreateManual}
+              className="bg-navy text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-navy-dark transition-colors"
+            >
+              + Create Manual Order
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* List */}
+      {displayed.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 p-12 text-center text-gray-400">
-          No orders yet. They&apos;ll appear here after customers complete payment or you create a manual order.
+          {showArchived
+            ? "No archived orders."
+            : "No orders yet. They’ll appear here after customers complete payment or you create a manual order."}
         </div>
       ) : (
-        <div className="space-y-3">
-          {paid.map(order => (
-            <button key={order.id} onClick={() => onSelect(order)}
-              className="w-full bg-white border border-gray-100 rounded-xl px-6 py-4 flex items-center justify-between hover:border-seafoam hover:shadow-sm transition-all text-left group">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-semibold text-navy group-hover:text-seafoam transition-colors">
-                    {order.business_name}
-                  </p>
-                  {(() => {
-                    const st = getEffectiveServiceType(order.service_type as ServiceType | null);
-                    return (
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${SERVICE_TAG_COLORS[st]}`}>
-                        {SERVICE_DISPLAY_NAMES[st]}
-                      </span>
-                    );
-                  })()}
-                </div>
-                <p className="text-sm text-gray-500 mt-0.5">{order.customer_name} · {order.email}</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  {order.analyst_note === "Manual Order" && (
-                    <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">Manual</span>
-                  )}
-                </p>
-              </div>
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ml-4 ${STATUS_COLORS[order.status] ?? STATUS_COLORS.new}`}>
-                {STATUS_LABELS[order.status] ?? order.status}
-              </span>
-            </button>
+        <div className="space-y-2">
+          {displayed.map(order => (
+            <OrderCard key={order.id} order={order} archived={showArchived} />
           ))}
         </div>
       )}
@@ -1586,19 +1761,24 @@ function BusinessPulse() {
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const [authed, setAuthed]         = useState(false);
-  const [activeTab, setActiveTab]   = useState<"orders" | "pulse">("orders");
-  const [orders, setOrders]         = useState<Order[]>([]);
-  const [selected, setSelected]     = useState<Order | null>(null);
-  const [showManual, setShowManual] = useState(false);
-  const [loading, setLoading]       = useState(false);
+  const [authed, setAuthed]               = useState(false);
+  const [activeTab, setActiveTab]         = useState<"orders" | "pulse">("orders");
+  const [orders, setOrders]               = useState<Order[]>([]);
+  const [archivedOrders, setArchived]     = useState<Order[]>([]);
+  const [showArchived, setShowArchived]   = useState(false);
+  const [selected, setSelected]           = useState<Order | null>(null);
+  const [showManual, setShowManual]       = useState(false);
+  const [loading, setLoading]             = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res  = await fetch("/api/orders");
-      const data = await res.json();
-      setOrders(data);
+      const [activeRes, archivedRes] = await Promise.all([
+        fetch("/api/orders"),
+        fetch("/api/orders?archived=true"),
+      ]);
+      setOrders(await activeRes.json());
+      setArchived(await archivedRes.json());
     } finally {
       setLoading(false);
     }
@@ -1614,6 +1794,42 @@ export default function DashboardPage() {
     setOrders(prev => [order, ...prev]);
     setShowManual(false);
     setSelected(order);
+  }
+
+  async function handleArchive(orderId: string) {
+    await fetch("/api/archive-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+    const archived = orders.find(o => o.id === orderId);
+    if (archived) {
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      setArchived(prev => [archived, ...prev]);
+    }
+  }
+
+  async function handleRestore(orderId: string) {
+    await fetch("/api/archive-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, restore: true }),
+    });
+    const restored = archivedOrders.find(o => o.id === orderId);
+    if (restored) {
+      setArchived(prev => prev.filter(o => o.id !== orderId));
+      setOrders(prev => [restored, ...prev]);
+    }
+  }
+
+  async function handleDelete(orderId: string) {
+    await fetch("/api/delete-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+    setArchived(prev => prev.filter(o => o.id !== orderId));
   }
 
   return (
@@ -1634,16 +1850,13 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {/* Tab navigation */}
           <nav className="flex gap-1 bg-white/10 rounded-full p-1">
             {(["orders", "pulse"] as const).map(tab => (
               <button
                 key={tab}
-                onClick={() => { setActiveTab(tab); setSelected(null); setShowManual(false); }}
+                onClick={() => { setActiveTab(tab); setSelected(null); setShowManual(false); setShowArchived(false); }}
                 className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${
-                  activeTab === tab
-                    ? "bg-white text-navy"
-                    : "text-white/70 hover:text-white"
+                  activeTab === tab ? "bg-white text-navy" : "text-white/70 hover:text-white"
                 }`}
               >
                 {tab === "orders" ? "Orders" : "Business Pulse"}
@@ -1670,7 +1883,17 @@ export default function DashboardPage() {
         ) : selected ? (
           <OrderDetail order={selected} onBack={() => { setSelected(null); fetchOrders(); }} />
         ) : (
-          <OrderList orders={orders} onSelect={setSelected} onCreateManual={() => setShowManual(true)} />
+          <OrderList
+            orders={orders}
+            archivedOrders={archivedOrders}
+            showArchived={showArchived}
+            onSelect={setSelected}
+            onCreateManual={() => setShowManual(true)}
+            onToggleArchived={() => setShowArchived(p => !p)}
+            onArchive={handleArchive}
+            onRestore={handleRestore}
+            onDelete={handleDelete}
+          />
         )}
       </main>
     </div>
