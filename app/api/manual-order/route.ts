@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      customerName, businessName, email,
+      customerName, businessName, email, serviceType,
       q1, q2, q3, q4, q5, q6, q7, q8, q9, q10,
     } = body;
 
@@ -19,8 +19,9 @@ export async function POST(req: NextRequest) {
         customer_name:  customerName,
         business_name:  businessName,
         email,
-        status:       "new",
-        analyst_note: "Manual Order",
+        status:         "new",
+        analyst_note:   "Manual Order",
+        service_type:   serviceType ?? "market_intelligence_report",
         q1:  q1  || null,
         q2:  q2  || null,
         q3:  q3  || null,

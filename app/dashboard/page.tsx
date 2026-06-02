@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Order, AIDraft, Insight, Recommendation } from "@/lib/supabase";
+import {
+  SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
+  getEffectiveServiceType, isBundle, type ServiceType,
+} from "@/lib/serviceConfig";
+import GenericServiceDetail from "@/app/dashboard/components/GenericServiceDetail";
+import SecretShoppingDetail from "@/app/dashboard/components/SecretShoppingDetail";
+import VoCDetail from "@/app/dashboard/components/VoCDetail";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -136,15 +143,31 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
 
 type ManualForm = {
   customerName: string; businessName: string; email: string; location: string;
+  serviceType: ServiceType;
   q1: string; q2: string; q3: string; q4: string; q5: string;
   q6: string; q7: string; q8: string; q9: string; q10: string;
 };
 
 const MANUAL_EMPTY: ManualForm = {
   customerName: "", businessName: "", email: "", location: "",
+  serviceType: "market_intelligence_report",
   q1: "", q2: "", q3: "", q4: "", q5: "",
   q6: "", q7: "", q8: "", q9: "", q10: "",
 };
+
+const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
+  { value: "market_intelligence_report",        label: "Market Intelligence Report" },
+  { value: "social_media_audit",                label: "Social Media Audit" },
+  { value: "secret_shopping",                   label: "Secret Shopping" },
+  { value: "deep_dive_report",                  label: "Deep Dive Report" },
+  { value: "synthetic_survey_report",           label: "Synthetic Survey Report" },
+  { value: "voice_of_customer_survey",          label: "Voice of Customer Survey" },
+  { value: "ai_starter_kit",                    label: "AI Starter Kit" },
+  { value: "starter_intelligence_bundle",       label: "Starter Intelligence Bundle" },
+  { value: "field_report_bundle",               label: "Field Report Bundle" },
+  { value: "market_mind_bundle",                label: "Market & Mind Bundle" },
+  { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience Bundle" },
+];
 
 function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) => void; onCancel: () => void }) {
   const [form, setForm]      = useState<ManualForm>(MANUAL_EMPTY);
@@ -177,6 +200,7 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           customerName: form.customerName,
           businessName: form.businessName,
           email:        form.email,
+          serviceType:  form.serviceType,
           q1: form.q1, q2: q2Val,  q3: form.q3,
           q4: form.q4, q5: form.q5, q6: form.q6,
           q7: form.q7, q8: form.q8, q9: form.q9, q10: form.q10,
@@ -231,6 +255,15 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
               <input type="text" placeholder="Bradley Beach, NJ" value={form.location}
                 onChange={e => set("location", e.target.value)} className={inputCls} />
               <p className="text-xs text-gray-400 mt-1">Prepended to Answer 2 automatically.</p>
+            </div>
+            <div className="col-span-2">
+              <label className={labelCls}>Service Type <span className="text-red-400 normal-case font-normal tracking-normal">*</span></label>
+              <select value={form.serviceType} onChange={e => set("serviceType", e.target.value as ServiceType)}
+                className={inputCls + " bg-white"}>
+                {SERVICE_TYPE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -299,9 +332,19 @@ function OrderList({ orders, onSelect, onCreateManual }: {
             <button key={order.id} onClick={() => onSelect(order)}
               className="w-full bg-white border border-gray-100 rounded-xl px-6 py-4 flex items-center justify-between hover:border-seafoam hover:shadow-sm transition-all text-left group">
               <div>
-                <p className="font-semibold text-navy group-hover:text-seafoam transition-colors">
-                  {order.business_name}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-navy group-hover:text-seafoam transition-colors">
+                    {order.business_name}
+                  </p>
+                  {(() => {
+                    const st = getEffectiveServiceType(order.service_type as ServiceType | null);
+                    return (
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${SERVICE_TAG_COLORS[st]}`}>
+                        {SERVICE_DISPLAY_NAMES[st]}
+                      </span>
+                    );
+                  })()}
+                </div>
                 <p className="text-sm text-gray-500 mt-0.5">{order.customer_name} · {order.email}</p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -327,11 +370,34 @@ function OldFormatFallback({ text }: { text: string }) {
   return <p className="text-sm text-gray-500 italic leading-relaxed whitespace-pre-wrap">{text}</p>;
 }
 
+// ── Service routing — delegates to the right detail component ─────────────────
+
+function ServiceOrderRouter({ order, onBack }: { order: Order; onBack: () => void }) {
+  const svcType = getEffectiveServiceType(order.service_type as ServiceType | null);
+
+  // Bundles: for now render each service using GenericServiceDetail
+  // (secondary service display is a future enhancement)
+  if (isBundle(svcType)) {
+    return <GenericServiceDetail order={order} onBack={onBack} />;
+  }
+  if (svcType === "secret_shopping")         return <SecretShoppingDetail order={order} onBack={onBack} />;
+  if (svcType === "voice_of_customer_survey") return <VoCDetail order={order} onBack={onBack} />;
+  if (svcType !== "market_intelligence_report") return <GenericServiceDetail order={order} onBack={onBack} />;
+
+  // Fall through to existing MIR OrderDetail below
+  return null;
+}
+
 // ── Order Detail ──────────────────────────────────────────────────────────────
 
 function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: () => void }) {
+  const svcType = getEffectiveServiceType(initialOrder.service_type as ServiceType | null);
+  // Non-MIR orders: delegate to the service-specific component
+  if (svcType !== "market_intelligence_report") {
+    return <ServiceOrderRouter order={initialOrder} onBack={onBack} />;
+  }
   const [order, setOrder]           = useState<Order>(initialOrder);
-  const [draft, setDraft]           = useState<AIDraft | null>(initialOrder.ai_draft);
+  const [draft, setDraft]           = useState<AIDraft | null>(initialOrder.ai_draft as AIDraft | null);
   const [analystNote, setAnalystNote]           = useState(initialOrder.analyst_note === "Manual Order" ? "" : (initialOrder.analyst_note ?? ""));
   const [executiveSummary, setExecutiveSummary] = useState(initialOrder.executive_summary ?? "");
   const [sectionMeta, setSectionMeta]           = useState<MetaMap>(() => initMeta(initialOrder));
