@@ -58,7 +58,21 @@ export default function BundlesPage() {
   const router = useRouter();
   // Which bundle section is expanded (only one at a time; null = all collapsed)
   const [expanded, setExpanded] = useState<string | null>(null);
-  function toggle(id: string) { setExpanded(prev => prev === id ? null : id); }
+  function toggle(id: string) {
+    const next = expanded === id ? null : id;
+    setExpanded(next);
+    if (next !== null) {
+      // Wait for React to finish re-rendering the new layout (collapsing the old
+      // section shifts content), then scroll the opened section into view.
+      setTimeout(() => {
+        const el = document.getElementById(next);
+        if (!el) return;
+        const headerOffset = 80; // approx. site header + bundle nav height
+        const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      }, 50);
+    }
+  }
 
   // ── Starter Intelligence state ──────────────────────────────────────────────
   const [si, setSi] = useState({ customerName:"",email:"",businessName:"",q1:"",q2:"",q3:"",q4:"",q5:"",q6:"",q7:"",q8:"",q9:"",q10:"",q11:"",q12:"",q13:"" });
