@@ -205,6 +205,25 @@ export default function GetReportPage() {
             </div>
           )}
 
+          {/* BUNDLE CALLOUTS */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Starter Intelligence — Bundle and save</p>
+              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Social Media Audit and save $49.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$349</strong>. <a href="/bundles#starter-intelligence" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
+            </div>
+            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>The Field Report — Bundle and save</p>
+              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Secret Shopping visit and save $49.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$449</strong>. <a href="/bundles#the-field-report" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
+            </div>
+            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Market & Mind — Bundle and save</p>
+              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Synthetic Survey Report and save $49.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$549</strong>. <a href="/bundles#market-and-mind" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
+            </div>
+          </div>
+
           <div className="text-center pb-4">
             <p className="text-gray-500 text-sm mb-4" style={{ fontFamily: MT }}>You will be taken to a secure checkout page to complete your $199 payment.</p>
             <button type="submit" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "14px 40px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>

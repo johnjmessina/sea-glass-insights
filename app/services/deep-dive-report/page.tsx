@@ -135,12 +135,6 @@ export default function DeepDiveReportPage() {
                 <ServiceFormField label="12. Have you done any market research before? If so, what did you learn?" hint="If no prior research, just say so — that's useful context too." placeholder="e.g. We ran a customer survey two years ago. Key finding was that people come for the atmosphere as much as the coffee. We haven't done anything formal since." rows={3}  value={form.q12} error={errors.q12} onChange={v => set("q12", v)} />
               </div>
             </div>
-            {/* BUNDLE CALLOUT */}
-            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Bundle and save</p>
-              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Social Media Audit and save $49.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$549</strong>. <Link href="/contact" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>Contact us to bundle →</Link></p>
-            </div>
             <div style={{ textAlign: "center" }}>
               <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $399</button>
               <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. No subscriptions. Report delivered within 5-7 days.</p>

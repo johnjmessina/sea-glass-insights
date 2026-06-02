@@ -127,6 +127,12 @@ export default function VoiceOfCustomerPage() {
                 <ServiceFormField label="7. What decision will this research inform?" required placeholder="e.g. Whether to expand our hours, add a subscription model, or open a second location. We want to understand our customers before committing." rows={3}  value={form.q7} error={errors.q7} onChange={v => set("q7", v)} />
               </div>
             </div>
+            {/* BUNDLE CALLOUT */}
+            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Complete Shopper Experience — Bundle and save</p>
+              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Secret Shopping visit and save $99.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$699</strong>. <Link href="/bundles#complete-shopper-experience" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</Link></p>
+            </div>
             <div style={{ textAlign: "center" }}>
               <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $499</button>
               <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. No subscriptions. After payment you&rsquo;ll receive a secure link to upload your contact list.</p>
