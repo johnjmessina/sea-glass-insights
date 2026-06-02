@@ -66,7 +66,7 @@ export default function SiteNav() {
           className="flex md:hidden"
           onClick={() => setOpen(o => !o)}
           aria-label={open ? "Close menu" : "Open menu"}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", alignItems: "center", justifyContent: "center" }}
         >
           {open ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
