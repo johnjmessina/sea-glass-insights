@@ -80,6 +80,19 @@ export default function AboutPage() {
                 }}
               />
             </div>
+
+            {/* Blog teaser */}
+            <p style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "0.78rem",
+              color: NAVY,
+              opacity: 0.55,
+              marginTop: "14px",
+              textAlign: "right",
+              letterSpacing: "0.01em",
+            }}>
+              Bloggin&rsquo; about Bradley. Coming soon →
+            </p>
           </div>
 
         </div>
