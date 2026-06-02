@@ -173,7 +173,26 @@ const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
   { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience — Bundle" },
 ];
 
+// ── Service picker cards ──────────────────────────────────────────────────────
+
+const SERVICE_PICKER_ITEMS: {
+  value: ServiceType; label: string; desc: string; bundle?: boolean;
+}[] = [
+  { value: "market_intelligence_report",        label: "Market Intelligence Report",   desc: "Market, customers, and competitors in one report" },
+  { value: "social_media_audit",                label: "Social Media Audit",            desc: "Presence, content, and engagement across platforms" },
+  { value: "secret_shopping",                   label: "Secret Shopping",               desc: "In-person visit scored across 7 experience dimensions" },
+  { value: "deep_dive_report",                  label: "Deep Dive Report",              desc: "Deeper intelligence for a specific major decision" },
+  { value: "synthetic_survey_report",           label: "Synthetic Survey Report",       desc: "AI personas pressure-test your customer assumptions" },
+  { value: "voice_of_customer_survey",          label: "Voice of Customer Survey",      desc: "Custom survey designed and sent to your customers" },
+  { value: "ai_starter_kit",                    label: "AI Starter Kit",                desc: "Custom AI prompts built for your specific business" },
+  { value: "starter_intelligence_bundle",       label: "Starter Intelligence",          desc: "Market Intelligence Report + Social Media Audit", bundle: true },
+  { value: "field_report_bundle",               label: "The Field Report",              desc: "Market Intelligence Report + Secret Shopping", bundle: true },
+  { value: "market_mind_bundle",                label: "Market & Mind",                 desc: "Market Intelligence Report + Synthetic Survey", bundle: true },
+  { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience",   desc: "Secret Shopping + Voice of Customer Survey", bundle: true },
+];
+
 function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) => void; onCancel: () => void }) {
+  const [step, setStep]      = useState<"select" | "intake">("select");
   const [form, setForm]      = useState<ManualForm>(MANUAL_EMPTY);
   const [submitting, setSub] = useState(false);
   const [error, setError]    = useState<string | null>(null);
@@ -182,16 +201,9 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
-  // When service type changes, clear intake answers so old answers don't bleed in
-  function setServiceType(st: ServiceType) {
-    setForm(prev => ({
-      ...MANUAL_EMPTY,
-      customerName: prev.customerName,
-      businessName: prev.businessName,
-      email:        prev.email,
-      location:     prev.location,
-      serviceType:  st,
-    }));
+  function pickService(st: ServiceType) {
+    setForm({ ...MANUAL_EMPTY, serviceType: st });
+    setStep("intake");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -211,7 +223,6 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           : `Located in ${form.location.trim()}.`
         : form.q2;
 
-      // Deep Dive: pass extra questions as service_data
       const extraServiceData = form.serviceType === "deep_dive_report"
         ? { deep_dive_extra: { q11: form.dd_q11, q12: form.dd_q12 } }
         : undefined;
@@ -243,8 +254,85 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
   const inputCls = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam placeholder-gray-300";
   const labelCls = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
 
-  const questions = MANUAL_INTAKE_QUESTIONS[form.serviceType] ?? MANUAL_INTAKE_QUESTIONS.market_intelligence_report;
-  const qKeys = (["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"] as (keyof ManualForm)[]).slice(0, questions.length);
+  // ── Step 1: Service selection ──────────────────────────────────────────────
+  if (step === "select") {
+    const individual = SERVICE_PICKER_ITEMS.filter(s => !s.bundle);
+    const bundles    = SERVICE_PICKER_ITEMS.filter(s => s.bundle);
+    return (
+      <div>
+        <div className="flex items-center gap-4 mb-8">
+          <button onClick={onCancel} className="text-sm text-gray-400 hover:text-navy transition-colors">
+            ← All Orders
+          </button>
+          <div className="h-4 w-px bg-gray-200" />
+          <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
+            Create Manual Order
+          </h2>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+          <h3 className="text-navy font-semibold mb-1" style={{ fontFamily: "Georgia, serif" }}>
+            Select a service type
+          </h3>
+          <p className="text-xs text-gray-400 mb-6">Click to select — intake fields will update to match.</p>
+
+          {/* Individual services */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            {individual.map(svc => {
+              const tagColor = SERVICE_TAG_COLORS[svc.value];
+              return (
+                <button
+                  key={svc.value}
+                  type="button"
+                  onClick={() => pickService(svc.value)}
+                  className="text-left border border-gray-150 rounded-xl p-4 hover:border-seafoam hover:shadow-sm transition-all group"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <span className="font-semibold text-navy text-sm group-hover:text-seafoam transition-colors">
+                      {svc.label}
+                    </span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${tagColor}`}>
+                      →
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 leading-relaxed">{svc.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bundles */}
+          <div className="border-t border-gray-100 pt-5">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Bundles</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {bundles.map(svc => (
+                <button
+                  key={svc.value}
+                  type="button"
+                  onClick={() => pickService(svc.value)}
+                  className="text-left border border-gray-150 rounded-xl p-4 hover:border-amber-300 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <span className="font-semibold text-navy text-sm group-hover:text-amber-700 transition-colors">
+                      {svc.label}
+                    </span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-amber-100 text-amber-700">
+                      Bundle
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 leading-relaxed">{svc.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Step 2: Contact + intake form ──────────────────────────────────────────
+  const questions   = MANUAL_INTAKE_QUESTIONS[form.serviceType] ?? MANUAL_INTAKE_QUESTIONS.market_intelligence_report;
+  const qKeys       = (["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"] as (keyof ManualForm)[]).slice(0, questions.length);
   const useLocation = showLocationHelper(form.serviceType);
   const isDeepDive  = form.serviceType === "deep_dive_report";
   const tagColor    = SERVICE_TAG_COLORS[form.serviceType];
@@ -256,13 +344,23 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           ← All Orders
         </button>
         <div className="h-4 w-px bg-gray-200" />
+        <button
+          onClick={() => setStep("select")}
+          className="text-sm text-gray-400 hover:text-navy transition-colors"
+        >
+          Change service
+        </button>
+        <div className="h-4 w-px bg-gray-200" />
         <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
           Create Manual Order
         </h2>
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${tagColor}`}>
+          {SERVICE_DISPLAY_NAMES[form.serviceType]}
+        </span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
-        {/* Contact + Service */}
+        {/* Contact */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
           <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Contact Information</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -289,21 +387,6 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
                 <p className="text-xs text-gray-400 mt-1">Prepended to Q2 automatically.</p>
               </div>
             )}
-            <div className={useLocation ? "col-span-2" : "col-span-2"}>
-              <label className={labelCls}>Service Type <span className="text-red-400 normal-case font-normal tracking-normal">*</span></label>
-              <div className="flex items-center gap-3">
-                <select value={form.serviceType}
-                  onChange={e => setServiceType(e.target.value as ServiceType)}
-                  className={inputCls + " bg-white flex-1"}>
-                  {SERVICE_TYPE_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full shrink-0 ${tagColor}`}>
-                  {SERVICE_DISPLAY_NAMES[form.serviceType]}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
