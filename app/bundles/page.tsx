@@ -39,15 +39,6 @@ function BundleHero({ id, name, price, savings, service1, price1, service2, pric
 }) {
   return (
     <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: "16px", padding: "36px 40px", marginBottom: "0" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
-        <div>
-          <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: NAVY, marginBottom: "6px" }}>{name}</h2>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "12px", flexWrap: "wrap" }}>
-            <span style={{ fontFamily: MT, fontSize: "1.6rem", fontWeight: 700, color: NAVY }}>{price}</span>
-            <span style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: TEAL }}>{savings}</span>
-          </div>
-        </div>
-      </div>
       <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
         {[[service1, price1], [service2, price2]].map(([svc, p]) => (
           <div key={svc} style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px" }}>
