@@ -6,6 +6,13 @@ import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
 import ServiceFormField from "@/components/ServiceFormField";
+import {
+  SelectWithOther,
+  CheckboxGroupWithOther,
+  YesNoReveal,
+  BUSINESS_TYPES,
+  VOC_COLLECTION_METHODS,
+} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -28,6 +35,8 @@ const HIW = [
   { num: "4", title: "Your Report Arrives", body: "A visual findings report with themes, highlights, and analyst interpretation lands in your inbox within 1-2 weeks." },
 ];
 
+const CONTACT_SIZES = ["Under 50", "50–100", "100–250", "250–500", "500–1,000", "1,000+"];
+
 type FormData = { customerName: string; email: string; businessName: string; q1: string; q2: string; q3: string; q4: string; q5: string; q6: string; q7: string; };
 const EMPTY: FormData = { customerName: "", email: "", businessName: "", q1: "", q2: "", q3: "", q4: "", q5: "", q6: "", q7: "" };
 const REQUIRED: (keyof FormData)[] = ["customerName", "email", "businessName", "q1", "q2", "q3", "q4", "q5", "q7"];
@@ -40,6 +49,7 @@ export default function VoiceOfCustomerPage() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [yesQ6, setYesQ6] = useState<boolean | null>(null);
 
   function set(f: keyof FormData, v: string) { setForm(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: undefined })); }
   function validate() {
@@ -51,7 +61,16 @@ export default function VoiceOfCustomerPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault(); setSubmitted(true);
     if (!validate()) { document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "voice-of-customer", ...form })); router.push("/checkout");
+    const q6combined =
+      yesQ6 === false
+        ? "No"
+        : form.q6.trim()
+        ? "Yes — " + form.q6.trim()
+        : yesQ6 === true
+        ? "Yes"
+        : "";
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "voice-of-customer", ...form, q6: q6combined }));
+    router.push("/checkout");
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
@@ -119,11 +138,50 @@ export default function VoiceOfCustomerPage() {
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business and Customers</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <ServiceFormField label="1. Business name and location" required placeholder="e.g. Anchor Coffee Co., Bradley Beach NJ — specialty coffee shop and roastery."  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
-                <ServiceFormField label="2. Industry / business type" required placeholder="e.g. Food & Beverage — independent coffee shop, retail and cafe."  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
-                <ServiceFormField label="3. Approximately how many customer contacts do you have?" required hint="An estimate is fine. This helps us understand response rate expectations." placeholder="e.g. Around 400 email addresses collected through our loyalty program and online orders."  value={form.q3} error={errors.q3} onChange={v => set("q3", v)} />
-                <ServiceFormField label="4. How were these contacts collected?" required hint="Past purchases, loyalty program, website signups, in-store collection, etc." placeholder="e.g. Mostly through our Square loyalty program. About 80 from an email signup form on our website." rows={2}  value={form.q4} error={errors.q4} onChange={v => set("q4", v)} />
+                <SelectWithOther
+                  label="2. Industry / business type"
+                  options={BUSINESS_TYPES}
+                  onChange={v => set("q2", v)}
+                  error={errors.q2}
+                  required
+                />
+                <SelectWithOther
+                  label="3. Approximately how many customer contacts do you have?"
+                  hint="An estimate is fine. This helps us understand response rate expectations."
+                  options={CONTACT_SIZES}
+                  onChange={v => set("q3", v)}
+                  error={errors.q3}
+                  required
+                />
+                <CheckboxGroupWithOther
+                  label="4. How were these contacts collected?"
+                  options={VOC_COLLECTION_METHODS}
+                  onChange={v => set("q4", v)}
+                  error={errors.q4}
+                  required
+                />
                 <ServiceFormField label="5. What do you most want to learn from your customers?" required hint="Be as specific as possible — this drives the survey question design." placeholder="e.g. Why they choose us over competitors, what would make them come more often, and whether they'd value a monthly coffee subscription." rows={4}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
-                <ServiceFormField label="6. Have you surveyed your customers before? If so, what did you find?" placeholder="e.g. We ran a short Google Form survey 2 years ago. About 30 responses — customers loved the atmosphere but mentioned wanting faster service during morning rush." rows={3}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
+                <YesNoReveal
+                  label="6. Have you surveyed your customers before?"
+                  onToggle={yes => {
+                    setYesQ6(yes);
+                    if (!yes) {
+                      set("q6", "No");
+                    } else {
+                      set("q6", "");
+                    }
+                  }}
+                  error={errors.q6}
+                >
+                  <textarea
+                    rows={3}
+                    placeholder="e.g. We ran a short Google Form 2 years ago. Customers loved the atmosphere but mentioned wanting faster service during morning rush."
+                    value={form.q6}
+                    onChange={e => set("q6", e.target.value)}
+                    className={`${inputBase} ${inputOk} resize-y w-full`}
+                    style={{ fontFamily: MT }}
+                  />
+                </YesNoReveal>
                 <ServiceFormField label="7. What decision will this research inform?" required placeholder="e.g. Whether to expand our hours, add a subscription model, or open a second location. We want to understand our customers before committing." rows={3}  value={form.q7} error={errors.q7} onChange={v => set("q7", v)} />
               </div>
             </div>

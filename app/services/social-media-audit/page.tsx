@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
+import {
+  PlatformCheckboxesWithHandles,
+  SMACompetitorFields,
+  CheckboxGroupWithOther,
+  SMA_CHALLENGES,
+} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -55,7 +61,7 @@ export default function SocialMediaAuditPage() {
     const e: Partial<Record<keyof FormData, string>> = {};
     REQUIRED.forEach(k => { if (!form[k].trim()) e[k] = "This field is required."; });
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Please enter a valid email address.";
-    if (!form.facebook.trim() && !form.instagram.trim() && !form.otherPlatforms.trim()) e.facebook = "Please enter at least one social media platform or handle.";
+    if (!form.facebook.trim()) e.facebook = "Please select at least one social media platform.";
     setErrors(e); return Object.keys(e).length === 0;
   }
   function handleSubmit(e: FormEvent) {
@@ -164,34 +170,33 @@ export default function SocialMediaAuditPage() {
                   <input type="text" placeholder="e.g. Coffee Shop, Retail Clothing, Fitness Studio, Restaurant" value={form.industry} onChange={e => set("industry", e.target.value)} className={cls("industry")} style={{ fontFamily: MT }} />
                   {errors.industry && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.industry}</p>}
                 </div>
-                <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: "20px" }}>
-                  <p style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, marginBottom: "4px" }}>Your Social Media Platforms <span style={{ color: "#EF4444" }}>*</span></p>
-                  <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginBottom: "14px" }}>Please enter at least one platform. Leave blank any that don&rsquo;t apply.</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                    <div>
-                      <label style={{ fontFamily: MT, fontSize: "0.8rem", fontWeight: 500, color: GRAY, display: "block", marginBottom: "5px" }}>Facebook Page URL</label>
-                      <input type="text" placeholder="facebook.com/yourbusiness" value={form.facebook} onChange={e => set("facebook", e.target.value)} className={cls("facebook")} style={{ fontFamily: MT }} data-error={errors.facebook ? true : undefined} />
-                    </div>
-                    <div>
-                      <label style={{ fontFamily: MT, fontSize: "0.8rem", fontWeight: 500, color: GRAY, display: "block", marginBottom: "5px" }}>Instagram Handle</label>
-                      <input type="text" placeholder="@yourbusiness" value={form.instagram} onChange={e => set("instagram", e.target.value)} className={cls("instagram")} style={{ fontFamily: MT }} />
-                    </div>
-                    <div>
-                      <label style={{ fontFamily: MT, fontSize: "0.8rem", fontWeight: 500, color: GRAY, display: "block", marginBottom: "5px" }}>Other Active Platforms and Handles</label>
-                      <textarea rows={2} placeholder="e.g. TikTok: @yourbusiness, LinkedIn: linkedin.com/company/yourbiz, Pinterest: @yourbusiness" value={form.otherPlatforms} onChange={e => set("otherPlatforms", e.target.value)} className={`${inputBase} ${inputOk} resize-y`} style={{ fontFamily: MT }} />
-                    </div>
-                    {errors.facebook && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "-6px" }}>{errors.facebook}</p>}
-                  </div>
+                <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: "20px" }} data-error={errors.facebook ? true : undefined}>
+                  <PlatformCheckboxesWithHandles
+                    label="Your Social Media Platforms"
+                    hint="Check each platform you are active on. Add a handle or URL for each one — it helps us find your profiles faster."
+                    required
+                    onChange={v => set("facebook", v)}
+                    error={errors.facebook}
+                  />
                 </div>
                 <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "4px" }}>Top 1-2 Competitors You&rsquo;re Aware Of <span style={{ fontFamily: MT, fontSize: "0.75rem", fontWeight: 400, color: LGRAY }}>(optional)</span></label>
-                  <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginBottom: "6px" }}>Names or social handles. We&rsquo;ll compare your presence to theirs.</p>
-                  <input type="text" placeholder="e.g. The Java House, @coastalcoffeenj" value={form.competitors} onChange={e => set("competitors", e.target.value)} className={`${inputBase} ${inputOk}`} style={{ fontFamily: MT }} />
+                  <SMACompetitorFields
+                    label="Top 1-2 Competitors You're Aware Of"
+                    hint="Names or social handles. We'll compare your presence to theirs."
+                    onChange={v => set("competitors", v)}
+                    error={errors.competitors}
+                  />
+                  <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "6px" }}>Please only share what you are comfortable sharing. Your responses are used solely to produce your audit.</p>
                 </div>
                 <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "6px" }}>Biggest Social Media Challenge Right Now <span style={{ color: "#EF4444" }}>*</span></label>
-                  <textarea rows={4} placeholder="e.g. We post regularly but get almost no engagement. We don't know what content actually resonates with our audience or how to grow our following." value={form.challenge} onChange={e => set("challenge", e.target.value)} className={`${cls("challenge")} resize-y`} style={{ fontFamily: MT }} />
-                  {errors.challenge && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.challenge}</p>}
+                  <CheckboxGroupWithOther
+                    label="Biggest Social Media Challenge Right Now"
+                    hint="Select all that apply."
+                    options={SMA_CHALLENGES}
+                    required
+                    onChange={v => set("challenge", v)}
+                    error={errors.challenge}
+                  />
                 </div>
               </div>
             </div>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
 import ServiceFormField from "@/components/ServiceFormField";
+import { CheckboxGroupWithOther, AI_TOOLS, AI_TASKS, AI_TONES } from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -115,9 +116,33 @@ export default function AIStarterKitPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <ServiceFormField label="1. What is your business name and what do you do?" required placeholder="e.g. Anchor Coffee Co. — we run a specialty coffee shop and roastery in Bradley Beach, NJ." rows={2}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
                 <ServiceFormField label="2. Where are you located and who are your customers?" required placeholder="e.g. Bradley Beach, NJ. Our customers are mostly locals, 25-50, who value quality and community. Tourists in summer." rows={2}  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
-                <ServiceFormField label="3. What AI tool are you planning to use?" required hint="e.g. ChatGPT, Claude, Gemini, Copilot, or other." placeholder="e.g. ChatGPT — I have a Plus subscription and have tried it a few times but don't know how to get good results."  value={form.q3} error={errors.q3} onChange={v => set("q3", v)} />
-                <ServiceFormField label="4. What are the top 3 tasks you want AI to help you with?" required hint="e.g. writing social posts, responding to reviews, drafting emails, creating promotions, writing product descriptions." placeholder="e.g. 1. Instagram captions that sound like us, 2. Responding to Google reviews professionally, 3. Monthly email newsletter drafts." rows={3}  value={form.q4} error={errors.q4} onChange={v => set("q4", v)} />
-                <ServiceFormField label="5. What is the tone of your brand?" required hint="How do you sound when you talk to customers? Friendly and casual? Professional? Local and personal? Something else?" placeholder="e.g. Warm and local. We know most of our regulars by name. We're not corporate at all — we want to sound like a person, not a brand." rows={2}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
+                <CheckboxGroupWithOther
+                  label="3. What AI tool are you planning to use?"
+                  hint="Select all that apply. If you're not sure yet, that's fine too."
+                  options={AI_TOOLS}
+                  onChange={v => set("q3", v)}
+                  required={true}
+                  error={errors.q3}
+                  otherPlaceholder="Which other AI tool?"
+                />
+                <CheckboxGroupWithOther
+                  label="4. What are the top tasks you want AI to help you with?"
+                  hint="Select all that apply."
+                  options={AI_TASKS}
+                  onChange={v => set("q4", v)}
+                  required={true}
+                  error={errors.q4}
+                  otherPlaceholder="Describe another task…"
+                />
+                <CheckboxGroupWithOther
+                  label="5. What is the tone of your brand?"
+                  hint="Select all that apply."
+                  options={AI_TONES}
+                  onChange={v => set("q5", v)}
+                  required={true}
+                  error={errors.q5}
+                  otherPlaceholder="Describe your brand tone…"
+                />
                 <ServiceFormField label="6. Anything specific about your business or customers we should know when writing your prompts?" hint="Seasonal business? Specific sensitivities? Things you never want to say? Anything that would help us get the tone exactly right." placeholder="e.g. We're very community-focused and never do aggressive sales language. We also have a lot of dog owners as customers — that's a big part of our identity." rows={3}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
               </div>
             </div>

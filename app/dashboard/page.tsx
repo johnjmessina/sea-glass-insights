@@ -7,6 +7,17 @@ import {
   getEffectiveServiceType, isBundle, type ServiceType,
   MANUAL_INTAKE_QUESTIONS, DEEP_DIVE_EXTRA_QUESTIONS, showLocationHelper,
 } from "@/lib/serviceConfig";
+import {
+  SelectWithOther, CheckboxGroupWithOther, AgeIncomeCheckboxes,
+  CompetitorFields, PlatformCheckboxesWithHandles, SMACompetitorFields,
+  AddressFields, YesNoReveal, NumberedTextFields,
+  BUSINESS_TYPES, DURATION_OPTIONS, MARKETING_CHANNELS,
+  SMA_CHALLENGES, SS_INTERACTION_TYPES, SS_SCORECARD_DIMS,
+  VOC_COLLECTION_METHODS, AI_TOOLS, AI_TASKS, AI_TONES,
+  DECISION_TYPES,
+} from "@/components/StructuredFormInputs";
+
+const CONTACT_SIZES = ["Under 50", "50–100", "100–250", "250–500", "500–1,000", "1,000+"];
 import GenericServiceDetail from "@/app/dashboard/components/GenericServiceDetail";
 import SecretShoppingDetail from "@/app/dashboard/components/SecretShoppingDetail";
 import VoCDetail from "@/app/dashboard/components/VoCDetail";
@@ -197,6 +208,13 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
   const [submitting, setSub] = useState(false);
   const [error, setError]    = useState<string | null>(null);
 
+  // Supplemental structured-input state — merged into q fields at submit
+  const [bizType,      setBizType]      = useState("");
+  const [duration,     setDuration]     = useState("");
+  const [decisionType, setDecisionType] = useState("");
+  const [yesQ12,       setYesQ12]       = useState<boolean | null>(null);
+  const [yesQ6,        setYesQ6]        = useState<boolean | null>(null);
+
   function set(field: keyof ManualForm, value: string) {
     setForm(prev => ({ ...prev, [field]: value }));
   }
@@ -204,6 +222,8 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
   function pickService(st: ServiceType) {
     setForm({ ...MANUAL_EMPTY, serviceType: st });
     setStep("intake");
+    setBizType(""); setDuration(""); setDecisionType("");
+    setYesQ12(null); setYesQ6(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -216,17 +236,39 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
     setError(null);
 
     try {
-      // Prepend location to Q2 for services that have the Location helper field
+      const st = form.serviceType;
+
+      // Merge supplemental structured-input values (bizType → q1, duration → q2, etc.)
+      const hasBizType = ["market_intelligence_report","deep_dive_report","synthetic_survey_report",
+        "starter_intelligence_bundle","field_report_bundle","market_mind_bundle"].includes(st);
+      const q1Val = hasBizType && bizType
+        ? [form.q1.trim(), `Business type: ${bizType}`].filter(Boolean).join("\n\n")
+        : form.q1;
+
+      // Location helper: prepend location to q2 for applicable services
       const location = form.location.trim();
       let q2Val = form.q2;
-      if (showLocationHelper(form.serviceType) && location) {
-        q2Val = form.q2.trim()
-          ? `${location}\n\n${form.q2.trim()}`
-          : location;
+      if (hasBizType) {
+        q2Val = [duration, form.q2.trim()].filter(Boolean).join(". ");
+      } else if (showLocationHelper(st) && location) {
+        q2Val = form.q2.trim() ? `${location}\n\n${form.q2.trim()}` : location;
       }
 
-      const extraServiceData = form.serviceType === "deep_dive_report"
-        ? { deep_dive_extra: { q11: form.dd_q11, q12: form.dd_q12 } }
+      // Deep Dive: combine decisionType + detail textarea for q11; yesQ12 + details for q12
+      const ddQ11 = st === "deep_dive_report"
+        ? [decisionType, form.dd_q11.trim()].filter(Boolean).join(". ")
+        : form.dd_q11;
+      const ddQ12 = st === "deep_dive_report"
+        ? (yesQ12 === false ? "No" : yesQ12 === true ? ("Yes" + (form.dd_q12.trim() ? ` — ${form.dd_q12.trim()}` : "")) : "")
+        : form.dd_q12;
+
+      // VoC: combine yesQ6 + details for q6
+      const q6Val = st === "voice_of_customer_survey"
+        ? (yesQ6 === false ? "No" : yesQ6 === true ? ("Yes" + (form.q6.trim() ? ` — ${form.q6.trim()}` : "")) : form.q6)
+        : form.q6;
+
+      const extraServiceData = st === "deep_dive_report"
+        ? { deep_dive_extra: { q11: ddQ11, q12: ddQ12 } }
         : undefined;
 
       const res = await fetch("/api/manual-order", {
@@ -238,8 +280,8 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           email:           form.email,
           serviceType:     form.serviceType,
           extraServiceData,
-          q1: form.q1, q2: q2Val,   q3: form.q3,
-          q4: form.q4, q5: form.q5, q6: form.q6,
+          q1: q1Val,  q2: q2Val,   q3: form.q3,
+          q4: form.q4, q5: form.q5, q6: q6Val,
           q7: form.q7, q8: form.q8, q9: form.q9, q10: form.q10,
         }),
       });
@@ -392,54 +434,130 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           </div>
         </div>
 
-        {/* Intake questions — service-specific */}
+        {/* Intake questions — service-specific structured inputs */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
           <div>
             <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Intake Answers</h3>
             <p className="text-xs text-gray-400 mt-1">All fields optional — fill in whatever the client shared.</p>
           </div>
-          {qKeys.map((key, i) => {
-            const q = questions[i];
-            return (
-              <div key={key}>
-                <label className={labelCls}>
-                  <span className="text-seafoam mr-1">Q{i + 1}</span> — {q.label}
-                </label>
-                <textarea
-                  rows={q.rows ?? 3}
-                  placeholder={q.placeholder ?? "Write as much detail as you have…"}
-                  value={form[key] as string}
-                  onChange={e => set(key, e.target.value)}
-                  className={`${inputCls} resize-y`}
-                />
-              </div>
-            );
-          })}
 
-          {/* Deep Dive only: Q11 + Q12 stored in service_data */}
-          {isDeepDive && (
-            <>
-              <div className="border-t border-dashed border-gray-200 pt-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
-                  Deep Dive specifics — stored separately
-                </p>
-                {DEEP_DIVE_EXTRA_QUESTIONS.map((q, i) => (
-                  <div key={i} className={i > 0 ? "mt-5" : ""}>
-                    <label className={labelCls}>
-                      <span className="text-indigo-400 mr-1">Extra</span> — {q.label}
-                    </label>
-                    <textarea
-                      rows={q.rows ?? 3}
-                      placeholder={q.placeholder ?? ""}
-                      value={i === 0 ? form.dd_q11 : form.dd_q12}
-                      onChange={e => set(i === 0 ? "dd_q11" : "dd_q12", e.target.value)}
-                      className={`${inputCls} resize-y`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+          {/* ── MIR + MIR-primary bundles ── */}
+          {(["market_intelligence_report","starter_intelligence_bundle","field_report_bundle","market_mind_bundle"] as ServiceType[]).includes(form.serviceType) && (<>
+            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label>
+              <textarea rows={3} placeholder="e.g. Anchor Coffee Co. — specialty coffee shop" value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} />
+              <div className="mt-2"><SelectWithOther label="Business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={setBizType} /></div>
+            </div>
+            <div>
+              <label className={labelCls}>Q2 — How long in business and where located</label>
+              <SelectWithOther label="Time in business" options={DURATION_OPTIONS} placeholder="Select duration…" onChange={setDuration} />
+              <div className="mt-2"><label className={labelCls}>Location</label><input type="text" placeholder="e.g. Bradley Beach, NJ" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} /></div>
+            </div>
+            <AgeIncomeCheckboxes label="Q3 — Ideal customer (age, income, lifestyle, problem)" onChange={v => set("q3", v)} />
+            <CompetitorFields label="Q4 — Top competitors" hint="Competitor 1 required. 2 and 3 optional." onChange={v => set("q4", v)} />
+            <div><label className={labelCls}>Q5 — What makes you different?</label><textarea rows={3} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. We roast in-house, staff knows the product deeply" /></div>
+            <div><label className={labelCls}>Q6 — Biggest challenge right now</label><textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} placeholder="Write as much detail as you have…" /></div>
+            <div><label className={labelCls}>Q7 — What does success look like in 12 months?</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} placeholder="Write as much detail as you have…" /></div>
+            <CheckboxGroupWithOther label="Q8 — Marketing currently doing" options={MARKETING_CHANNELS} onChange={v => set("q8", v)} />
+            <div><label className={labelCls}>Q9 — What do you wish you knew about your market?</label><textarea rows={3} value={form.q9} onChange={e => set("q9", e.target.value)} className={`${inputCls} resize-y`} placeholder="Write as much detail as you have…" /></div>
+            <div><label className={labelCls}>Q10 — Anything else to focus on?</label><textarea rows={3} value={form.q10} onChange={e => set("q10", e.target.value)} className={`${inputCls} resize-y`} placeholder="Optional" /></div>
+          </>)}
+
+          {/* ── Social Media Audit ── */}
+          {form.serviceType === "social_media_audit" && (<>
+            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label><textarea rows={2} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. Anchor Coffee Co." /></div>
+            <div><label className={labelCls}>Q2 — Location</label><input type="text" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} placeholder="e.g. Bradley Beach, NJ" /></div>
+            <div><label className={labelCls}>Q3 — Industry / business type</label><input type="text" value={form.q3} onChange={e => set("q3", e.target.value)} className={inputCls} placeholder="e.g. Coffee Shop, Retail, Restaurant" /></div>
+            <PlatformCheckboxesWithHandles label="Q4 — Social media platforms (select all that apply)" onChange={v => set("q4", v)} />
+            <SMACompetitorFields label="Q5 — Top 1–2 competitors" hint="Optional — names and social handles." onChange={v => set("q5", v)} />
+            <CheckboxGroupWithOther label="Q6 — Biggest social media challenge" options={SMA_CHALLENGES} onChange={v => set("q6", v)} />
+          </>)}
+
+          {/* ── Secret Shopping ── */}
+          {(["secret_shopping","complete_shopper_experience_bundle"] as ServiceType[]).includes(form.serviceType) && (<>
+            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label><input type="text" value={form.q1} onChange={e => set("q1", e.target.value)} className={inputCls} placeholder="e.g. Anchor Coffee Co." /></div>
+            <AddressFields label="Q2 — Business address" required onChange={v => set("q2", v)} />
+            <div><label className={labelCls}>Q3 — Industry / business type</label><input type="text" value={form.q3} onChange={e => set("q3", e.target.value)} className={inputCls} placeholder="e.g. Coffee Shop, Retail Boutique" /></div>
+            <div><label className={labelCls}>Q4 — Hours of operation</label><input type="text" value={form.q4} onChange={e => set("q4", e.target.value)} className={inputCls} placeholder="e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm" /></div>
+            <CheckboxGroupWithOther label="Q5 — Typical customer interaction type" options={SS_INTERACTION_TYPES} onChange={v => set("q5", v)} />
+            <CheckboxGroupWithOther label="Q6 — Experience dimensions to evaluate" options={SS_SCORECARD_DIMS} onChange={v => set("q6", v)} />
+            <YesNoReveal label="Q7 — Shop a competitor location as well?" onToggle={yes => set("q7", yes ? "Yes" : "No")}>
+              <input type="text" value={form.q7 === "No" || form.q7 === "Yes" ? "" : form.q7} onChange={e => set("q7", "Yes — " + e.target.value)} className={inputCls} placeholder="Competitor name and address" />
+            </YesNoReveal>
+            <div><label className={labelCls}>Q8 — What are you most concerned about or want us to focus on?</label><textarea rows={4} value={form.q8} onChange={e => set("q8", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. Google reviews mention slow service at lunch…" /></div>
+          </>)}
+
+          {/* ── Deep Dive Report ── */}
+          {form.serviceType === "deep_dive_report" && (<>
+            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label>
+              <textarea rows={3} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. Anchor Coffee Co." />
+              <div className="mt-2"><SelectWithOther label="Business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={setBizType} /></div>
+            </div>
+            <div>
+              <label className={labelCls}>Q2 — How long in business and where located</label>
+              <SelectWithOther label="Time in business" options={DURATION_OPTIONS} placeholder="Select duration…" onChange={setDuration} />
+              <div className="mt-2"><label className={labelCls}>Location</label><input type="text" placeholder="e.g. Bradley Beach, NJ" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} /></div>
+            </div>
+            <AgeIncomeCheckboxes label="Q3 — Ideal customer (age, income, lifestyle, problem)" onChange={v => set("q3", v)} />
+            <CompetitorFields label="Q4 — Top competitors" withDescription withLocation hint="Competitor 1 required. 2 and 3 optional." onChange={v => set("q4", v)} />
+            <div><label className={labelCls}>Q5 — What makes you different?</label><textarea rows={3} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <div><label className={labelCls}>Q6 — Biggest challenge right now</label><textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <div><label className={labelCls}>Q7 — Success in 12 months</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <CheckboxGroupWithOther label="Q8 — Marketing currently doing" options={MARKETING_CHANNELS} onChange={v => set("q8", v)} />
+            <div><label className={labelCls}>Q9 — What do you wish you knew?</label><textarea rows={3} value={form.q9} onChange={e => set("q9", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <div><label className={labelCls}>Q10 — Anything else to focus on?</label><textarea rows={3} value={form.q10} onChange={e => set("q10", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <div className="border-t border-dashed border-gray-200 pt-4 space-y-4">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Deep Dive specifics</p>
+              <SelectWithOther label="Q11 — Decision type" options={DECISION_TYPES} placeholder="Select the type of decision…" onChange={setDecisionType} />
+              <div><label className={labelCls}>Q11 detail — describe the decision in detail</label><textarea rows={4} value={form.dd_q11} onChange={e => set("dd_q11", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. We are deciding whether to sign a lease on a second location…" /></div>
+              <YesNoReveal label="Q12 — Done prior market research?" onToggle={yes => { setYesQ12(yes); if (!yes) set("dd_q12", ""); }}>
+                <textarea rows={3} value={form.dd_q12} onChange={e => set("dd_q12", e.target.value)} className={`${inputCls} resize-y`} placeholder="What did you find?" />
+              </YesNoReveal>
+            </div>
+          </>)}
+
+          {/* ── Synthetic Survey Report ── */}
+          {form.serviceType === "synthetic_survey_report" && (<>
+            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label>
+              <textarea rows={3} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} />
+              <div className="mt-2"><SelectWithOther label="Business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={setBizType} /></div>
+            </div>
+            <div>
+              <label className={labelCls}>Q2 — How long in business and where located</label>
+              <SelectWithOther label="Time in business" options={DURATION_OPTIONS} placeholder="Select duration…" onChange={setDuration} />
+              <div className="mt-2"><label className={labelCls}>Location</label><input type="text" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} placeholder="e.g. Bradley Beach, NJ" /></div>
+            </div>
+            <AgeIncomeCheckboxes label="Q3 — Ideal customer" onChange={v => set("q3", v)} />
+            <CompetitorFields label="Q4 — Top competitors" onChange={v => set("q4", v)} />
+            <div><label className={labelCls}>Q5 — Assumptions to test</label><textarea rows={4} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} placeholder="What do you assume about your customers that you haven't confirmed?" /></div>
+            <NumberedTextFields label="Q6 — Most important questions to answer (up to 5)" count={5} onChange={v => set("q6", v)} />
+            <div><label className={labelCls}>Q7 — Pricing and how customers find you</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <CheckboxGroupWithOther label="Q8 — Marketing currently doing" options={MARKETING_CHANNELS} onChange={v => set("q8", v)} />
+            <div><label className={labelCls}>Q9 — Specific product or decision to test</label><textarea rows={3} value={form.q9} onChange={e => set("q9", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <div><label className={labelCls}>Q10 — Anything else</label><textarea rows={3} value={form.q10} onChange={e => set("q10", e.target.value)} className={`${inputCls} resize-y`} /></div>
+          </>)}
+
+          {/* ── Voice of Customer Survey ── */}
+          {form.serviceType === "voice_of_customer_survey" && (<>
+            <div><label className={labelCls}>Q1 — Business name and location</label><input type="text" value={form.q1} onChange={e => set("q1", e.target.value)} className={inputCls} placeholder="e.g. Anchor Coffee Co., Bradley Beach NJ" /></div>
+            <SelectWithOther label="Q2 — Industry / business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={v => set("q2", v)} />
+            <SelectWithOther label="Q3 — Approximately how many customer contacts?" options={CONTACT_SIZES} placeholder="Select a range…" onChange={v => set("q3", v)} />
+            <CheckboxGroupWithOther label="Q4 — How were these contacts collected?" options={VOC_COLLECTION_METHODS} onChange={v => set("q4", v)} />
+            <div><label className={labelCls}>Q5 — What do you most want to learn?</label><textarea rows={4} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} placeholder="Be as specific as possible — this drives the survey design." /></div>
+            <YesNoReveal label="Q6 — Surveyed customers before?" onToggle={yes => { setYesQ6(yes); if (!yes) set("q6", ""); }}>
+              <textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} placeholder="What did you find?" />
+            </YesNoReveal>
+            <div><label className={labelCls}>Q7 — What decision will this inform?</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} /></div>
+          </>)}
+
+          {/* ── AI Starter Kit ── */}
+          {form.serviceType === "ai_starter_kit" && (<>
+            <div><label className={labelCls}>Q1 — Business name and what you do</label><textarea rows={2} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <div><label className={labelCls}>Q2 — Location and who your customers are</label><textarea rows={2} value={form.q2} onChange={e => set("q2", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            <CheckboxGroupWithOther label="Q3 — AI tool planning to use" options={AI_TOOLS} onChange={v => set("q3", v)} />
+            <CheckboxGroupWithOther label="Q4 — Top tasks you want AI to help with" options={AI_TASKS} onChange={v => set("q4", v)} />
+            <CheckboxGroupWithOther label="Q5 — Brand tone" options={AI_TONES} onChange={v => set("q5", v)} />
+            <div><label className={labelCls}>Q6 — Anything specific about your business we should know?</label><textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} placeholder="Seasonal business? Sensitivities? Community focus? Etc." /></div>
+          </>)}
         </div>
 
         {error && (

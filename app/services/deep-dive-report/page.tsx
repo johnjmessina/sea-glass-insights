@@ -6,6 +6,17 @@ import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
 import ServiceFormField from "@/components/ServiceFormField";
+import {
+  SelectWithOther,
+  AgeIncomeCheckboxes,
+  CompetitorFields,
+  CheckboxGroupWithOther,
+  YesNoReveal,
+  BUSINESS_TYPES,
+  DURATION_OPTIONS,
+  MARKETING_CHANNELS,
+  DECISION_TYPES,
+} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -41,18 +52,53 @@ export default function DeepDiveReportPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
 
+  // Extra state vars for structured inputs
+  const [bizType, setBizType] = useState("");
+  const [duration, setDuration] = useState("");
+  const [decisionType, setDecisionType] = useState("");
+  const [yesQ12, setYesQ12] = useState<boolean | null>(null);
+
   function set(f: keyof FormData, v: string) { setForm(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: undefined })); }
+
   function validate() {
     const e: Partial<Record<keyof FormData, string>> = {};
-    REQUIRED.forEach(k => { if (!form[k].trim()) e[k] = "This field is required."; });
+    REQUIRED.forEach(k => {
+      if (k === "q11") {
+        // q11 validation: require decisionType (not the textarea)
+        if (!decisionType.trim()) e[k] = "This field is required.";
+      } else {
+        if (!form[k].trim()) e[k] = "This field is required.";
+      }
+    });
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Please enter a valid email address.";
     setErrors(e); return Object.keys(e).length === 0;
   }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault(); setSubmitted(true);
     if (!validate()) { document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "deep-dive-report", ...form })); router.push("/checkout");
+
+    // Combine structured fields
+    const q1combined = form.q1 + (bizType ? "\n\nBusiness type: " + bizType : "");
+    const q2combined = [duration, form.q2.trim()].filter(Boolean).join(". ");
+    const q11combined = [decisionType, form.q11.trim()].filter(Boolean).join(". ");
+    const q12combined = yesQ12 === false
+      ? "No"
+      : yesQ12 === true
+        ? ("Yes" + (form.q12.trim() ? ` — ${form.q12.trim()}` : ""))
+        : "";
+
+    sessionStorage.setItem("sgi_intake", JSON.stringify({
+      service: "deep-dive-report",
+      ...form,
+      q1: q1combined,
+      q2: q2combined,
+      q11: q11combined,
+      q12: q12combined,
+    }));
+    router.push("/checkout");
   }
+
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
 
@@ -115,14 +161,73 @@ export default function DeepDiveReportPage() {
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "8px" }}>Business Context</h3>
               <p style={{ fontFamily: MT, fontSize: "0.82rem", color: LGRAY, marginBottom: "24px" }}>These questions give us the foundation for the research. More detail here means sharper insights in your report.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <ServiceFormField label="1. What is your business name and what do you sell or offer?" required placeholder="e.g. Anchor Coffee Co. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={3}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
-                <ServiceFormField label="2. How long have you been in business, and where are you located?" required placeholder="e.g. 4 years, Bradley Beach NJ. Seasonal location with year-round operations."  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
-                <ServiceFormField label="3. Who is your ideal customer?" required hint="Age, income, lifestyle, and what they need from a business like yours." placeholder="e.g. 28-45, dual income households, value quality over price, want a third-place that feels local not corporate." rows={3}  value={form.q3} error={errors.q3} onChange={v => set("q3", v)} />
-                <ServiceFormField label="4. Who are your top 2–3 competitors?" required hint="Names, or describe them if you don't know exact names." placeholder="e.g. Starbucks on Main St, a newer indie shop called The Grind that opened last year, and the bagel shop that also sells coffee." rows={3}  value={form.q4} error={errors.q4} onChange={v => set("q4", v)} />
+                {/* Q1: textarea + business type dropdown */}
+                <div>
+                  <ServiceFormField label="1. What is your business name and what do you sell or offer?" required placeholder="e.g. Anchor Coffee Co. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={3}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
+                  <div style={{ marginTop: "12px" }}>
+                    <SelectWithOther
+                      label="Business type"
+                      options={BUSINESS_TYPES}
+                      onChange={v => setBizType(v)}
+                    />
+                  </div>
+                </div>
+
+                {/* Q2: duration dropdown + location text input */}
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.875rem", fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                    2. How long have you been in business, and where are you located?
+                    <span style={{ color: "#EF4444", marginLeft: "4px" }}>*</span>
+                  </label>
+                  <SelectWithOther
+                    label="How long in business"
+                    options={DURATION_OPTIONS}
+                    onChange={v => setDuration(v)}
+                    error={errors.q2}
+                  />
+                  <input
+                    type="text"
+                    value={form.q2}
+                    onChange={e => set("q2", e.target.value)}
+                    placeholder="Location (e.g. Bradley Beach, NJ)"
+                    className={cls("q2")}
+                    style={{ fontFamily: MT, marginTop: "8px" }}
+                  />
+                  {errors.q2 && <p style={{ color: "#EF4444", fontSize: "0.75rem", marginTop: "4px" }}>{errors.q2}</p>}
+                </div>
+
+                {/* Q3: AgeIncomeCheckboxes */}
+                <AgeIncomeCheckboxes
+                  label="3. Who is your ideal customer?"
+                  hint="Age, income, lifestyle, and what they need from a business like yours."
+                  required
+                  onChange={v => set("q3", v)}
+                  error={errors.q3}
+                />
+
+                {/* Q4: CompetitorFields with description + location */}
+                <CompetitorFields
+                  label="4. Who are your top 2–3 competitors?"
+                  hint="Names, or describe them if you don't know exact names."
+                  withDescription={true}
+                  withLocation={true}
+                  onChange={v => set("q4", v)}
+                  error={errors.q4}
+                />
+
                 <ServiceFormField label="5. What makes you different from those competitors?" required placeholder="e.g. We roast in-house, our staff knows the product deeply, and we have a loyalty base that treats us like a community hub." rows={3}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
                 <ServiceFormField label="6. What is the biggest challenge you are facing right now?" required placeholder="e.g. The new shop that opened across town is pulling our afternoon regulars and we don't know why." rows={3}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
                 <ServiceFormField label="7. What does success look like for you in the next 12 months?" required placeholder="e.g. Stabilize our customer base, grow revenue by 20%, and have a clear strategy for the off-season." rows={3}  value={form.q7} error={errors.q7} onChange={v => set("q7", v)} />
-                <ServiceFormField label="8. What marketing are you currently doing, if any?" required placeholder="e.g. Instagram 3x per week, occasional Facebook posts, no paid ads. Email list of about 400 people we rarely use." rows={3}  value={form.q8} error={errors.q8} onChange={v => set("q8", v)} />
+
+                {/* Q8: CheckboxGroupWithOther using MARKETING_CHANNELS */}
+                <CheckboxGroupWithOther
+                  label="8. What marketing are you currently doing, if any?"
+                  options={MARKETING_CHANNELS}
+                  required
+                  onChange={v => set("q8", v)}
+                  error={errors.q8}
+                />
+
                 <ServiceFormField label="9. What do you wish you knew about your market or customers that you don't know today?" required placeholder="e.g. Why our lunch traffic is weaker than our morning traffic, and whether there's an untapped customer segment we're missing." rows={3}  value={form.q9} error={errors.q9} onChange={v => set("q9", v)} />
                 <ServiceFormField label="10. Is there anything else you want the report to focus on or address?" placeholder="e.g. We're thinking about adding a second location. Anything relevant to that decision would be useful." rows={3}  value={form.q10} error={errors.q10} onChange={v => set("q10", v)} />
               </div>
@@ -131,8 +236,43 @@ export default function DeepDiveReportPage() {
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "8px" }}>Deep Dive Specifics</h3>
               <p style={{ fontFamily: MT, fontSize: "0.82rem", color: LGRAY, marginBottom: "24px" }}>These questions are what separate the Deep Dive from a standard report. Take your time here — your answers directly shape the decision-specific section of the analysis.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <ServiceFormField label="11. What specific decision are you trying to make or problem are you trying to solve with this report?" required hint="Be as specific as possible. The more clearly you define the question, the more targeted the analysis." placeholder="e.g. We are deciding whether to sign a lease on a second location in Asbury Park by the end of Q3. I need to understand whether the market can support it and whether our current brand positioning translates to that area." rows={4}  value={form.q11} error={errors.q11} onChange={v => set("q11", v)} />
-                <ServiceFormField label="12. Have you done any market research before? If so, what did you learn?" hint="If no prior research, just say so — that's useful context too." placeholder="e.g. We ran a customer survey two years ago. Key finding was that people come for the atmosphere as much as the coffee. We haven't done anything formal since." rows={3}  value={form.q12} error={errors.q12} onChange={v => set("q12", v)} />
+                {/* Q11: decision type dropdown + detail textarea */}
+                <div>
+                  <SelectWithOther
+                    label="11. What specific decision are you trying to make or problem are you trying to solve with this report?"
+                    hint="Be as specific as possible. The more clearly you define the question, the more targeted the analysis."
+                    options={DECISION_TYPES}
+                    required
+                    onChange={v => setDecisionType(v)}
+                    error={errors.q11}
+                  />
+                  <textarea
+                    rows={4}
+                    value={form.q11}
+                    onChange={e => set("q11", e.target.value)}
+                    placeholder="e.g. We are deciding whether to sign a lease on a second location in Asbury Park by the end of Q3. I need to understand whether the market can support it and whether our current brand positioning translates to that area."
+                    className={`${inputBase} ${inputOk}`}
+                    style={{ fontFamily: MT, marginTop: "8px", resize: "vertical" }}
+                  />
+                </div>
+
+                {/* Q12: YesNoReveal */}
+                <YesNoReveal
+                  label="12. Have you done any market research before?"
+                  onToggle={yes => {
+                    setYesQ12(yes);
+                    if (!yes) set("q12", "");
+                  }}
+                >
+                  <textarea
+                    rows={3}
+                    value={form.q12}
+                    onChange={e => set("q12", e.target.value)}
+                    placeholder="e.g. We ran a customer survey two years ago. Key finding was that people come for the atmosphere as much as the coffee. We haven't done anything formal since."
+                    className={`${inputBase} ${inputOk}`}
+                    style={{ fontFamily: MT, resize: "vertical", width: "100%" }}
+                  />
+                </YesNoReveal>
               </div>
             </div>
             <div style={{ textAlign: "center" }}>

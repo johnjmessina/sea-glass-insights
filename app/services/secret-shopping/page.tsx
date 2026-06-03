@@ -6,6 +6,13 @@ import Link from "next/link";
 import SiteNav          from "@/components/SiteNav";
 import SiteFooter        from "@/components/SiteFooter";
 import ServiceFormField  from "@/components/ServiceFormField";
+import {
+  AddressFields,
+  CheckboxGroupWithOther,
+  YesNoReveal,
+  SS_INTERACTION_TYPES,
+  SS_SCORECARD_DIMS,
+} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -38,6 +45,10 @@ export default function SecretShoppingPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
 
+  // Local state for competitor reveal inputs
+  const [competitorName,    setCompetitorName]    = useState("");
+  const [competitorAddress, setCompetitorAddress] = useState("");
+
   function set(f: keyof FormData, v: string) { setForm(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: undefined })); }
   function validate() {
     const e: Partial<Record<keyof FormData, string>> = {};
@@ -52,6 +63,48 @@ export default function SecretShoppingPage() {
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
+  // Derive form.competitorShop from Yes/No toggle + name/address fields
+  function handleCompetitorToggle(yes: boolean) {
+    if (!yes) {
+      set("competitorShop", "No");
+    } else {
+      const name = competitorName.trim();
+      const addr = competitorAddress.trim();
+      if (name && addr) {
+        set("competitorShop", `Yes — ${name}, ${addr}`);
+      } else {
+        set("competitorShop", "Yes");
+      }
+    }
+  }
+
+  function handleCompetitorName(val: string) {
+    setCompetitorName(val);
+    // Only update form if Yes is already selected (competitorShop starts with "Yes")
+    if (form.competitorShop.startsWith("Yes")) {
+      const addr = competitorAddress.trim();
+      const name = val.trim();
+      if (name && addr) {
+        set("competitorShop", `Yes — ${name}, ${addr}`);
+      } else {
+        set("competitorShop", "Yes");
+      }
+    }
+  }
+
+  function handleCompetitorAddress(val: string) {
+    setCompetitorAddress(val);
+    // Only update form if Yes is already selected
+    if (form.competitorShop.startsWith("Yes")) {
+      const name = competitorName.trim();
+      const addr = val.trim();
+      if (name && addr) {
+        set("competitorShop", `Yes — ${name}, ${addr}`);
+      } else {
+        set("competitorShop", "Yes");
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
@@ -65,7 +118,7 @@ export default function SecretShoppingPage() {
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: "#CBD5E1", maxWidth: "520px", margin: "0 auto 16px" }}>A professional in-person visit to your business, scored across seven dimensions of the customer experience. Delivered as a complete formatted report with narrative notes and specific recommendations.</p>
         <p style={{ fontFamily: MT, fontSize: "0.78rem", color: "rgba(147,197,253,0.65)", marginBottom: "24px" }}>Available for businesses in the Monmouth County and Jersey Shore area. Travel surcharge may apply for locations outside this area.</p>
-        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
+        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started &rarr;</a>
       </section>
       <div style={{ backgroundColor: WHITE, padding: "14px 24px", textAlign: "center", borderBottom: "1px solid #F3F4F6" }}>
         <p style={{ fontFamily: MT, fontSize: "0.8rem", color: NAVY, opacity: 0.55, letterSpacing: "0.04em" }}>Analyst-reviewed. Flat fee. No surprises.</p>
@@ -77,7 +130,7 @@ export default function SecretShoppingPage() {
             <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
               {CHECKLIST.map(item => (
                 <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: TEAL, fontWeight: 700, fontSize: "1rem", flexShrink: 0, marginTop: "1px" }}>✓</span>
+                  <span style={{ color: TEAL, fontWeight: 700, fontSize: "1rem", flexShrink: 0, marginTop: "1px" }}>&#10003;</span>
                   <span style={{ fontFamily: MT, fontSize: "0.9rem", color: NAVY, lineHeight: 1.5 }}>{item}</span>
                 </li>
               ))}
@@ -112,28 +165,67 @@ export default function SecretShoppingPage() {
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Business</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co." value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
-                <ServiceFormField label="Business Address" required placeholder="123 Main St, Bradley Beach, NJ 07720" value={form.businessAddress} error={errors.businessAddress} onChange={v => set("businessAddress", v)} />
+                <AddressFields
+                  label="Business Address"
+                  required
+                  error={errors.businessAddress}
+                  onChange={v => set("businessAddress", v)}
+                />
                 <ServiceFormField label="Industry / Business Type" required placeholder="e.g. Coffee Shop, Retail Boutique, Restaurant, Fitness Studio" value={form.industry} error={errors.industry} onChange={v => set("industry", v)} />
                 <ServiceFormField label="Hours of Operation" required placeholder="e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm" value={form.hours} error={errors.hours} onChange={v => set("hours", v)} />
-                <ServiceFormField label="What does a typical customer interaction look like?" required hint="Walk us through what happens from the moment a customer arrives to the moment they leave." placeholder="e.g. Customer walks in, browses for a few minutes, orders at the counter, waits for their drink, finds a seat." rows={4} value={form.typicalInteraction} error={errors.typicalInteraction} onChange={v => set("typicalInteraction", v)} />
-                <ServiceFormField label="Specific experience dimensions you want evaluated?" hint="e.g. greeting, wait time, product knowledge, cleanliness, upsell behavior, problem resolution" placeholder="e.g. We want to focus on whether staff proactively engage customers and whether the restroom is being maintained during peak hours." rows={3} value={form.dimensions} error={errors.dimensions} onChange={v => set("dimensions", v)} />
-                <ServiceFormField label="Would you like a competitor location shopped as well?" hint="An additional fee applies for competitor shops. If yes, we'll follow up to confirm details and pricing before scheduling." placeholder="e.g. Yes — The Java House, 456 Ocean Ave, Belmar, NJ" value={form.competitorShop} error={errors.competitorShop} onChange={v => set("competitorShop", v)} />
+                <CheckboxGroupWithOther
+                  label="What does a typical customer interaction look like?"
+                  hint="Walk us through what happens from the moment a customer arrives to the moment they leave."
+                  options={SS_INTERACTION_TYPES}
+                  required
+                  error={errors.typicalInteraction}
+                  onChange={v => set("typicalInteraction", v)}
+                />
+                <CheckboxGroupWithOther
+                  label="Specific experience dimensions you want evaluated"
+                  options={SS_SCORECARD_DIMS}
+                  error={errors.dimensions}
+                  onChange={v => set("dimensions", v)}
+                />
+                <YesNoReveal
+                  label="Would you like a competitor location shopped as well?"
+                  hint="An additional fee applies for competitor shops. If yes, we'll follow up on details and pricing before scheduling."
+                  onToggle={handleCompetitorToggle}
+                  error={errors.competitorShop}
+                >
+                  <input
+                    type="text"
+                    value={competitorName}
+                    onChange={e => handleCompetitorName(e.target.value)}
+                    placeholder="Business name"
+                    className={`${inputBase} ${inputOk}`}
+                    style={{ fontFamily: MT }}
+                  />
+                  <input
+                    type="text"
+                    value={competitorAddress}
+                    onChange={e => handleCompetitorAddress(e.target.value)}
+                    placeholder="Address, City, State"
+                    className={`${inputBase} ${inputOk}`}
+                    style={{ fontFamily: MT }}
+                  />
+                </YesNoReveal>
                 <ServiceFormField label="Anything specific you're concerned about or want us to focus on?" required placeholder="e.g. We've had a few Google reviews mentioning slow service during lunch. We want to know if it's a staffing issue or a process issue." rows={4} value={form.focus} error={errors.focus} onChange={v => set("focus", v)} />
               </div>
             </div>
             {/* BUNDLE CALLOUT */}
             <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>The Field Report — Bundle and save</p>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>The Field Report &mdash; Bundle and save</p>
               <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Market Intelligence Report and save $49.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$449</strong>. <Link href="/bundles#the-field-report" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</Link></p>
+              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$449</strong>. <Link href="/bundles#the-field-report" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle &rarr;</Link></p>
             </div>
             <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Complete Shopper Experience — Bundle and save</p>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Complete Shopper Experience &mdash; Bundle and save</p>
               <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Voice of Customer Survey and save $99.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$699</strong>. <Link href="/bundles#complete-shopper-experience" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</Link></p>
+              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$699</strong>. <Link href="/bundles#complete-shopper-experience" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle &rarr;</Link></p>
             </div>
             <div style={{ textAlign: "center" }}>
-              <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $299</button>
+              <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment &mdash; $299</button>
               <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. No subscriptions. Report delivered within 5-7 days of the visit.</p>
               <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "6px" }}>Please only share what you are comfortable sharing. Your responses are used solely to conduct your secret shop.</p>
             </div>

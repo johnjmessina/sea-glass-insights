@@ -4,10 +4,13 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
+import {
+  SelectWithOther, AgeIncomeCheckboxes, CompetitorFields, CheckboxGroupWithOther,
+  BUSINESS_TYPES, DURATION_OPTIONS, MARKETING_CHANNELS,
+} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
-
 const NAVY  = "#0A2F61";
 const TEAL  = "#00CED1";
 const SAND  = "#F4EADA";
@@ -32,19 +35,6 @@ const HIW = [
   { num: "3", title: "Your Report Arrives", body: "A professionally written report lands in your inbox within the promised timeframe. Insights you can act on immediately." },
 ];
 
-const QUESTIONS = [
-  { id: "q1",  label: "1. What is your business name and what do you sell or offer?" },
-  { id: "q2",  label: "2. How long have you been in business, and where are you located?" },
-  { id: "q3",  label: "3. Who is your ideal customer? (age, income, lifestyle, problem they have)" },
-  { id: "q4",  label: "4. Who are your top 2–3 competitors? (names, or describe them)" },
-  { id: "q5",  label: "5. What makes you different from those competitors?" },
-  { id: "q6",  label: "6. What is the biggest challenge you are facing right now?" },
-  { id: "q7",  label: "7. What does success look like for you in the next 12 months?" },
-  { id: "q8",  label: "8. What marketing are you currently doing, if any?" },
-  { id: "q9",  label: "9. What do you wish you knew about your market or customers that you don't know today?" },
-  { id: "q10", label: "10. Is there anything else you want the report to focus on or address?" },
-];
-
 type FormData = {
   customerName: string; businessName: string; email: string;
   q1: string; q2: string; q3: string; q4: string; q5: string;
@@ -67,6 +57,11 @@ export default function GetReportPage() {
   const [errors, setErrors]       = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
 
+  // ── Structured-input state ─────────────────────────────────────────────────
+  // These are separate from form.q_n and get merged at submit time.
+  const [bizType,  setBizType]  = useState(""); // supplemental to q1
+  const [duration, setDuration] = useState(""); // supplemental to q2 (location stays in form.q2)
+
   function set(field: keyof FormData, value: string) {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -74,11 +69,27 @@ export default function GetReportPage() {
 
   function validate(): boolean {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
-    (Object.keys(EMPTY) as (keyof FormData)[]).forEach(key => {
-      if (!form[key].trim()) newErrors[key] = "This field is required.";
-    });
+    // Contact
+    if (!form.customerName.trim()) newErrors.customerName = "This field is required.";
+    if (!form.businessName.trim()) newErrors.businessName = "This field is required.";
+    if (!form.email.trim()) newErrors.email = "This field is required.";
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       newErrors.email = "Please enter a valid email address.";
+    // Q1 — text description required; bizType optional
+    if (!form.q1.trim()) newErrors.q1 = "This field is required.";
+    // Q2 — location text required
+    if (!form.q2.trim() && !duration) newErrors.q2 = "This field is required.";
+    // Q3 — structured (AgeIncomeCheckboxes writes directly into form.q3)
+    if (!form.q3.trim()) newErrors.q3 = "Please describe your ideal customer.";
+    // Q4 — structured (CompetitorFields writes into form.q4)
+    if (!form.q4.trim()) newErrors.q4 = "Please enter at least one competitor.";
+    // Q5-Q7, Q9-Q10 — plain text, all required
+    if (!form.q5.trim()) newErrors.q5 = "This field is required.";
+    if (!form.q6.trim()) newErrors.q6 = "This field is required.";
+    if (!form.q7.trim()) newErrors.q7 = "This field is required.";
+    if (!form.q8.trim()) newErrors.q8 = "Please select at least one option.";
+    if (!form.q9.trim()) newErrors.q9 = "This field is required.";
+    if (!form.q10.trim()) newErrors.q10 = "This field is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -90,7 +101,10 @@ export default function GetReportPage() {
       document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    sessionStorage.setItem("sgi_intake", JSON.stringify(form));
+    // Merge supplemental structured values
+    const q1val = [form.q1.trim(), bizType ? `Business type: ${bizType}` : ""].filter(Boolean).join("\n\n");
+    const q2val = [duration, form.q2.trim()].filter(Boolean).join(". ");
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ ...form, q1: q1val, q2: q2val }));
     router.push("/checkout");
   }
 
@@ -125,7 +139,7 @@ export default function GetReportPage() {
         </p>
       </div>
 
-      {/* ── TWO-COLUMN: WHAT'S INCLUDED | HOW IT WORKS ── */}
+      {/* ── TWO-COLUMN ── */}
       <section style={{ backgroundColor: WHITE, padding: "56px 24px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "48px", alignItems: "start" }}>
           <div>
@@ -160,6 +174,7 @@ export default function GetReportPage() {
       <section id="intake-form" style={{ backgroundColor: SAND, padding: "64px 16px" }}>
         <form onSubmit={handleSubmit} noValidate className="max-w-2xl mx-auto space-y-8">
 
+          {/* Contact */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
             <h2 style={{ fontFamily: CG, color: NAVY, fontSize: "1.4rem", fontWeight: 700 }}>Your Contact Information</h2>
             <div>
@@ -183,20 +198,132 @@ export default function GetReportPage() {
             </div>
           </div>
 
+          {/* Intake */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8">
             <h2 style={{ fontFamily: CG, color: NAVY, fontSize: "1.4rem", fontWeight: 700 }}>Share what you know. We&rsquo;ll find what matters.</h2>
-            {QUESTIONS.map(({ id, label }) => {
-              const key = id as keyof FormData;
-              const hasError = !!errors[key];
-              return (
-                <div key={id} data-error={hasError ? true : undefined}>
-                  <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>{label} <span className="text-red-500">*</span></label>
-                  <textarea rows={4} placeholder="Write as much detail as you like…" value={form[key]} onChange={e => set(key, e.target.value)}
-                    className={`${inputBase} resize-y ${hasError ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
-                  {hasError && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors[key]}</p>}
+
+            {/* Q1 — text + business type dropdown */}
+            <div data-error={errors.q1 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                1. What is your business name and what do you sell or offer? <span className="text-red-500">*</span>
+              </label>
+              <textarea rows={3} placeholder="e.g. Anchor Coffee Co. — specialty coffee shop and retail roastery in Bradley Beach, NJ."
+                value={form.q1} onChange={e => set("q1", e.target.value)}
+                className={`${inputBase} resize-y ${errors.q1 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
+              {errors.q1 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q1}</p>}
+              <div className="mt-3">
+                <SelectWithOther
+                  label="Business type"
+                  options={BUSINESS_TYPES}
+                  placeholder="Select your business type…"
+                  onChange={setBizType}
+                />
+              </div>
+            </div>
+
+            {/* Q2 — duration + location */}
+            <div data-error={errors.q2 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                2. How long have you been in business, and where are you located? <span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-2">
+                <SelectWithOther
+                  label="Time in business"
+                  options={DURATION_OPTIONS}
+                  placeholder="Select how long you've been open…"
+                  onChange={setDuration}
+                />
+                <div className="mt-2">
+                  <label className="block text-xs text-gray-500 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>Location</label>
+                  <input type="text" placeholder="e.g. Bradley Beach, NJ" value={form.q2} onChange={e => set("q2", e.target.value)}
+                    className={`${inputBase} ${errors.q2 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
                 </div>
-              );
-            })}
+              </div>
+              {errors.q2 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q2}</p>}
+            </div>
+
+            {/* Q3 — age/income checkboxes */}
+            <div data-error={errors.q3 ? true : undefined}>
+              <AgeIncomeCheckboxes
+                label="3. Who is your ideal customer? (age, income, lifestyle, problem they have)"
+                onChange={v => { set("q3", v); }}
+                error={errors.q3}
+                required
+              />
+            </div>
+
+            {/* Q4 — three competitor fields */}
+            <div data-error={errors.q4 ? true : undefined}>
+              <CompetitorFields
+                label="4. Who are your top competitors?"
+                hint="Competitor 1 is required. 2 and 3 are optional but recommended."
+                onChange={v => set("q4", v)}
+                error={errors.q4}
+              />
+            </div>
+
+            {/* Q5 — plain text */}
+            <div data-error={errors.q5 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                5. What makes you different from those competitors? <span className="text-red-500">*</span>
+              </label>
+              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q5} onChange={e => set("q5", e.target.value)}
+                className={`${inputBase} resize-y ${errors.q5 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
+              {errors.q5 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q5}</p>}
+            </div>
+
+            {/* Q6 — plain text */}
+            <div data-error={errors.q6 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                6. What is the biggest challenge you are facing right now? <span className="text-red-500">*</span>
+              </label>
+              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q6} onChange={e => set("q6", e.target.value)}
+                className={`${inputBase} resize-y ${errors.q6 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
+              {errors.q6 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q6}</p>}
+            </div>
+
+            {/* Q7 — plain text */}
+            <div data-error={errors.q7 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                7. What does success look like for you in the next 12 months? <span className="text-red-500">*</span>
+              </label>
+              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q7} onChange={e => set("q7", e.target.value)}
+                className={`${inputBase} resize-y ${errors.q7 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
+              {errors.q7 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q7}</p>}
+            </div>
+
+            {/* Q8 — marketing checkboxes */}
+            <div data-error={errors.q8 ? true : undefined}>
+              <CheckboxGroupWithOther
+                label="8. What marketing are you currently doing, if any?"
+                hint="Select all that apply."
+                options={MARKETING_CHANNELS}
+                onChange={v => set("q8", v)}
+                error={errors.q8}
+                required
+                otherPlaceholder="Describe other marketing channels…"
+              />
+            </div>
+
+            {/* Q9 — plain text */}
+            <div data-error={errors.q9 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                9. What do you wish you knew about your market or customers that you don&rsquo;t know today? <span className="text-red-500">*</span>
+              </label>
+              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q9} onChange={e => set("q9", e.target.value)}
+                className={`${inputBase} resize-y ${errors.q9 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
+              {errors.q9 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q9}</p>}
+            </div>
+
+            {/* Q10 — plain text */}
+            <div data-error={errors.q10 ? true : undefined}>
+              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
+                10. Is there anything else you want the report to focus on or address? <span className="text-red-500">*</span>
+              </label>
+              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q10} onChange={e => set("q10", e.target.value)}
+                className={`${inputBase} resize-y ${errors.q10 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
+              {errors.q10 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q10}</p>}
+            </div>
           </div>
 
           {submitted && Object.keys(errors).length > 0 && (
@@ -218,7 +345,7 @@ export default function GetReportPage() {
               <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$449</strong>. <a href="/bundles#the-field-report" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
             </div>
             <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Market & Mind — Bundle and save</p>
+              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Market &amp; Mind — Bundle and save</p>
               <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Synthetic Survey Report and save $49.</p>
               <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$549</strong>. <a href="/bundles#market-and-mind" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
             </div>
