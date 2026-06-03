@@ -198,13 +198,9 @@ const VOC_QUESTIONS = [
   "(not used)",
 ];
 
-export function getQuestionLabels(type: ServiceType): string[] {
-  switch (type) {
-    case "secret_shopping":         return SS_QUESTIONS;
-    case "voice_of_customer_survey":return VOC_QUESTIONS;
-    default:                        return MIR_QUESTIONS;
-  }
-}
+// NOTE: getQuestionLabels is defined at the bottom of this file, after
+// MANUAL_INTAKE_QUESTIONS, so it can derive labels from that source of truth.
+// The function is exported from there.
 
 // ── Manual Order Form — per-service question configs ──────────────────────────
 
@@ -380,4 +376,18 @@ export function showLocationHelper(type: ServiceType): boolean {
   // SS uses Q2 for full address; VoC Q1 already includes location; bundles containing SS skip it
   const noHelper: ServiceType[] = ["secret_shopping", "voice_of_customer_survey", "complete_shopper_experience_bundle", "field_report_bundle"];
   return !noHelper.includes(type);
+}
+
+/**
+ * Returns the question labels shown in the "Intake Answers" panel for a given
+ * service type. Derived from MANUAL_INTAKE_QUESTIONS so the label shown when
+ * VIEWING an order always matches the label shown when CREATING it.
+ * Shorter question sets are padded to 10 with "(not used)".
+ */
+export function getQuestionLabels(type: ServiceType): string[] {
+  const questions = MANUAL_INTAKE_QUESTIONS[type];
+  if (!questions || questions.length === 0) return MIR_QUESTIONS;
+  const labels = questions.map(q => q.label);
+  while (labels.length < 10) labels.push("(not used)");
+  return labels;
 }

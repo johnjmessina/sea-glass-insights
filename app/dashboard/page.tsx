@@ -216,12 +216,14 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
     setError(null);
 
     try {
-      const useLocation = showLocationHelper(form.serviceType);
-      const q2Val = useLocation && form.location.trim()
-        ? form.q2.trim()
-          ? `Located in ${form.location.trim()}.\n\n${form.q2}`
-          : `Located in ${form.location.trim()}.`
-        : form.q2;
+      // Prepend location to Q2 for services that have the Location helper field
+      const location = form.location.trim();
+      let q2Val = form.q2;
+      if (showLocationHelper(form.serviceType) && location) {
+        q2Val = form.q2.trim()
+          ? `${location}\n\n${form.q2.trim()}`
+          : location;
+      }
 
       const extraServiceData = form.serviceType === "deep_dive_report"
         ? { deep_dive_extra: { q11: form.dd_q11, q12: form.dd_q12 } }
