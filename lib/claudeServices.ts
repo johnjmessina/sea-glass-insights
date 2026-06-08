@@ -43,12 +43,10 @@ function parseJsonSections(raw: string): Record<string, string> {
 // ── Social Media Audit (web-search enabled) ────────────────────────────────────
 //
 // Uses Anthropic's built-in web_search_20250305 tool to look up the client's
-// actual social profiles and competitor accounts before writing the report.
+// actual social profiles before writing the report.
 // The API executes searches server-side; no multi-turn loop is required.
-// In addition to the 8 narrative sections the function returns a 9th key
-// "sma_comparison" with the structured data for the dashboard comparison table.
 
-async function generateSMADraft(order: Order): Promise<Record<string, unknown>> {
+async function generateSMADraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
 
   const system = `You are a senior social media analyst at Sea Glass Insights.
@@ -56,17 +54,13 @@ Your job is to produce a professional Social Media Audit grounded in REAL, OBSER
 
 STEP 1 — WEB RESEARCH (use web_search for each handle/URL in the intake):
 • Look up the client's social media profiles on every platform they listed.
-• Look up each competitor by name or handle.
 • For each profile collect: approximate follower/fan count, recent posting frequency (posts per week or month), dominant content types (photos, Reels, carousels, videos, Stories), visible engagement patterns (typical likes and comments on recent posts), and profile completeness (bio filled in, link in bio, story highlights, contact info).
 • If a profile is private, note that. If it cannot be found, note "not found".
 
-STEP 2 — POPULATE THE COMPARISON TABLE:
-Using the data you collected, fill in every cell of the sma_comparison object below. Use plain-English descriptive values (e.g. "1,243 followers", "3x per week", "2.1% — Above Average", "Primarily promotional"). Never fabricate specific numbers; use "Not publicly available" if you could not determine a value.
-
-STEP 3 — WRITE ALL 8 REPORT SECTIONS:
+STEP 2 — WRITE ALL 7 REPORT SECTIONS:
 Ground every sentence in what you actually observed online. Name specific posts, content series, follower counts, engagement rates, or profile gaps that you found.
 
-Return ONLY a valid JSON object with exactly these 9 keys. No markdown. No code fences. Raw JSON only.
+Return ONLY a valid JSON object with exactly these 7 keys. No markdown. No code fences. Raw JSON only.
 
 {
   "profile_setup_review": "2-4 paragraphs on actual profile setup based on research",
@@ -75,35 +69,20 @@ Return ONLY a valid JSON object with exactly these 9 keys. No markdown. No code 
   "engagement_assessment": "2-4 paragraphs on actual engagement rates and community interaction",
   "brand_consistency_evaluation": "2-4 paragraphs on visual identity and voice based on observed content",
   "platform_utilization_review": "2-4 paragraphs on effective use of each platform observed",
-  "competitive_social_comparison": "2-3 paragraphs narrative summary comparing client to competitors",
-  "overall_presence_score": "2-4 paragraphs with qualitative rating (Strong / Developing / Needs Attention) and top 3-4 recommendations",
-  "sma_comparison": {
-    "competitor_1_name": "Name of Competitor 1 from intake, or empty string if none provided",
-    "competitor_2_name": "Name of Competitor 2 from intake, or empty string if none provided",
-    "rows": {
-      "platforms": { "your_business": "e.g. Instagram, Facebook", "competitor_1": "...", "competitor_2": "..." },
-      "follower_count": { "your_business": "e.g. 1,243 followers", "competitor_1": "...", "competitor_2": "..." },
-      "posting_frequency": { "your_business": "e.g. 3x per week", "competitor_1": "...", "competitor_2": "..." },
-      "avg_engagement_rate": { "your_business": "e.g. 2.1% — Above Average", "competitor_1": "...", "competitor_2": "..." },
-      "content_mix": { "your_business": "e.g. Varied — product, lifestyle, community", "competitor_1": "...", "competitor_2": "..." },
-      "profile_completeness": { "your_business": "e.g. 85% complete — missing story highlights", "competitor_1": "...", "competitor_2": "..." },
-      "response_to_comments": { "your_business": "e.g. Active — responds within 24 hours", "competitor_1": "...", "competitor_2": "..." },
-      "overall_presence": { "your_business": "Strong / Developing / Needs Attention", "competitor_1": "...", "competitor_2": "..." }
-    }
-  }
+  "overall_presence_score": "2-4 paragraphs with qualitative rating (Strong / Developing / Needs Attention) and top 3-4 recommendations"
 }
 
 Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
 
   const response = await client.messages.create({
     model:      "claude-sonnet-4-5",
-    max_tokens: 8000,
+    max_tokens: 6000,
     tools:      [{ type: "web_search_20250305", name: "web_search" }],
     system,
     messages: [
       {
         role: "user",
-        content: `Business intake:\n\n${intake}\n\nSearch for the social media profiles and competitor accounts mentioned above, collect real data, then produce the complete audit report including the comparison table.`,
+        content: `Business intake:\n\n${intake}\n\nSearch for the social media profiles mentioned in the intake, collect real observed data, then produce the complete audit report.`,
       },
     ],
   });
@@ -118,9 +97,9 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
     .replace(/\n?```$/i, "")
     .trim();
 
-  let parsed: Record<string, unknown>;
+  let parsed: Record<string, string>;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(raw) as Record<string, string>;
   } catch {
     throw new Error(`SMA generation returned invalid JSON: ${raw.slice(0, 400)}`);
   }
@@ -266,7 +245,6 @@ const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   engagement_assessment:         "Write 2-4 paragraphs on engagement rates and community interaction.",
   brand_consistency_evaluation:  "Write 2-4 paragraphs on visual identity and voice consistency across platforms.",
   platform_utilization_review:   "Write 2-4 paragraphs on how effectively each platform is being used.",
-  competitive_social_comparison: "Write 2-3 paragraphs as a narrative competitive summary. If COMPARISON TABLE DATA is included in the analyst notes, base the narrative on those specific values — highlight the client's strengths, note where competitors have an edge, and close with the most important takeaway. Write in second person ('Your business...'). Plain prose only, no tables.",
   overall_presence_score:        "Write 2-4 paragraphs summarizing overall presence with a qualitative score and top recommendations.",
   // Deep Dive
   executive_summary:             "Write 2-3 paragraphs — where they stand, biggest opportunity, most urgent action.",
@@ -344,8 +322,6 @@ export async function generateServiceDraft(
 ): Promise<Record<string, unknown>> {
   switch (serviceType) {
     case "social_media_audit":
-      // Returns Record<string, unknown> — includes nested sma_comparison object.
-      // The generate-draft route extracts sma_comparison and saves it to service_data.
       return generateSMADraft(order);
 
     case "deep_dive_report":

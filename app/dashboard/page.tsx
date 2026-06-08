@@ -9,7 +9,7 @@ import {
 } from "@/lib/serviceConfig";
 import {
   SelectWithOther, CheckboxGroupWithOther, AgeIncomeCheckboxes,
-  CompetitorFields, PlatformCheckboxesWithHandles, SMACompetitorFields,
+  CompetitorFields, PlatformCheckboxesWithHandles,
   AddressFields, YesNoReveal, NumberedTextFields,
   BUSINESS_TYPES, DURATION_OPTIONS, MARKETING_CHANNELS,
   SMA_CHALLENGES, SS_INTERACTION_TYPES, SS_SCORECARD_DIMS,
@@ -515,10 +515,7 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
               // Q3 platforms
               structuredInput = <PlatformCheckboxesWithHandles label="" onChange={v => set(key, v)} />;
             } else if (isSMAOnly && i === 5) {
-              // Q6 competitors
-              structuredInput = <SMACompetitorFields label="" hint="Optional — names and social handles." onChange={v => set(key, v)} />;
-            } else if (isSMAOnly && i === 6) {
-              // Q7 challenge
+              // Q6 biggest challenge
               structuredInput = <CheckboxGroupWithOther label="" options={SMA_CHALLENGES} onChange={v => set(key, v)} />;
             } else if (isVoCOnly && i === 1) {
               // Q2 business type

@@ -237,10 +237,8 @@ export const MANUAL_INTAKE_QUESTIONS: Record<ServiceType, ManualIntakeQuestion[]
     { label: "Which social media platforms are you currently using?",                            placeholder: "e.g. Instagram, Facebook — we have TikTok but never post on it" },
     { label: "How often do you post on each platform?",                                          placeholder: "e.g. Instagram 3x/week, Facebook once a week or less" },
     { label: "Who is your target audience on social media?",                                     placeholder: "e.g. 28-45 locals and seasonal visitors, coffee enthusiasts, people looking for a community spot" },
-    { label: "Top 1–2 social media competitors (names, or describe them)",                       placeholder: "e.g. The Grind — they have great Reels, The Bagel Shop — very active on Facebook" },
     { label: "Biggest challenge with social media right now",                                    placeholder: "e.g. Low engagement, inconsistent posting, not sure what content works" },
     { label: "What are you hoping to improve or learn from this audit?",                         placeholder: "e.g. What content drives the most engagement, whether we're missing any platforms" },
-    { label: "Links to your social profiles (Instagram, Facebook, TikTok, etc.)",               placeholder: "e.g. instagram.com/anchorcoffeebb, facebook.com/anchorcoffeebb" },
     { label: "Anything specific you want us to evaluate or focus on?",                           placeholder: "e.g. Whether our Stories are performing, how our bio looks, content mix" },
   ],
 

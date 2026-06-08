@@ -7,7 +7,6 @@ import SiteNav    from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
 import {
   PlatformCheckboxesWithHandles,
-  SMACompetitorFields,
   CheckboxGroupWithOther,
   SMA_CHALLENGES,
 } from "@/components/StructuredFormInputs";
@@ -40,9 +39,9 @@ const HIW = [
 type FormData = {
   customerName: string; email: string; businessName: string;
   location: string; industry: string; facebook: string;
-  instagram: string; otherPlatforms: string; competitors: string; challenge: string;
+  instagram: string; otherPlatforms: string; challenge: string;
 };
-const EMPTY: FormData = { customerName: "", email: "", businessName: "", location: "", industry: "", facebook: "", instagram: "", otherPlatforms: "", competitors: "", challenge: "" };
+const EMPTY: FormData = { customerName: "", email: "", businessName: "", location: "", industry: "", facebook: "", instagram: "", otherPlatforms: "", challenge: "" };
 const REQUIRED: (keyof FormData)[] = ["customerName", "email", "businessName", "location", "industry", "challenge"];
 
 const inputBase = "w-full rounded-lg border px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-seafoam transition";
@@ -177,15 +176,6 @@ export default function SocialMediaAuditPage() {
                     onChange={v => set("facebook", v)}
                     error={errors.facebook}
                   />
-                </div>
-                <div>
-                  <SMACompetitorFields
-                    label="Top 1-2 Competitors You're Aware Of"
-                    hint="Names or social handles. We'll compare your presence to theirs."
-                    onChange={v => set("competitors", v)}
-                    error={errors.competitors}
-                  />
-                  <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "6px" }}>Please only share what you are comfortable sharing. Your responses are used solely to produce your audit.</p>
                 </div>
                 <div>
                   <CheckboxGroupWithOther

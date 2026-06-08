@@ -55,26 +55,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── SMA: extract comparison table from draft and save to service_data ──────
-  // The SMA generator returns a 9th key "sma_comparison" with the structured
-  // table data. We save it to service_data so the dashboard comparison table
-  // component can display and edit it. It is removed from ai_draft which only
-  // stores the narrative sections.
-  let finalDraft = draft;
-  if (serviceType === "social_media_audit" && draft.sma_comparison) {
-    const smaComparison = draft.sma_comparison;
-    finalDraft = { ...draft };
-    delete (finalDraft as Record<string, unknown>).sma_comparison;
-
-    // Merge into existing service_data (preserve VoC phase etc. if any)
-    const existingServiceData = (order.service_data as Record<string, unknown>) ?? {};
-    await supabase
-      .from("orders")
-      .update({ service_data: { ...existingServiceData, sma_comparison: smaComparison } })
-      .eq("id", orderId);
-  }
-
   // For VoC Phase 2, merge new analysis sections into existing draft (keep Phase 1)
+  let finalDraft = draft;
   if (serviceType === "voice_of_customer_survey" && (vocPhase === 2 || (order.service_data as Record<string,unknown>)?.voc_phase === 2)) {
     const existing = (order.ai_draft as Record<string, unknown>) ?? {};
     finalDraft = { ...existing, ...finalDraft };

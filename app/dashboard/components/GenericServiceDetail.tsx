@@ -65,6 +65,7 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
   const [saveMsg, setSaveMsg]           = useState<string | null>(null);
   const [sendingReport, setSendingReport] = useState(false);
   const [sendMsg, setSendMsg]           = useState<string | null>(null);
+  const [downloadingDocx, setDownloadingDocx] = useState(false);
 
   const metaTimer  = useRef<NodeJS.Timeout | null>(null);
   const noteTimer  = useRef<NodeJS.Timeout | null>(null);
@@ -182,6 +183,32 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
     setSaveMsg("All changes saved.");
     setTimeout(() => setSaveMsg(null), 3000);
     setSaving(false);
+  }
+
+  async function downloadDocx() {
+    setDownloadingDocx(true);
+    try {
+      const res = await fetch("/api/generate-sma-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, analystNote }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "Report generation failed");
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-SocialMediaAudit.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Report generation failed");
+    } finally {
+      setDownloadingDocx(false);
+    }
   }
 
   async function sendReport() {
@@ -440,6 +467,12 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
                 className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50">
                 {saving ? "Saving…" : "Save Report"}
               </button>
+              {serviceType === "social_media_audit" && hasDraft && (
+                <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
+                  className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                  {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+                </button>
+              )}
               <button onClick={sendReport}
                 disabled={sendingReport || order.status === "delivered" || !hasDraft || !allLocked}
                 className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
