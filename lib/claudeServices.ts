@@ -199,7 +199,7 @@ const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   engagement_assessment:         "Write 2-4 paragraphs on engagement rates and community interaction.",
   brand_consistency_evaluation:  "Write 2-4 paragraphs on visual identity and voice consistency across platforms.",
   platform_utilization_review:   "Write 2-4 paragraphs on how effectively each platform is being used.",
-  competitive_social_comparison: "Write 2-4 paragraphs comparing social presence to up to 2 competitors.",
+  competitive_social_comparison: "Write 2-3 paragraphs as a narrative competitive summary. If COMPARISON TABLE DATA is included in the analyst notes, base the narrative on those specific values — highlight the client's strengths, note where competitors have an edge, and close with the most important takeaway. Write in second person ('Your business...'). Plain prose only, no tables.",
   overall_presence_score:        "Write 2-4 paragraphs summarizing overall presence with a qualitative score and top recommendations.",
   // Deep Dive
   executive_summary:             "Write 2-3 paragraphs — where they stand, biggest opportunity, most urgent action.",

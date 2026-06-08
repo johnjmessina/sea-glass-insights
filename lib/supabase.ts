@@ -31,6 +31,44 @@ export interface SSAnalystObs {
   additional_observations:  string;
 }
 
+// ── Social Media Audit — competitive comparison table ─────────────────────────
+
+export interface SMAComparisonRow {
+  your_business: string;
+  competitor_1:  string;
+  competitor_2:  string;
+}
+
+export interface SMAComparison {
+  competitor_1_name: string;
+  competitor_2_name: string;
+  rows: {
+    platforms:            SMAComparisonRow;
+    follower_count:       SMAComparisonRow;
+    posting_frequency:    SMAComparisonRow;
+    avg_engagement_rate:  SMAComparisonRow;
+    content_mix:          SMAComparisonRow;
+    profile_completeness: SMAComparisonRow;
+    response_to_comments: SMAComparisonRow;
+    overall_presence:     SMAComparisonRow;
+  };
+}
+
+export const EMPTY_SMA_COMPARISON: SMAComparison = {
+  competitor_1_name: "",
+  competitor_2_name: "",
+  rows: {
+    platforms:            { your_business: "", competitor_1: "", competitor_2: "" },
+    follower_count:       { your_business: "", competitor_1: "", competitor_2: "" },
+    posting_frequency:    { your_business: "", competitor_1: "", competitor_2: "" },
+    avg_engagement_rate:  { your_business: "", competitor_1: "", competitor_2: "" },
+    content_mix:          { your_business: "", competitor_1: "", competitor_2: "" },
+    profile_completeness: { your_business: "", competitor_1: "", competitor_2: "" },
+    response_to_comments: { your_business: "", competitor_1: "", competitor_2: "" },
+    overall_presence:     { your_business: "", competitor_1: "", competitor_2: "" },
+  },
+};
+
 export interface ServiceData {
   // Secret Shopping
   ss_visit_overview?:  SSVisitOverview;
@@ -39,6 +77,8 @@ export interface ServiceData {
   // Voice of Customer
   voc_phase?:          1 | 2;
   voc_responses?:      string;
+  // Social Media Audit
+  sma_comparison?:     SMAComparison;
   // Bundles — secondary service
   secondary_draft?:       Record<string, string>;
   secondary_commentary?:  Record<string, { notes: string; locked: boolean }>;

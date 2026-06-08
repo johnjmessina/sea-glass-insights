@@ -23,7 +23,12 @@ const MIR_FORMAT: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { orderId, sectionKey, analystNotes } = await req.json();
+    const { orderId, sectionKey, analystNotes, tableContext } = await req.json() as {
+      orderId: string;
+      sectionKey: string;
+      analystNotes?: string;
+      tableContext?: string;  // for SMA competitive comparison — serialized table data
+    };
 
     if (!orderId || !sectionKey) {
       return NextResponse.json({ error: "Missing orderId or sectionKey" }, { status: 400 });
@@ -92,11 +97,16 @@ export async function POST(req: NextRequest) {
     // ── Non-MIR sections — plain text regeneration ─────────────────────────────
     const currentContent = ((order.ai_draft as Record<string, unknown>)[sectionKey] as string) ?? "";
 
+    // Special handling: SMA competitive comparison — inject table data into prompt
+    const isCompTable = serviceType === "social_media_audit" && sectionKey === "competitive_social_comparison";
+
     const newContent = await regenerateServiceSection(
       order,
       sectionKey,
       currentContent,
-      analystNotes ?? ""
+      isCompTable && tableContext
+        ? `${analystNotes?.trim() ? analystNotes.trim() + "\n\n" : ""}COMPARISON TABLE DATA:\n${tableContext}`
+        : (analystNotes ?? "")
     );
 
     const updatedDraft = { ...(order.ai_draft as object), [sectionKey]: newContent };
