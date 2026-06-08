@@ -2,7 +2,24 @@
 
 import { useState, useRef } from "react";
 import type { Order, SMAComparison, SMAComparisonRow } from "@/lib/supabase";
-import { EMPTY_SMA_COMPARISON } from "@/lib/supabase";
+
+// Defined locally to avoid importing a value from the server-only supabase module
+// (lib/supabase.ts throws at init time if SUPABASE_URL is absent — not safe to
+// bundle into a "use client" component).
+const EMPTY_SMA_COMPARISON: SMAComparison = {
+  competitor_1_name: "",
+  competitor_2_name: "",
+  rows: {
+    platforms:            { your_business: "", competitor_1: "", competitor_2: "" },
+    follower_count:       { your_business: "", competitor_1: "", competitor_2: "" },
+    posting_frequency:    { your_business: "", competitor_1: "", competitor_2: "" },
+    avg_engagement_rate:  { your_business: "", competitor_1: "", competitor_2: "" },
+    content_mix:          { your_business: "", competitor_1: "", competitor_2: "" },
+    profile_completeness: { your_business: "", competitor_1: "", competitor_2: "" },
+    response_to_comments: { your_business: "", competitor_1: "", competitor_2: "" },
+    overall_presence:     { your_business: "", competitor_1: "", competitor_2: "" },
+  },
+};
 import {
   SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
   getSectionsForService, getQuestionLabels, getEffectiveServiceType,
