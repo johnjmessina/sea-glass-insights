@@ -28,7 +28,6 @@ const CHECKLIST = [
   "Engagement assessment",
   "Brand Consistency evaluation",
   "Platform Utilization review",
-  "Competitive Social Comparison (up to 2 competitors)",
   "Overall Presence Score with written recommendations",
 ];
 

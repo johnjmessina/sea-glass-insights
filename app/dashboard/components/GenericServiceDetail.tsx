@@ -2,30 +2,12 @@
 
 // All imports must precede any executable code — SWC/ESModules requirement.
 import { useState, useRef } from "react";
-import type { Order, SMAComparison, SMAComparisonRow } from "@/lib/supabase";
+import type { Order } from "@/lib/supabase";
 import {
   SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
   getSectionsForService, getQuestionLabels, getEffectiveServiceType,
   type ServiceSection,
 } from "@/lib/serviceConfig";
-
-// Defined locally (not imported from @/lib/supabase) because supabase.ts is a
-// server-only module that throws at init time when SUPABASE_URL is absent.
-// Importing any VALUE from it inside a "use client" component crashes the page.
-const EMPTY_SMA_COMPARISON: SMAComparison = {
-  competitor_1_name: "",
-  competitor_2_name: "",
-  rows: {
-    platforms:            { your_business: "", competitor_1: "", competitor_2: "" },
-    follower_count:       { your_business: "", competitor_1: "", competitor_2: "" },
-    posting_frequency:    { your_business: "", competitor_1: "", competitor_2: "" },
-    avg_engagement_rate:  { your_business: "", competitor_1: "", competitor_2: "" },
-    content_mix:          { your_business: "", competitor_1: "", competitor_2: "" },
-    profile_completeness: { your_business: "", competitor_1: "", competitor_2: "" },
-    response_to_comments: { your_business: "", competitor_1: "", competitor_2: "" },
-    overall_presence:     { your_business: "", competitor_1: "", competitor_2: "" },
-  },
-};
 
 type SectionMeta = { notes: string; locked: boolean };
 type MetaMap     = Record<string, SectionMeta>;
@@ -86,14 +68,6 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
 
   const metaTimer  = useRef<NodeJS.Timeout | null>(null);
   const noteTimer  = useRef<NodeJS.Timeout | null>(null);
-  const compTimer  = useRef<NodeJS.Timeout | null>(null);
-
-  // ── SMA Competitive Comparison table state ─────────────────────────────────
-  const isSMA = serviceType === "social_media_audit";
-  const [smaComp, setSmaComp] = useState<SMAComparison>(() => {
-    const saved = (initialOrder.service_data as Record<string, unknown> | null)?.sma_comparison;
-    return (saved as SMAComparison | undefined) ?? EMPTY_SMA_COMPARISON;
-  });
 
   function flashSaved() {
     setAutoSaved(true);
@@ -117,14 +91,6 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
   function schedNote(note: string) {
     if (noteTimer.current) clearTimeout(noteTimer.current);
     noteTimer.current = setTimeout(() => persist({ analyst_note: note }), 2000);
-  }
-
-  function updateSmaComp(updated: SMAComparison) {
-    setSmaComp(updated);
-    if (compTimer.current) clearTimeout(compTimer.current);
-    compTimer.current = setTimeout(() => persist({
-      service_data: { ...(order.service_data ?? {}), sma_comparison: updated },
-    }), 1500);
   }
 
   function updateMeta(key: string, notes: string) {
@@ -238,262 +204,6 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
       setSendingReport(false);
       setTimeout(() => setSendMsg(null), 6000);
     }
-  }
-
-  // ── SMA Competitive Comparison section ────────────────────────────────────
-
-  function buildTableContext(comp: SMAComparison): string {
-    const haC1 = comp.competitor_1_name.trim() !== "";
-    const haC2 = comp.competitor_2_name.trim() !== "";
-    const cols = [
-      "Your Business",
-      haC1 ? (comp.competitor_1_name || "Competitor 1") : null,
-      haC2 ? (comp.competitor_2_name || "Competitor 2") : null,
-    ].filter(Boolean) as string[];
-
-    const ROW_LABELS: Record<keyof SMAComparison["rows"], string> = {
-      platforms:            "Platform(s)",
-      follower_count:       "Follower Count",
-      posting_frequency:    "Posting Frequency",
-      avg_engagement_rate:  "Avg Engagement Rate",
-      content_mix:          "Content Mix",
-      profile_completeness: "Profile Completeness",
-      response_to_comments: "Response to Comments",
-      overall_presence:     "Overall Presence",
-    };
-
-    const lines = [`Metric | ${cols.join(" | ")}`];
-    for (const [key, label] of Object.entries(ROW_LABELS)) {
-      const row = comp.rows[key as keyof SMAComparison["rows"]];
-      const cells = [row.your_business, haC1 ? row.competitor_1 : null, haC2 ? row.competitor_2 : null].filter(v => v !== null);
-      lines.push(`${label} | ${cells.join(" | ")}`);
-    }
-    return lines.join("\n");
-  }
-
-  function renderSMAComparisonSection() {
-    const KEY     = "competitive_social_comparison";
-    const m       = meta[KEY] ?? { notes: "", locked: false };
-    const content = draft[KEY] ?? "";
-    const isRegen = !!regenerating[KEY];
-    const err     = regenError[KEY];
-    const comp    = smaComp;
-    const haC1    = comp.competitor_1_name.trim() !== "";
-    const haC2    = comp.competitor_2_name.trim() !== "";
-
-    const NAVY = "#0A2F61";
-
-    type RowKey = keyof SMAComparison["rows"];
-    const TABLE_ROWS: { key: RowKey; label: string }[] = [
-      { key: "platforms",            label: "Platform(s)" },
-      { key: "follower_count",       label: "Follower Count" },
-      { key: "posting_frequency",    label: "Posting Frequency" },
-      { key: "avg_engagement_rate",  label: "Avg Engagement Rate" },
-      { key: "content_mix",          label: "Content Mix" },
-      { key: "profile_completeness", label: "Profile Completeness" },
-      { key: "response_to_comments", label: "Response to Comments" },
-      { key: "overall_presence",     label: "Overall Presence" },
-    ];
-
-    function updateCell(rowKey: RowKey, col: keyof SMAComparisonRow, val: string) {
-      const updated: SMAComparison = {
-        ...comp,
-        rows: {
-          ...comp.rows,
-          [rowKey]: { ...comp.rows[rowKey], [col]: val },
-        },
-      };
-      updateSmaComp(updated);
-    }
-
-    function updateCompName(slot: 1 | 2, val: string) {
-      updateSmaComp({
-        ...comp,
-        [slot === 1 ? "competitor_1_name" : "competitor_2_name"]: val,
-      });
-    }
-
-    const inpCls = "w-full text-xs text-gray-700 bg-transparent border-0 outline-none resize-none leading-relaxed placeholder-gray-300 focus:bg-white focus:ring-1 focus:ring-seafoam rounded px-1 py-0.5";
-
-    return (
-      <div className="border-t border-gray-100 py-5">
-        {/* Section header */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className={`w-1 h-5 rounded-full shrink-0 ${m.locked ? "bg-green-400" : "bg-seafoam"}`} />
-            <h4 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>
-              Competitive Social Comparison
-            </h4>
-            {m.locked && (
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Locked</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {m.locked ? (
-              <button onClick={() => unlockSection(KEY)}
-                className="text-xs text-gray-400 hover:text-orange-500 transition-colors">
-                Unlock
-              </button>
-            ) : (
-              <button onClick={() => lockSection(KEY)}
-                className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
-                Lock Section
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ── Editable comparison table ── */}
-        {!m.locked && (
-          <div className="mb-5">
-            {/* Competitor name inputs */}
-            <div className="flex gap-3 mb-3">
-              <div className="flex-1" />
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Competitor 1 name</label>
-                <input type="text" value={comp.competitor_1_name}
-                  onChange={e => updateCompName(1, e.target.value)}
-                  placeholder="e.g. The Java House"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam" />
-              </div>
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Competitor 2 name <span className="text-gray-300 normal-case font-normal tracking-normal">(optional)</span></label>
-                <input type="text" value={comp.competitor_2_name}
-                  onChange={e => updateCompName(2, e.target.value)}
-                  placeholder="e.g. Coastal Coffee"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Table */}
-        <div className="overflow-x-auto mb-5 rounded-lg border border-gray-200">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr style={{ backgroundColor: NAVY, color: "#fff" }}>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold w-[28%]">Metric</th>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold">Your Business</th>
-                {(haC1 || !m.locked) && (
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold" style={{ color: "#00CED1" }}>
-                    {comp.competitor_1_name || "Competitor 1"}
-                  </th>
-                )}
-                {(haC2 || !m.locked) && (
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold" style={{ color: "#93C5FD" }}>
-                    {comp.competitor_2_name || "Competitor 2"}
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {TABLE_ROWS.map(({ key: rk, label }, idx) => {
-                const row = comp.rows[rk];
-                const bg  = idx % 2 === 0 ? "bg-gray-50" : "bg-white";
-                return (
-                  <tr key={rk} className={bg}>
-                    <td className="px-4 py-2 text-xs font-semibold text-gray-600 border-b border-gray-100 align-top whitespace-nowrap">
-                      {label}
-                    </td>
-                    <td className="px-3 py-1.5 border-b border-gray-100 align-top">
-                      {m.locked ? (
-                        <span className="text-xs text-gray-700">{row.your_business || <span className="text-gray-300 italic">—</span>}</span>
-                      ) : (
-                        <textarea rows={2} value={row.your_business}
-                          onChange={e => updateCell(rk, "your_business", e.target.value)}
-                          placeholder={rk === "overall_presence" ? "Strong / Developing / Needs Attention" : "Enter value…"}
-                          className={inpCls} />
-                      )}
-                    </td>
-                    {(haC1 || !m.locked) && (
-                      <td className="px-3 py-1.5 border-b border-gray-100 align-top">
-                        {m.locked ? (
-                          <span className="text-xs text-gray-700">{row.competitor_1 || <span className="text-gray-300 italic">—</span>}</span>
-                        ) : (
-                          <textarea rows={2} value={row.competitor_1}
-                            onChange={e => updateCell(rk, "competitor_1", e.target.value)}
-                            placeholder={rk === "overall_presence" ? "Strong / Developing / Needs Attention" : "Enter value…"}
-                            className={inpCls} />
-                        )}
-                      </td>
-                    )}
-                    {(haC2 || !m.locked) && (
-                      <td className="px-3 py-1.5 border-b border-gray-100 align-top">
-                        {m.locked ? (
-                          <span className="text-xs text-gray-700">{row.competitor_2 || <span className="text-gray-300 italic">—</span>}</span>
-                        ) : (
-                          <textarea rows={2} value={row.competitor_2}
-                            onChange={e => updateCell(rk, "competitor_2", e.target.value)}
-                            placeholder={rk === "overall_presence" ? "Strong / Developing / Needs Attention" : "Enter value…"}
-                            className={inpCls} />
-                        )}
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* ── Narrative paragraph ── */}
-        {content && (
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Comparison Narrative</p>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
-          </div>
-        )}
-
-        {/* ── Analyst notes + generate ── */}
-        {!m.locked && (
-          <div className="mt-4 pt-3 border-t border-gray-50 space-y-2">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block">
-              Analyst Notes — guidance for the narrative paragraph
-            </label>
-            <textarea rows={2} value={m.notes}
-              onChange={e => updateMeta(KEY, e.target.value)}
-              placeholder="e.g. Focus on our engagement advantage. Note that competitor 1 has more followers but lower engagement rate."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y placeholder-gray-300"
-            />
-            {err && <p className="text-red-500 text-xs">{err}</p>}
-            <button
-              onClick={async () => {
-                setRegenerating(p => ({ ...p, [KEY]: true }));
-                setRegenError(p => ({ ...p, [KEY]: undefined }));
-                try {
-                  const tableCtx = buildTableContext(comp);
-                  const res = await fetch("/api/regenerate-section", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      orderId:      order.id,
-                      sectionKey:   KEY,
-                      analystNotes: m.notes,
-                      tableContext: tableCtx,
-                    }),
-                  });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error ?? "Failed");
-                  setDraft(p => ({ ...p, [KEY]: data.content as string }));
-                  flashSaved();
-                } catch (e) {
-                  setRegenError(p => ({ ...p, [KEY]: e instanceof Error ? e.message : "Failed" }));
-                } finally {
-                  setRegenerating(p => ({ ...p, [KEY]: false }));
-                }
-              }}
-              disabled={isRegen}
-              className="inline-flex items-center gap-1.5 text-xs bg-navy text-white font-semibold px-4 py-2 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isRegen ? (
-                <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Generating…</>
-              ) : content ? "↺ Regenerate Comparison Narrative" : "✦ Generate Comparison Narrative"}
-            </button>
-            <p className="text-xs text-gray-400">Claude will write a narrative paragraph from the table values above.</p>
-          </div>
-        )}
-      </div>
-    );
   }
 
   // ── Section renderer ───────────────────────────────────────────────────────
@@ -704,11 +414,7 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
 
         {(hasDraft || generating === false) && !generating && (
           <div>
-            {sections.map(s =>
-              isSMA && s.key === "competitive_social_comparison"
-                ? <div key={s.key}>{renderSMAComparisonSection()}</div>
-                : renderSection(s)
-            )}
+            {sections.map(s => renderSection(s))}
 
             {/* Analyst closing note */}
             <div className="border-t-2 border-dashed border-seagreen/30 pt-6 mt-2">

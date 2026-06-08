@@ -57,8 +57,7 @@ export const SMA_SECTIONS: ServiceSection[] = [
   { key: "posting_consistency_analysis",  label: "Posting Consistency Analysis",         aiGenerated: true },
   { key: "engagement_assessment",         label: "Engagement Assessment",                aiGenerated: true },
   { key: "brand_consistency_evaluation",  label: "Brand Consistency Evaluation",         aiGenerated: true },
-  { key: "platform_utilization_review",   label: "Platform Utilization Review",          aiGenerated: true },
-  { key: "competitive_social_comparison", label: "Competitive Social Comparison",        aiGenerated: true },
+  { key: "platform_utilization_review",   label: "Platform Utilization Review",              aiGenerated: true },
   { key: "overall_presence_score",        label: "Overall Presence Score & Recommendations", aiGenerated: true },
 ];
 
