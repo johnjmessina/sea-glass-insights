@@ -16,11 +16,13 @@ import {
   VOC_COLLECTION_METHODS, AI_TOOLS, AI_TASKS, AI_TONES,
   DECISION_TYPES,
 } from "@/components/StructuredFormInputs";
-
-const CONTACT_SIZES = ["Under 50", "50–100", "100–250", "250–500", "500–1,000", "1,000+"];
 import GenericServiceDetail from "@/app/dashboard/components/GenericServiceDetail";
 import SecretShoppingDetail from "@/app/dashboard/components/SecretShoppingDetail";
 import VoCDetail from "@/app/dashboard/components/VoCDetail";
+
+// Must be after all imports — const declarations between import groups cause
+// module-evaluation errors in strict ESM / Turbopack builds.
+const CONTACT_SIZES = ["Under 50", "50–100", "100–250", "250–500", "500–1,000", "1,000+"];
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -375,8 +377,11 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
   }
 
   // ── Step 2: Contact + intake form ──────────────────────────────────────────
-  const questions   = MANUAL_INTAKE_QUESTIONS[form.serviceType] ?? MANUAL_INTAKE_QUESTIONS.market_intelligence_report;
-  const qKeys       = (["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"] as (keyof ManualForm)[]).slice(0, questions.length);
+  // Use the questions array for the selected service; fall back to MIR if missing.
+  const questions = MANUAL_INTAKE_QUESTIONS[form.serviceType] ?? MANUAL_INTAKE_QUESTIONS.market_intelligence_report;
+  // qKeys must be derived from the SAME questions array so indices always align.
+  const ALL_Q_KEYS: (keyof ManualForm)[] = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"];
+  const qKeys = ALL_Q_KEYS.slice(0, questions.length);
   const useLocation = showLocationHelper(form.serviceType);
   const isDeepDive  = form.serviceType === "deep_dive_report";
   const tagColor    = SERVICE_TAG_COLORS[form.serviceType];
@@ -442,7 +447,9 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           </div>
 
           {qKeys.map((key, i) => {
-            const q    = questions[i];
+            const q = questions[i];
+            // Safety guard: if questions[i] is somehow undefined, skip the item
+            if (!q) return null;
             const qNum = i + 1;
             const st   = form.serviceType;
 
@@ -2011,8 +2018,15 @@ export default function DashboardPage() {
         fetch("/api/orders"),
         fetch("/api/orders?archived=true"),
       ]);
-      setOrders(await activeRes.json());
-      setArchived(await archivedRes.json());
+      const activeData   = await activeRes.json();
+      const archivedData = await archivedRes.json();
+      // Guard: always set arrays — if the API returned an error object, default to []
+      setOrders(Array.isArray(activeData)   ? activeData   : []);
+      setArchived(Array.isArray(archivedData) ? archivedData : []);
+    } catch (err) {
+      console.error("fetchOrders error:", err);
+      setOrders([]);
+      setArchived([]);
     } finally {
       setLoading(false);
     }
