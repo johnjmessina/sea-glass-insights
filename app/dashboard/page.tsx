@@ -434,130 +434,161 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
           </div>
         </div>
 
-        {/* Intake questions — service-specific structured inputs */}
+        {/* Intake questions — all questions always rendered; structured inputs for specific fields */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
           <div>
             <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Intake Answers</h3>
             <p className="text-xs text-gray-400 mt-1">All fields optional — fill in whatever the client shared.</p>
           </div>
 
-          {/* ── MIR + MIR-primary bundles ── */}
-          {(["market_intelligence_report","starter_intelligence_bundle","field_report_bundle","market_mind_bundle"] as ServiceType[]).includes(form.serviceType) && (<>
-            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label>
-              <textarea rows={3} placeholder="e.g. Anchor Coffee Co. — specialty coffee shop" value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} />
-              <div className="mt-2"><SelectWithOther label="Business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={setBizType} /></div>
-            </div>
-            <div>
-              <label className={labelCls}>Q2 — How long in business and where located</label>
-              <SelectWithOther label="Time in business" options={DURATION_OPTIONS} placeholder="Select duration…" onChange={setDuration} />
-              <div className="mt-2"><label className={labelCls}>Location</label><input type="text" placeholder="e.g. Bradley Beach, NJ" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} /></div>
-            </div>
-            <AgeIncomeCheckboxes label="Q3 — Ideal customer (age, income, lifestyle, problem)" onChange={v => set("q3", v)} />
-            <CompetitorFields label="Q4 — Top competitors" hint="Competitor 1 required. 2 and 3 optional." onChange={v => set("q4", v)} />
-            <div><label className={labelCls}>Q5 — What makes you different?</label><textarea rows={3} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. We roast in-house, staff knows the product deeply" /></div>
-            <div><label className={labelCls}>Q6 — Biggest challenge right now</label><textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} placeholder="Write as much detail as you have…" /></div>
-            <div><label className={labelCls}>Q7 — What does success look like in 12 months?</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} placeholder="Write as much detail as you have…" /></div>
-            <CheckboxGroupWithOther label="Q8 — Marketing currently doing" options={MARKETING_CHANNELS} onChange={v => set("q8", v)} />
-            <div><label className={labelCls}>Q9 — What do you wish you knew about your market?</label><textarea rows={3} value={form.q9} onChange={e => set("q9", e.target.value)} className={`${inputCls} resize-y`} placeholder="Write as much detail as you have…" /></div>
-            <div><label className={labelCls}>Q10 — Anything else to focus on?</label><textarea rows={3} value={form.q10} onChange={e => set("q10", e.target.value)} className={`${inputCls} resize-y`} placeholder="Optional" /></div>
-          </>)}
+          {qKeys.map((key, i) => {
+            const q    = questions[i];
+            const qNum = i + 1;
+            const st   = form.serviceType;
 
-          {/* ── Social Media Audit ── */}
-          {form.serviceType === "social_media_audit" && (<>
-            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label><textarea rows={2} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. Anchor Coffee Co." /></div>
-            <div><label className={labelCls}>Q2 — Location</label><input type="text" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} placeholder="e.g. Bradley Beach, NJ" /></div>
-            <div><label className={labelCls}>Q3 — Industry / business type</label><input type="text" value={form.q3} onChange={e => set("q3", e.target.value)} className={inputCls} placeholder="e.g. Coffee Shop, Retail, Restaurant" /></div>
-            <PlatformCheckboxesWithHandles label="Q4 — Social media platforms (select all that apply)" onChange={v => set("q4", v)} />
-            <SMACompetitorFields label="Q5 — Top 1–2 competitors" hint="Optional — names and social handles." onChange={v => set("q5", v)} />
-            <CheckboxGroupWithOther label="Q6 — Biggest social media challenge" options={SMA_CHALLENGES} onChange={v => set("q6", v)} />
-          </>)}
+            // Pre-computed service-type group predicates (no type assertions inside JSX)
+            const isMIRLike  = st === "market_intelligence_report" || st === "starter_intelligence_bundle" || st === "field_report_bundle" || st === "market_mind_bundle";
+            const isSMAOnly  = st === "social_media_audit";
+            const isSSLike   = st === "secret_shopping" || st === "complete_shopper_experience_bundle";
+            const isDDOnly   = st === "deep_dive_report";
+            const isSynOnly  = st === "synthetic_survey_report";
+            const isVoCOnly  = st === "voice_of_customer_survey";
+            const isAIOnly   = st === "ai_starter_kit";
 
-          {/* ── Secret Shopping ── */}
-          {(["secret_shopping","complete_shopper_experience_bundle"] as ServiceType[]).includes(form.serviceType) && (<>
-            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label><input type="text" value={form.q1} onChange={e => set("q1", e.target.value)} className={inputCls} placeholder="e.g. Anchor Coffee Co." /></div>
-            <AddressFields label="Q2 — Business address" required onChange={v => set("q2", v)} />
-            <div><label className={labelCls}>Q3 — Industry / business type</label><input type="text" value={form.q3} onChange={e => set("q3", e.target.value)} className={inputCls} placeholder="e.g. Coffee Shop, Retail Boutique" /></div>
-            <div><label className={labelCls}>Q4 — Hours of operation</label><input type="text" value={form.q4} onChange={e => set("q4", e.target.value)} className={inputCls} placeholder="e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm" /></div>
-            <CheckboxGroupWithOther label="Q5 — Typical customer interaction type" options={SS_INTERACTION_TYPES} onChange={v => set("q5", v)} />
-            <CheckboxGroupWithOther label="Q6 — Experience dimensions to evaluate" options={SS_SCORECARD_DIMS} onChange={v => set("q6", v)} />
-            <YesNoReveal label="Q7 — Shop a competitor location as well?" onToggle={yes => set("q7", yes ? "Yes" : "No")}>
-              <input type="text" value={form.q7 === "No" || form.q7 === "Yes" ? "" : form.q7} onChange={e => set("q7", "Yes — " + e.target.value)} className={inputCls} placeholder="Competitor name and address" />
-            </YesNoReveal>
-            <div><label className={labelCls}>Q8 — What are you most concerned about or want us to focus on?</label><textarea rows={4} value={form.q8} onChange={e => set("q8", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. Google reviews mention slow service at lunch…" /></div>
-          </>)}
+            // Q1 biz-type dropdown: show for all services except SS, VoC
+            const showBizTypeDropdown = (isMIRLike || isSMAOnly || isDDOnly || isSynOnly || isAIOnly) && i === 0;
 
-          {/* ── Deep Dive Report ── */}
-          {form.serviceType === "deep_dive_report" && (<>
-            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label>
-              <textarea rows={3} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. Anchor Coffee Co." />
-              <div className="mt-2"><SelectWithOther label="Business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={setBizType} /></div>
-            </div>
-            <div>
-              <label className={labelCls}>Q2 — How long in business and where located</label>
-              <SelectWithOther label="Time in business" options={DURATION_OPTIONS} placeholder="Select duration…" onChange={setDuration} />
-              <div className="mt-2"><label className={labelCls}>Location</label><input type="text" placeholder="e.g. Bradley Beach, NJ" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} /></div>
-            </div>
-            <AgeIncomeCheckboxes label="Q3 — Ideal customer (age, income, lifestyle, problem)" onChange={v => set("q3", v)} />
-            <CompetitorFields label="Q4 — Top competitors" withDescription withLocation hint="Competitor 1 required. 2 and 3 optional." onChange={v => set("q4", v)} />
-            <div><label className={labelCls}>Q5 — What makes you different?</label><textarea rows={3} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <div><label className={labelCls}>Q6 — Biggest challenge right now</label><textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <div><label className={labelCls}>Q7 — Success in 12 months</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <CheckboxGroupWithOther label="Q8 — Marketing currently doing" options={MARKETING_CHANNELS} onChange={v => set("q8", v)} />
-            <div><label className={labelCls}>Q9 — What do you wish you knew?</label><textarea rows={3} value={form.q9} onChange={e => set("q9", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <div><label className={labelCls}>Q10 — Anything else to focus on?</label><textarea rows={3} value={form.q10} onChange={e => set("q10", e.target.value)} className={`${inputCls} resize-y`} /></div>
+            // Q2 duration widget: show for MIR-like and Deep Dive, Synthetic (Q2 = "how long + where")
+            const showDurationWidget  = (isMIRLike || isDDOnly || isSynOnly) && i === 1;
+
+            // Structured component for specific question/service combinations
+            let structuredInput: React.ReactNode = null;
+
+            if (showDurationWidget) {
+              structuredInput = (
+                <>
+                  <SelectWithOther label="" options={DURATION_OPTIONS} placeholder="Time in business…" onChange={setDuration} />
+                  <div className="mt-2">
+                    <label className={labelCls}>Location</label>
+                    <input type="text" placeholder="e.g. Bradley Beach, NJ" value={form[key] as string}
+                      onChange={e => set(key, e.target.value)} className={inputCls} />
+                  </div>
+                </>
+              );
+            } else if ((isMIRLike || isDDOnly || isSynOnly) && i === 2) {
+              // Q3 ideal customer — age/income checkboxes
+              structuredInput = <AgeIncomeCheckboxes label="" onChange={v => set(key, v)} />;
+            } else if (isDDOnly && i === 3) {
+              // Q4 competitors for Deep Dive — with location + description
+              structuredInput = <CompetitorFields label="" withDescription withLocation hint="Competitor 1 required. 2 and 3 optional." onChange={v => set(key, v)} />;
+            } else if ((isMIRLike || isSynOnly) && i === 3) {
+              // Q4 competitors — basic fields
+              structuredInput = <CompetitorFields label="" hint="Competitor 1 required. 2 and 3 optional." onChange={v => set(key, v)} />;
+            } else if ((isMIRLike || isDDOnly || isSynOnly) && i === 7) {
+              // Q8 marketing channels
+              structuredInput = <CheckboxGroupWithOther label="" options={MARKETING_CHANNELS} onChange={v => set(key, v)} />;
+            } else if (isSSLike && i === 1) {
+              // Q2 address for Secret Shopping
+              structuredInput = <AddressFields label="" onChange={v => set(key, v)} />;
+            } else if (isSSLike && i === 4) {
+              // Q5 typical interaction type
+              structuredInput = <CheckboxGroupWithOther label="" options={SS_INTERACTION_TYPES} onChange={v => set(key, v)} />;
+            } else if (isSSLike && i === 5) {
+              // Q6 experience dimensions
+              structuredInput = <CheckboxGroupWithOther label="" options={SS_SCORECARD_DIMS} onChange={v => set(key, v)} />;
+            } else if (isSSLike && i === 6) {
+              // Q7 competitor shop yes/no
+              structuredInput = (
+                <YesNoReveal label="" onToggle={yes => set(key, yes ? "Yes" : "No")}>
+                  <input type="text" placeholder="Competitor name and address"
+                    onChange={e => set(key, "Yes — " + e.target.value)} className={inputCls} />
+                </YesNoReveal>
+              );
+            } else if (isSMAOnly && i === 2) {
+              // Q3 platforms
+              structuredInput = <PlatformCheckboxesWithHandles label="" onChange={v => set(key, v)} />;
+            } else if (isSMAOnly && i === 5) {
+              // Q6 competitors
+              structuredInput = <SMACompetitorFields label="" hint="Optional — names and social handles." onChange={v => set(key, v)} />;
+            } else if (isSMAOnly && i === 6) {
+              // Q7 challenge
+              structuredInput = <CheckboxGroupWithOther label="" options={SMA_CHALLENGES} onChange={v => set(key, v)} />;
+            } else if (isVoCOnly && i === 1) {
+              // Q2 business type
+              structuredInput = <SelectWithOther label="" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={v => set(key, v)} />;
+            } else if (isVoCOnly && i === 2) {
+              // Q3 contact list size
+              structuredInput = <SelectWithOther label="" options={CONTACT_SIZES} placeholder="Select a range…" onChange={v => set(key, v)} />;
+            } else if (isVoCOnly && i === 3) {
+              // Q4 collection methods
+              structuredInput = <CheckboxGroupWithOther label="" options={VOC_COLLECTION_METHODS} onChange={v => set(key, v)} />;
+            } else if (isVoCOnly && i === 5) {
+              // Q6 surveyed before yes/no
+              structuredInput = (
+                <YesNoReveal label="" onToggle={yes => { setYesQ6(yes); if (!yes) set(key, "No"); }}>
+                  <textarea rows={3} value={form[key] as string}
+                    onChange={e => set(key, e.target.value)}
+                    className={`${inputCls} resize-y`} placeholder="What did you find?" />
+                </YesNoReveal>
+              );
+            } else if (isAIOnly && i === 4) {
+              // Q5 AI tools
+              structuredInput = <CheckboxGroupWithOther label="" options={AI_TOOLS} onChange={v => set(key, v)} />;
+            } else if (isAIOnly && i === 5) {
+              // Q6 tasks
+              structuredInput = <CheckboxGroupWithOther label="" options={AI_TASKS} onChange={v => set(key, v)} />;
+            } else if (isSynOnly && i === 5) {
+              // Q6 numbered research questions
+              structuredInput = <NumberedTextFields label="" count={5} onChange={v => set(key, v)} />;
+            }
+
+            return (
+              <div key={key}>
+                <label className={labelCls}>
+                  <span className="text-seafoam mr-1">Q{qNum}</span> — {q.label}
+                </label>
+                {structuredInput ?? (
+                  <textarea
+                    rows={q.rows ?? 3}
+                    placeholder={q.placeholder ?? "Write as much detail as you have…"}
+                    value={form[key] as string}
+                    onChange={e => set(key, e.target.value)}
+                    className={`${inputCls} resize-y`}
+                  />
+                )}
+                {showBizTypeDropdown && (
+                  <div className="mt-2">
+                    <SelectWithOther label="Business type (optional)" options={BUSINESS_TYPES}
+                      placeholder="Select business type…" onChange={setBizType} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Deep Dive: Q11 + Q12 extras stored in service_data */}
+          {isDeepDive && (
             <div className="border-t border-dashed border-gray-200 pt-4 space-y-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Deep Dive specifics</p>
-              <SelectWithOther label="Q11 — Decision type" options={DECISION_TYPES} placeholder="Select the type of decision…" onChange={setDecisionType} />
-              <div><label className={labelCls}>Q11 detail — describe the decision in detail</label><textarea rows={4} value={form.dd_q11} onChange={e => set("dd_q11", e.target.value)} className={`${inputCls} resize-y`} placeholder="e.g. We are deciding whether to sign a lease on a second location…" /></div>
-              <YesNoReveal label="Q12 — Done prior market research?" onToggle={yes => { setYesQ12(yes); if (!yes) set("dd_q12", ""); }}>
-                <textarea rows={3} value={form.dd_q12} onChange={e => set("dd_q12", e.target.value)} className={`${inputCls} resize-y`} placeholder="What did you find?" />
-              </YesNoReveal>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Deep Dive specifics — stored separately</p>
+              <div>
+                <label className={labelCls}>Q11 — Decision type</label>
+                <SelectWithOther label="" options={DECISION_TYPES} placeholder="Select the type of decision…" onChange={setDecisionType} />
+              </div>
+              <div>
+                <label className={labelCls}>Q11 detail — describe the specific decision in detail</label>
+                <textarea rows={4} value={form.dd_q11} onChange={e => set("dd_q11", e.target.value)}
+                  className={`${inputCls} resize-y`}
+                  placeholder="e.g. We are deciding whether to sign a lease on a second location…" />
+              </div>
+              <div>
+                <label className={labelCls}>Q12 — Done prior market research?</label>
+                <YesNoReveal label="" onToggle={yes => { setYesQ12(yes); if (!yes) set("dd_q12", ""); }}>
+                  <textarea rows={3} value={form.dd_q12} onChange={e => set("dd_q12", e.target.value)}
+                    className={`${inputCls} resize-y`} placeholder="What did you find?" />
+                </YesNoReveal>
+              </div>
             </div>
-          </>)}
-
-          {/* ── Synthetic Survey Report ── */}
-          {form.serviceType === "synthetic_survey_report" && (<>
-            <div><label className={labelCls}>Q1 — Business name and what you sell or offer</label>
-              <textarea rows={3} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} />
-              <div className="mt-2"><SelectWithOther label="Business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={setBizType} /></div>
-            </div>
-            <div>
-              <label className={labelCls}>Q2 — How long in business and where located</label>
-              <SelectWithOther label="Time in business" options={DURATION_OPTIONS} placeholder="Select duration…" onChange={setDuration} />
-              <div className="mt-2"><label className={labelCls}>Location</label><input type="text" value={form.q2} onChange={e => set("q2", e.target.value)} className={inputCls} placeholder="e.g. Bradley Beach, NJ" /></div>
-            </div>
-            <AgeIncomeCheckboxes label="Q3 — Ideal customer" onChange={v => set("q3", v)} />
-            <CompetitorFields label="Q4 — Top competitors" onChange={v => set("q4", v)} />
-            <div><label className={labelCls}>Q5 — Assumptions to test</label><textarea rows={4} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} placeholder="What do you assume about your customers that you haven't confirmed?" /></div>
-            <NumberedTextFields label="Q6 — Most important questions to answer (up to 5)" count={5} onChange={v => set("q6", v)} />
-            <div><label className={labelCls}>Q7 — Pricing and how customers find you</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <CheckboxGroupWithOther label="Q8 — Marketing currently doing" options={MARKETING_CHANNELS} onChange={v => set("q8", v)} />
-            <div><label className={labelCls}>Q9 — Specific product or decision to test</label><textarea rows={3} value={form.q9} onChange={e => set("q9", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <div><label className={labelCls}>Q10 — Anything else</label><textarea rows={3} value={form.q10} onChange={e => set("q10", e.target.value)} className={`${inputCls} resize-y`} /></div>
-          </>)}
-
-          {/* ── Voice of Customer Survey ── */}
-          {form.serviceType === "voice_of_customer_survey" && (<>
-            <div><label className={labelCls}>Q1 — Business name and location</label><input type="text" value={form.q1} onChange={e => set("q1", e.target.value)} className={inputCls} placeholder="e.g. Anchor Coffee Co., Bradley Beach NJ" /></div>
-            <SelectWithOther label="Q2 — Industry / business type" options={BUSINESS_TYPES} placeholder="Select business type…" onChange={v => set("q2", v)} />
-            <SelectWithOther label="Q3 — Approximately how many customer contacts?" options={CONTACT_SIZES} placeholder="Select a range…" onChange={v => set("q3", v)} />
-            <CheckboxGroupWithOther label="Q4 — How were these contacts collected?" options={VOC_COLLECTION_METHODS} onChange={v => set("q4", v)} />
-            <div><label className={labelCls}>Q5 — What do you most want to learn?</label><textarea rows={4} value={form.q5} onChange={e => set("q5", e.target.value)} className={`${inputCls} resize-y`} placeholder="Be as specific as possible — this drives the survey design." /></div>
-            <YesNoReveal label="Q6 — Surveyed customers before?" onToggle={yes => { setYesQ6(yes); if (!yes) set("q6", ""); }}>
-              <textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} placeholder="What did you find?" />
-            </YesNoReveal>
-            <div><label className={labelCls}>Q7 — What decision will this inform?</label><textarea rows={3} value={form.q7} onChange={e => set("q7", e.target.value)} className={`${inputCls} resize-y`} /></div>
-          </>)}
-
-          {/* ── AI Starter Kit ── */}
-          {form.serviceType === "ai_starter_kit" && (<>
-            <div><label className={labelCls}>Q1 — Business name and what you do</label><textarea rows={2} value={form.q1} onChange={e => set("q1", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <div><label className={labelCls}>Q2 — Location and who your customers are</label><textarea rows={2} value={form.q2} onChange={e => set("q2", e.target.value)} className={`${inputCls} resize-y`} /></div>
-            <CheckboxGroupWithOther label="Q3 — AI tool planning to use" options={AI_TOOLS} onChange={v => set("q3", v)} />
-            <CheckboxGroupWithOther label="Q4 — Top tasks you want AI to help with" options={AI_TASKS} onChange={v => set("q4", v)} />
-            <CheckboxGroupWithOther label="Q5 — Brand tone" options={AI_TONES} onChange={v => set("q5", v)} />
-            <div><label className={labelCls}>Q6 — Anything specific about your business we should know?</label><textarea rows={3} value={form.q6} onChange={e => set("q6", e.target.value)} className={`${inputCls} resize-y`} placeholder="Seasonal business? Sensitivities? Community focus? Etc." /></div>
-          </>)}
+          )}
         </div>
 
         {error && (

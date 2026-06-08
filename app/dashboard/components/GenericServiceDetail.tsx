@@ -1,11 +1,17 @@
 "use client";
 
+// All imports must precede any executable code — SWC/ESModules requirement.
 import { useState, useRef } from "react";
 import type { Order, SMAComparison, SMAComparisonRow } from "@/lib/supabase";
+import {
+  SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
+  getSectionsForService, getQuestionLabels, getEffectiveServiceType,
+  type ServiceSection,
+} from "@/lib/serviceConfig";
 
-// Defined locally to avoid importing a value from the server-only supabase module
-// (lib/supabase.ts throws at init time if SUPABASE_URL is absent — not safe to
-// bundle into a "use client" component).
+// Defined locally (not imported from @/lib/supabase) because supabase.ts is a
+// server-only module that throws at init time when SUPABASE_URL is absent.
+// Importing any VALUE from it inside a "use client" component crashes the page.
 const EMPTY_SMA_COMPARISON: SMAComparison = {
   competitor_1_name: "",
   competitor_2_name: "",
@@ -20,11 +26,6 @@ const EMPTY_SMA_COMPARISON: SMAComparison = {
     overall_presence:     { your_business: "", competitor_1: "", competitor_2: "" },
   },
 };
-import {
-  SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
-  getSectionsForService, getQuestionLabels, getEffectiveServiceType,
-  type ServiceSection,
-} from "@/lib/serviceConfig";
 
 type SectionMeta = { notes: string; locked: boolean };
 type MetaMap     = Record<string, SectionMeta>;
