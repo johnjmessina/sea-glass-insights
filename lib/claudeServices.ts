@@ -49,7 +49,9 @@ function parseJsonSections(raw: string): Record<string, string> {
 async function generateSMADraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
 
-  const system = `You are a senior social media analyst at Sea Glass Insights.
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+
+You are a senior social media analyst at Sea Glass Insights.
 Your job is to produce a professional Social Media Audit grounded in REAL, OBSERVED data — not just intake answers.
 
 STEP 1 — WEB RESEARCH (use web_search for each handle/URL in the intake):
@@ -94,28 +96,36 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
     ],
   });
 
-  // Extract text blocks (web_search results come back as WebSearchToolResultBlocks
-  // alongside the text; we only need the final text answer)
-  const raw = response.content
+  // Extract text blocks only (web_search tool result blocks are ignored)
+  const fullText = response.content
     .filter(b => b.type === "text")
     .map(b => (b as { type: "text"; text: string }).text)
-    .join("")
-    // Strip markdown fences
-    .replace(/^```(?:json)?\n?/i, "")
-    .replace(/\n?```$/i, "")
-    // Strip citation markup that web_search can inject into Claude's output:
-    // <cite>…</cite>, <a href="…">…</a>, and any other HTML tags inside values
+    .join("");
+
+  // Strip citation markup that web_search can inject into output
+  const stripped = fullText
     .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
     .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
     .replace(/<[a-z][^>]*\/?>/gi, "")
-    // Strip bracketed reference numbers like [1] or [12]
     .replace(/\[\d+\]/g, "")
+    // Strip markdown fences
+    .replace(/^```(?:json)?\n?/i, "")
+    .replace(/\n?```$/i, "")
     .trim();
+
+  // Safety net: discard any preamble/postamble text by extracting only the
+  // outermost JSON object — everything from the first { to the last }
+  const firstBrace = stripped.indexOf("{");
+  const lastBrace  = stripped.lastIndexOf("}");
+  const raw = firstBrace !== -1 && lastBrace > firstBrace
+    ? stripped.slice(firstBrace, lastBrace + 1)
+    : stripped;
 
   let parsed: Record<string, string>;
   try {
     parsed = JSON.parse(raw) as Record<string, string>;
   } catch {
+    console.error("SMA generation — raw response that failed to parse:\n", fullText);
     throw new Error(`SMA generation returned invalid JSON: ${raw.slice(0, 400)}`);
   }
   return parsed;
