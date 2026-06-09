@@ -32,6 +32,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const SECTION_LABELS = ["Visit Overview", "Experience Scorecard", "Analyst Observations", "Narrative Notes", "Summary & Recommendations", "Analyst Note"];
+const NARRATIVE_ONLY = SS_NARRATIVE_SECTIONS.filter(s => s.key !== "summary_and_recommendations");
 
 export default function SecretShoppingDetail({ order: initialOrder, onBack }: { order: Order; onBack: () => void }) {
   const sd = (initialOrder.service_data ?? {}) as ServiceData;
@@ -67,6 +68,7 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
   const [sendMsg, setSendMsg]       = useState<string | null>(null);
   const [scorecardStep, setScorecardStep] = useState(0);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
+  const [narrativeStep, setNarrativeStep] = useState(0);
 
   const voTimer   = useRef<NodeJS.Timeout | null>(null);
   const scTimer   = useRef<NodeJS.Timeout | null>(null);
@@ -129,16 +131,17 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
     setMeta(u); persist({ analyst_commentary: u });
   }
 
-  const hasDraft     = Object.keys(narrativeDraft).length > 0;
-  const lockedCount  = SS_NARRATIVE_SECTIONS.filter(s => meta[s.key]?.locked).length;
-  const allLocked    = lockedCount === SS_NARRATIVE_SECTIONS.length;
+  const hasDraft      = Object.keys(narrativeDraft).length > 0;
+  const lockedCount   = NARRATIVE_ONLY.filter(s => meta[s.key]?.locked).length;
+  const summaryLocked = !!(meta["summary_and_recommendations"]?.locked);
+  const allLocked     = lockedCount === NARRATIVE_ONLY.length && summaryLocked;
 
   async function generateNarratives() {
     setGenerating(true); setGenError(null); setEditingKey(null);
     try {
       const res  = await fetch("/api/generate-draft", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
+        body: JSON.stringify({ orderId: order.id, ssScorecard: scorecard, ssAnalystObs: analystObs }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Generation failed");
@@ -185,7 +188,15 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
       const res = await fetch("/api/generate-ss-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id, analystNote }),
+        body: JSON.stringify({
+          orderId: order.id,
+          analystNote,
+          visitOverview,
+          scorecard,
+          analystObs,
+          aiDraft: narrativeDraft,
+          summaryAnalystNote: meta["summary_and_recommendations"]?.notes ?? "",
+        }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -297,6 +308,100 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
     );
   }
 
+  // ── Section 5 renderer (always shows analyst notes, even when locked) ────────
+
+  function renderSection5() {
+    const key = "summary_and_recommendations";
+    const m = meta[key] ?? { notes: "", locked: false };
+    const content = narrativeDraft[key] ?? "";
+    const isEditing = editingKey === key;
+    const isRegen = !!regenerating[key];
+    const err = regenError[key];
+    return (
+      <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 bg-seafoam rounded-full" />
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 5 — Summary & Recommendations</h3>
+          </div>
+          <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+            Section 5 of 6
+          </span>
+        </div>
+        {/* AI content with lock / edit controls */}
+        <div className="border-t border-gray-100 py-4 first:border-0 first:pt-0">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="flex items-center gap-2">
+              <div className={`w-1 h-4 rounded-full shrink-0 ${m.locked ? "bg-green-400" : "bg-seafoam"}`} />
+              <h5 className="font-semibold text-navy text-sm">Summary & Recommendations</h5>
+              {m.locked && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Locked</span>}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {!m.locked && !isEditing && (
+                <button onClick={() => { setEditBuf(content); setEditingKey(key); }}
+                  className="text-xs text-seafoam hover:text-navy border border-seafoam/40 rounded-full px-3 py-1 transition-colors font-medium">
+                  Edit
+                </button>
+              )}
+              {m.locked ? (
+                <button onClick={() => unlockSection(key)} className="text-xs text-gray-400 hover:text-orange-500 transition-colors">Unlock</button>
+              ) : (
+                <button onClick={() => lockSection(key)}
+                  className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
+                  Lock Section
+                </button>
+              )}
+            </div>
+          </div>
+          {isEditing ? (
+            <div>
+              <textarea rows={8} value={editBuf} onChange={e => setEditBuf(e.target.value)}
+                className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y"
+                autoFocus />
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => {
+                  const u = { ...narrativeDraft, [key]: editBuf };
+                  setNarr(u); setEditingKey(null); persist({ ai_draft: u });
+                }} className="text-xs bg-seafoam text-navy font-semibold px-4 py-1.5 rounded-full hover:bg-seafoam-dark transition-colors">
+                  Apply Changes
+                </button>
+                <button onClick={() => setEditingKey(null)} className="text-xs text-gray-400 px-3 py-1.5">Cancel</button>
+              </div>
+            </div>
+          ) : content ? (
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+          ) : (
+            <p className="text-sm text-gray-300 italic">Generate narratives to populate this section.</p>
+          )}
+        </div>
+        {/* Analyst Notes — always visible, even when locked */}
+        <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+          <label className={lbl}>Analyst Notes</label>
+          <textarea rows={3} value={m.notes}
+            onChange={e => { const u = { ...meta, [key]: { ...m, notes: e.target.value } }; setMeta(u); schedMeta(u); }}
+            placeholder="Direction for regenerating this section…"
+            className={inp + " resize-y placeholder-gray-300"} />
+          {err && <p className="text-red-500 text-xs">{err}</p>}
+          <button onClick={() => regenerateSection(key)} disabled={isRegen || !hasDraft}
+            className="inline-flex items-center gap-1.5 text-xs bg-navy text-white font-semibold px-4 py-2 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50">
+            {isRegen ? <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Regenerating…</> : "↺ Regenerate"}
+          </button>
+        </div>
+        {/* Back / Continue */}
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+          <button type="button" onClick={() => { setNarrativeStep(NARRATIVE_ONLY.length - 1); setActive(4); }}
+            className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+            ← Back
+          </button>
+          <button type="button" onClick={() => setActive(6)}
+            className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+            Continue to Analyst Note →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ── Sub-section nav ────────────────────────────────────────────────────────
 
   const navItems: { n: 1|2|3|4|5|6; label: string }[] = [
@@ -344,10 +449,15 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
       {/* ── Section 1: Visit Overview ─────────────────────────────────────── */}
       {activeSection === 1 && (
         <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-5 bg-orange-400 rounded-full" />
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 1 — Visit Overview</h3>
-            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human entry only</span>
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-orange-400 rounded-full" />
+              <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 1 — Visit Overview</h3>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human entry only</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+              Section 1 of 6
+            </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {([
@@ -364,6 +474,12 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
                   onChange={e => updateVO(field, e.target.value)} />
               </div>
             ))}
+          </div>
+          <div className="flex items-center justify-end mt-6 pt-4 border-t border-gray-100">
+            <button type="button" onClick={() => setActive(2)}
+              className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+              Continue to Scorecard →
+            </button>
           </div>
         </div>
       )}
@@ -385,9 +501,8 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
             <button
               type="button"
-              onClick={() => setScorecardStep(s => Math.max(0, s - 1))}
-              disabled={scorecardStep === 0}
-              className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              onClick={() => scorecardStep === 0 ? setActive(1) : setScorecardStep(s => s - 1)}
+              className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
               ← Back
             </button>
             {scorecardStep < SS_DIMENSIONS.length - 1 ? (
@@ -412,10 +527,15 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
       {/* ── Section 3: Analyst Observations ─────────────────────────────── */}
       {activeSection === 3 && (
         <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-5 bg-orange-400 rounded-full" />
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 3 — Analyst Observations</h3>
-            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human entry only</span>
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-orange-400 rounded-full" />
+              <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 3 — Analyst Observations</h3>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human entry only</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+              Section 3 of 6
+            </span>
           </div>
           <div className="space-y-4">
             {([
@@ -431,6 +551,16 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
               </div>
             ))}
           </div>
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+            <button type="button" onClick={() => setActive(2)}
+              className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+              ← Back
+            </button>
+            <button type="button" onClick={() => { setNarrativeStep(0); setActive(4); }}
+              className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+              Continue to Narrative Notes →
+            </button>
+          </div>
         </div>
       )}
 
@@ -443,7 +573,12 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
               <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 4 — Narrative Notes</h3>
             </div>
             <div className="flex items-center gap-3">
-              {hasDraft && <span className="text-xs text-gray-400">{lockedCount}/{SS_NARRATIVE_SECTIONS.length} locked</span>}
+              {hasDraft && (
+                <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+                  Narrative {narrativeStep + 1} of {NARRATIVE_ONLY.length}
+                </span>
+              )}
+              {hasDraft && <span className="text-xs text-gray-400">{lockedCount}/{NARRATIVE_ONLY.length} locked</span>}
               <button onClick={generateNarratives} disabled={generating}
                 className="bg-seafoam text-navy font-semibold text-sm px-5 py-2 rounded-full hover:bg-seafoam-dark transition-colors disabled:opacity-50">
                 {generating ? "Generating…" : hasDraft ? "Regenerate Narratives" : "Generate AI Narratives"}
@@ -458,38 +593,65 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
             </div>
           )}
           {!hasDraft && !generating && (
-            <p className="text-xs text-gray-400 text-center py-4">
-              Complete the scorecard and analyst observations, then click &ldquo;Generate AI Narratives&rdquo;.
-            </p>
+            <div>
+              <p className="text-xs text-gray-400 text-center py-4">
+                Complete the scorecard and analyst observations, then click &ldquo;Generate AI Narratives&rdquo;.
+              </p>
+              <div className="flex items-center justify-start mt-4 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setActive(3)}
+                  className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+                  ← Back
+                </button>
+              </div>
+            </div>
           )}
           {hasDraft && !generating && (
             <div>
-              {SS_NARRATIVE_SECTIONS.filter(s => s.key !== "summary_and_recommendations").map(s =>
-                renderNarrativeSection(s.key, s.label)
-              )}
+              {renderNarrativeSection(NARRATIVE_ONLY[narrativeStep].key, NARRATIVE_ONLY[narrativeStep].label)}
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+                <button type="button"
+                  onClick={() => narrativeStep === 0 ? setActive(3) : setNarrativeStep(s => s - 1)}
+                  className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+                  ← Back
+                </button>
+                {narrativeStep < NARRATIVE_ONLY.length - 1 ? (
+                  <button type="button" onClick={() => setNarrativeStep(s => s + 1)}
+                    className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+                    Continue →
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => setActive(5)}
+                    className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+                    Continue to Summary →
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
       )}
 
       {/* ── Section 5: Summary & Recommendations ────────────────────────── */}
-      {activeSection === 5 && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-5 bg-seafoam rounded-full" />
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 5 — Summary & Recommendations</h3>
-          </div>
-          {renderNarrativeSection("summary_and_recommendations", "Summary & Recommendations")}
-        </div>
-      )}
+      {activeSection === 5 && renderSection5()}
 
       {/* ── Section 6: Analyst Note + Actions ───────────────────────────── */}
       {activeSection === 6 && (
         <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6 space-y-5">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 bg-seagreen rounded-full" />
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 6 — Analyst Note</h3>
-            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human entry</span>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-seagreen rounded-full" />
+              <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 6 — Analyst Note</h3>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human entry</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+              Section 6 of 6
+            </span>
+          </div>
+          <div className="flex items-center pb-1 border-b border-gray-100">
+            <button type="button" onClick={() => setActive(5)}
+              className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+              ← Back to Summary
+            </button>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed">
             Write one warm, personal closing paragraph. Auto-saved as you type.
@@ -518,7 +680,7 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
             )}
             {!allLocked && hasDraft && (
               <p className="text-xs text-amber-600 font-medium">
-                Lock all narrative sections first ({lockedCount}/{SS_NARRATIVE_SECTIONS.length} locked)
+                Lock all sections first ({lockedCount}/{NARRATIVE_ONLY.length} narratives{!summaryLocked ? " + summary" : ""} locked)
               </p>
             )}
             {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}

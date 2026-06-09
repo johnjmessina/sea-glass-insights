@@ -5,9 +5,22 @@ const { generateSSReport } = require("@/lib/ssReportGenerator");
 
 export async function POST(req: NextRequest) {
   try {
-    const { orderId, analystNote: passedNote } = await req.json() as {
+    const {
+      orderId,
+      analystNote: passedNote,
+      visitOverview: passedVO,
+      scorecard: passedSC,
+      analystObs: passedObs,
+      aiDraft: passedDraft,
+      summaryAnalystNote: passedSummaryNote,
+    } = await req.json() as {
       orderId: string;
       analystNote?: string;
+      visitOverview?: Record<string, string>;
+      scorecard?: Record<string, boolean | number>;
+      analystObs?: Record<string, string>;
+      aiDraft?: Record<string, string>;
+      summaryAnalystNote?: string;
     };
 
     if (!orderId) {
@@ -31,7 +44,20 @@ export async function POST(req: NextRequest) {
       passedNote ??
       (order.analyst_note === "Manual Order" ? "" : (order.analyst_note ?? ""));
 
-    const docxBuffer: Buffer = await generateSSReport(order, analystNote);
+    // Merge current in-memory state (not yet auto-saved) over whatever is in Supabase
+    const storedSD = (order.service_data as Record<string, unknown>) ?? {};
+    const reportData = {
+      ...order,
+      service_data: {
+        ...storedSD,
+        ss_visit_overview: passedVO  ?? storedSD.ss_visit_overview ?? {},
+        ss_scorecard:      passedSC  ?? storedSD.ss_scorecard      ?? {},
+        ss_analyst_obs:    passedObs ?? storedSD.ss_analyst_obs    ?? {},
+        ss_summary_analyst_note: passedSummaryNote ?? "",
+      },
+      ai_draft: passedDraft ?? (order.ai_draft as Record<string, string> | null) ?? {},
+    };
+    const docxBuffer: Buffer = await generateSSReport(reportData, analystNote);
 
     const businessName = (order.business_name as string).replace(/[^a-zA-Z0-9]/g, "");
     const filename = `SeaGlassInsights-${businessName}-SecretShopping.docx`;

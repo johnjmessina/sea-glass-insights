@@ -6,10 +6,12 @@ import { getEffectiveServiceType } from "@/lib/serviceConfig";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { orderId, vocPhase, vocResponses } = body as {
+  const { orderId, vocPhase, vocResponses, ssScorecard: bodyScorecard, ssAnalystObs: bodyAnalystObs } = body as {
     orderId: string;
     vocPhase?: 1 | 2;
     vocResponses?: string;
+    ssScorecard?: Record<string, boolean | number>;
+    ssAnalystObs?: { best_moment: string; biggest_miss: string; immediate_fix: string; additional_observations: string };
   };
 
   if (!orderId) {
@@ -40,8 +42,8 @@ export async function POST(req: NextRequest) {
       draft = await generateServiceDraft(order, serviceType, {
         vocPhase:    (vocPhase ?? (ss?.voc_phase as 1 | 2 | undefined)) ?? 1,
         vocResponses: vocResponses ?? (ss?.voc_responses as string | undefined),
-        ssScorecard:  ss?.ss_scorecard as Record<string, boolean | number> | undefined,
-        ssAnalystObs: ss?.ss_analyst_obs as {
+        ssScorecard:  bodyScorecard ?? ss?.ss_scorecard as Record<string, boolean | number> | undefined,
+        ssAnalystObs: bodyAnalystObs ?? ss?.ss_analyst_obs as {
           best_moment: string; biggest_miss: string;
           immediate_fix: string; additional_observations: string;
         } | undefined,
