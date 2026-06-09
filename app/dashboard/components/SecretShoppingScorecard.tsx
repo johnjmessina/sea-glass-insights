@@ -150,6 +150,8 @@ interface ScorecardProps {
   scorecard: Record<string, boolean | number>;
   onChange:  (updated: Record<string, boolean | number>) => void;
   readOnly?: boolean;
+  /** If provided, renders only the dimension at this 0-based index (total score still shown). */
+  step?: number;
 }
 
 function StarRating({
@@ -209,13 +211,17 @@ function YesNoToggle({
   );
 }
 
-export function SecretShoppingScorecard({ scorecard, onChange, readOnly }: ScorecardProps) {
+export function SecretShoppingScorecard({ scorecard, onChange, readOnly, step }: ScorecardProps) {
   const total = totalWeightedScore(scorecard);
   const band  = ratingBand(total);
 
   function setVal(key: string, val: boolean | number) {
     onChange({ ...scorecard, [key]: val });
   }
+
+  const dimsToRender = typeof step === "number"
+    ? ([SS_DIMENSIONS[step]].filter(Boolean) as SSDimension[])
+    : SS_DIMENSIONS;
 
   return (
     <div className="space-y-6">
@@ -238,7 +244,7 @@ export function SecretShoppingScorecard({ scorecard, onChange, readOnly }: Score
       </div>
 
       {/* Per-dimension sections */}
-      {SS_DIMENSIONS.map(dim => {
+      {dimsToRender.map(dim => {
         const raw = dimensionRawScore(dim, scorecard);
         return (
           <div key={dim.key} className="border border-gray-100 rounded-xl overflow-hidden">

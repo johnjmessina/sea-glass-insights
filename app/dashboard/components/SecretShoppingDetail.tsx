@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import type { Order } from "@/lib/supabase";
 import type { SSVisitOverview, SSAnalystObs, ServiceData } from "@/lib/supabase";
 import { SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS, getEffectiveServiceType, SS_NARRATIVE_SECTIONS } from "@/lib/serviceConfig";
-import { SecretShoppingScorecard } from "./SecretShoppingScorecard";
+import { SecretShoppingScorecard, SS_DIMENSIONS } from "./SecretShoppingScorecard";
 
 type SectionMeta = { notes: string; locked: boolean };
 type MetaMap     = Record<string, SectionMeta>;
@@ -65,6 +65,8 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
   const [saveMsg, setSaveMsg]       = useState<string | null>(null);
   const [sendingReport, setSending] = useState(false);
   const [sendMsg, setSendMsg]       = useState<string | null>(null);
+  const [scorecardStep, setScorecardStep] = useState(0);
+  const [downloadingDocx, setDownloadingDocx] = useState(false);
 
   const voTimer   = useRef<NodeJS.Timeout | null>(null);
   const scTimer   = useRef<NodeJS.Timeout | null>(null);
@@ -175,6 +177,32 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
     });
     setOrder(p => ({ ...p, status: newStatus as Order["status"] }));
     setSaveMsg("All changes saved."); setTimeout(() => setSaveMsg(null), 3000); setSaving(false);
+  }
+
+  async function downloadDocx() {
+    setDownloadingDocx(true);
+    try {
+      const res = await fetch("/api/generate-ss-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, analystNote }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "Report generation failed");
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-SecretShopping.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Report generation failed");
+    } finally {
+      setDownloadingDocx(false);
+    }
   }
 
   async function sendReport() {
@@ -343,12 +371,41 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
       {/* ── Section 2: Scorecard ─────────────────────────────────────────── */}
       {activeSection === 2 && (
         <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-5 bg-orange-400 rounded-full" />
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 2 — Experience Scorecard</h3>
-            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human scoring</span>
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-orange-400 rounded-full" />
+              <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Section 2 — Experience Scorecard</h3>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Human scoring</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+              Section {scorecardStep + 1} of {SS_DIMENSIONS.length}
+            </span>
           </div>
-          <SecretShoppingScorecard scorecard={scorecard} onChange={updateScorecard} />
+          <SecretShoppingScorecard scorecard={scorecard} onChange={updateScorecard} step={scorecardStep} />
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => setScorecardStep(s => Math.max(0, s - 1))}
+              disabled={scorecardStep === 0}
+              className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              ← Back
+            </button>
+            {scorecardStep < SS_DIMENSIONS.length - 1 ? (
+              <button
+                type="button"
+                onClick={() => setScorecardStep(s => s + 1)}
+                className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+                Continue →
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setActive(3)}
+                className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+                Continue to Observations →
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -453,6 +510,12 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
               className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
               {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
             </button>
+            {hasDraft && (
+              <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
+                className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+              </button>
+            )}
             {!allLocked && hasDraft && (
               <p className="text-xs text-amber-600 font-medium">
                 Lock all narrative sections first ({lockedCount}/{SS_NARRATIVE_SECTIONS.length} locked)
