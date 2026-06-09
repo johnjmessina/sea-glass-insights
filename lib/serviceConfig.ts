@@ -370,8 +370,11 @@ export const DEEP_DIVE_EXTRA_QUESTIONS: ManualIntakeQuestion[] = [
 
 /** Whether to show the Location helper field (prepends to Q2) */
 export function showLocationHelper(type: ServiceType): boolean {
-  // SS uses Q2 for full address; VoC Q1 already includes location; bundles containing SS skip it
-  const noHelper: ServiceType[] = ["secret_shopping", "voice_of_customer_survey", "complete_shopper_experience_bundle", "field_report_bundle"];
+  // Services that do NOT need the Location helper field:
+  // SS/bundles-with-SS: Q2 is a full address field
+  // VoC: Q1 already includes location
+  // SMA: location is not relevant for a social media audit
+  const noHelper: ServiceType[] = ["secret_shopping", "voice_of_customer_survey", "complete_shopper_experience_bundle", "field_report_bundle", "social_media_audit"];
   return !noHelper.includes(type);
 }
 

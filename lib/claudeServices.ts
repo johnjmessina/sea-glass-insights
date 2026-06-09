@@ -60,7 +60,14 @@ STEP 1 — WEB RESEARCH (use web_search for each handle/URL in the intake):
 STEP 2 — WRITE ALL 7 REPORT SECTIONS:
 Ground every sentence in what you actually observed online. Name specific posts, content series, follower counts, engagement rates, or profile gaps that you found.
 
-Return ONLY a valid JSON object with exactly these 7 keys. No markdown. No code fences. Raw JSON only.
+CRITICAL OUTPUT RULES — read carefully before writing your response:
+• Your ENTIRE response must be one valid JSON object and nothing else.
+• Do NOT include any citation tags, HTML tags, or markup of any kind inside JSON values — no <cite>, </cite>, <a>, or any other HTML elements.
+• Do NOT include web search attribution, reference numbers, bracketed citations like [1], or source annotations anywhere in the JSON values.
+• Do NOT include markdown, backticks, code fences, or any text before or after the JSON object.
+• Write all facts as plain prose sentences only. If you observed a follower count from a web search result, state it as plain text: "The account has 1,243 followers." — never as "The account has 1,243 followers<cite>source.com</cite>".
+
+Return ONLY a raw JSON object with exactly these 7 keys:
 
 {
   "profile_setup_review": "2-4 paragraphs on actual profile setup based on research",
@@ -93,8 +100,16 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
     .filter(b => b.type === "text")
     .map(b => (b as { type: "text"; text: string }).text)
     .join("")
+    // Strip markdown fences
     .replace(/^```(?:json)?\n?/i, "")
     .replace(/\n?```$/i, "")
+    // Strip citation markup that web_search can inject into Claude's output:
+    // <cite>…</cite>, <a href="…">…</a>, and any other HTML tags inside values
+    .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
+    .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
+    .replace(/<[a-z][^>]*\/?>/gi, "")
+    // Strip bracketed reference numbers like [1] or [12]
+    .replace(/\[\d+\]/g, "")
     .trim();
 
   let parsed: Record<string, string>;
