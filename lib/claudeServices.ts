@@ -131,25 +131,101 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
   return parsed;
 }
 
-// ── Deep Dive Report ───────────────────────────────────────────────────────────
+// ── Deep Dive Report (web-search enabled) ─────────────────────────────────────
+//
+// Uses Anthropic's built-in web_search_20250305 tool to research the client's
+// market, competitors, and industry before writing the report.
+// Q11 (specific decision) and Q12 (prior research) are pulled from
+// service_data.deep_dive_extra and woven into the generation prompt.
 
 async function generateDeepDiveDraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
-  const system = `You are a senior market research analyst at Sea Glass Insights. Produce a professional Deep Dive Report for a small business. This is an expanded, more rigorous version of the standard Market Intelligence Report — deeper competitive intelligence, 4-5 customer segments, decision-specific analysis, and a priority action framework. Return ONLY a valid JSON object with exactly these 9 keys. Each value is 3-5 paragraphs of plain text. No markdown within values. Tone: warm, credible, direct. No em-dashes. No corporate jargon.
 
-Keys required:
-- "executive_summary" (2-3 paragraphs — where they stand, biggest opportunity, most urgent action)
-- "business_snapshot" (3-4 paragraphs — who they are, market context, what makes them tick)
-- "customer_segments" (4-5 distinct segments, each with name, description, motivation, key need — formatted as readable prose)
-- "competitive_intelligence" (deep per-competitor analysis — strengths, vulnerabilities, positioning gaps)
-- "market_context" (industry trends, seasonal/local factors, macro conditions affecting this business)
-- "decision_specific_analysis" (address the specific decision or problem they're trying to solve — reference Q11 if available)
-- "extended_recommendations" (5-6 specific recommendations with implementation guidance)
-- "priority_action_framework" (3-tier: do now, do soon, do eventually — with rationale)
-- "expanded_analyst_interpretation" (synthesis — the thread connecting all findings, what it means)`;
+  const sd    = (order.service_data as Record<string, unknown>) ?? {};
+  const extra = (sd.deep_dive_extra as Record<string, string>) ?? {};
+  const q11   = extra.q11 ?? "";
+  const q12   = extra.q12 ?? "";
+  const extraContext = [
+    q11 ? `Q11 (Specific Decision or Problem): ${q11}` : "",
+    q12 ? `Q12 (Prior Research): ${q12}` : "",
+  ].filter(Boolean).join("\n");
 
-  const raw = await callClaude(system, `Business intake:\n\n${intake}`, 6000);
-  return parseJsonSections(raw);
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+
+You are a senior market research analyst at Sea Glass Insights.
+Your job is to produce a professional Deep Dive Report grounded in REAL, RESEARCHED data — not just intake answers. This is a more rigorous, decision-focused version of the standard Market Intelligence Report.
+
+STEP 1 — WEB RESEARCH (use web_search for each item):
+• Search for the client's business to understand their current positioning, presence, and reputation.
+• Look up each competitor mentioned in the intake — research their strengths, weaknesses, pricing, positioning, and any recent changes.
+• Research industry trends, local market conditions, and macro factors relevant to this business type and location.
+• If Q11 mentions a specific decision (expansion, pricing change, new product, etc.), search for relevant data, benchmarks, or examples that directly inform that decision.
+• Note real facts you discover: market data, competitor details, industry context.
+
+STEP 2 — WRITE ALL 9 SECTIONS:
+Ground every section in what you actually researched. This is a Deep Dive — more depth, more sources, more context than a standard report. Address the specific decision from Q11 throughout all relevant sections.
+
+CRITICAL OUTPUT RULES — read carefully before writing your response:
+• Your ENTIRE response must be one valid JSON object and nothing else.
+• Do NOT include any citation tags, HTML tags, or markup of any kind inside JSON values.
+• Do NOT include web search attribution, reference numbers, bracketed citations like [1], or source annotations.
+• Do NOT include markdown, backticks, or any text before or after the JSON object.
+• Write all facts as plain prose sentences only.
+• No em-dashes. No corporate jargon. Tone: warm, credible, direct.
+
+Return ONLY a raw JSON object with exactly these 9 keys:
+
+{
+  "executive_summary": "2-3 paragraphs: where they stand today (grounded in research), biggest opportunity, most urgent action — informed by Q11",
+  "business_snapshot": "3-4 paragraphs: who they are, what makes them distinctive, their market context based on research",
+  "customer_segments": "4-5 distinct segments as readable prose — name, description, motivation, key need for each",
+  "competitive_intelligence": "deep per-competitor analysis grounded in research — actual strengths, vulnerabilities, positioning gaps",
+  "market_context": "industry trends, seasonal and local factors, macro conditions — based on researched current data",
+  "decision_specific_analysis": "directly address the specific decision or problem in Q11 — analysis, risks, considerations, recommendation",
+  "extended_recommendations": "5-6 specific recommendations with implementation guidance — informed by all research and Q11",
+  "priority_action_framework": "3-tier framework: Do Now / Do Soon / Do Eventually — each tier has 2-3 items with rationale tied to Q11",
+  "expanded_analyst_interpretation": "synthesis — the thread connecting all findings, what it means for this specific business and decision"
+}`;
+
+  const response = await client.messages.create({
+    model:      "claude-sonnet-4-5",
+    max_tokens: 8000,
+    tools:      [{ type: "web_search_20250305", name: "web_search" }],
+    system,
+    messages: [{
+      role:    "user",
+      content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for this business's market, competitors, and industry conditions, then produce the complete Deep Dive Report.`,
+    }],
+  });
+
+  const fullText = response.content
+    .filter(b => b.type === "text")
+    .map(b => (b as { type: "text"; text: string }).text)
+    .join("");
+
+  const stripped = fullText
+    .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
+    .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
+    .replace(/<[a-z][^>]*\/?>/gi, "")
+    .replace(/\[\d+\]/g, "")
+    .replace(/^```(?:json)?\n?/i, "")
+    .replace(/\n?```$/i, "")
+    .trim();
+
+  const firstBrace = stripped.indexOf("{");
+  const lastBrace  = stripped.lastIndexOf("}");
+  const raw = firstBrace !== -1 && lastBrace > firstBrace
+    ? stripped.slice(firstBrace, lastBrace + 1)
+    : stripped;
+
+  let parsed: Record<string, string>;
+  try {
+    parsed = JSON.parse(raw) as Record<string, string>;
+  } catch {
+    console.error("DDR generation — raw response that failed to parse:\n", fullText);
+    throw new Error(`DDR generation returned invalid JSON: ${raw.slice(0, 400)}`);
+  }
+  return parsed;
 }
 
 // ── Synthetic Survey Report ────────────────────────────────────────────────────

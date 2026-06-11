@@ -1,0 +1,620 @@
+"use client";
+
+import { useState, useRef } from "react";
+import type { Order } from "@/lib/supabase";
+import {
+  DEEP_DIVE_SECTIONS,
+  DEEP_DIVE_EXTRA_QUESTIONS,
+  SERVICE_DISPLAY_NAMES,
+  SERVICE_TAG_COLORS,
+  getEffectiveServiceType,
+} from "@/lib/serviceConfig";
+
+// SectionMeta extends the base notes/locked with a `callout` field for
+// the Analyst Perspective block that appears per section in the docx.
+type SectionMeta = { notes: string; locked: boolean; callout: string };
+type MetaMap     = Record<string, SectionMeta>;
+
+function defaultMeta(): MetaMap {
+  return Object.fromEntries(
+    DEEP_DIVE_SECTIONS.map(s => [s.key, { notes: "", locked: false, callout: "" }])
+  );
+}
+
+function initMeta(saved: Record<string, unknown> | null): MetaMap {
+  const base = defaultMeta();
+  if (!saved) return base;
+  for (const k of Object.keys(base)) {
+    const v = saved[k];
+    if (v && typeof v === "object" && "locked" in (v as object)) {
+      const sv = v as Partial<SectionMeta>;
+      base[k] = { notes: sv.notes ?? "", locked: !!sv.locked, callout: sv.callout ?? "" };
+    }
+  }
+  return base;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  new:         "bg-blue-100 text-blue-700",
+  in_progress: "bg-yellow-100 text-yellow-700",
+  delivered:   "bg-green-100 text-green-700",
+};
+
+interface Props { order: Order; onBack: () => void; }
+
+export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
+  const [order, setOrder]     = useState(initialOrder);
+  const [draft, setDraft]     = useState<Record<string, string>>(
+    (initialOrder.ai_draft as Record<string, string>) ?? {}
+  );
+  const [meta, setMeta]       = useState<MetaMap>(() =>
+    initMeta(initialOrder.analyst_commentary as Record<string, unknown> | null)
+  );
+  const [analystNote, setAnalystNote]     = useState(
+    initialOrder.analyst_note === "Manual Order" ? "" : (initialOrder.analyst_note ?? "")
+  );
+  // 1-9 = AI sections (maps to DEEP_DIVE_SECTIONS[activeSection-1]), 10 = Analyst Note
+  const [activeSection, setActiveSection] = useState(1);
+  const [generating, setGenerating]       = useState(false);
+  const [genError, setGenError]           = useState<string | null>(null);
+  const [regenerating, setRegenerating]   = useState<Record<string, boolean>>({});
+  const [regenError, setRegenError]       = useState<Record<string, string | undefined>>({});
+  const [editingKey, setEditingKey]       = useState<string | null>(null);
+  const [editBuf, setEditBuf]             = useState("");
+  const [autoSaved, setAutoSaved]         = useState(false);
+  const [saving, setSaving]               = useState(false);
+  const [saveMsg, setSaveMsg]             = useState<string | null>(null);
+  const [downloadingDocx, setDownloadingDocx] = useState(false);
+
+  const metaTimer = useRef<NodeJS.Timeout | null>(null);
+  const noteTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const hasDraft    = Object.keys(draft).length > 0;
+  const lockedCount = DEEP_DIVE_SECTIONS.filter(s => meta[s.key]?.locked).length;
+  const allLocked   = lockedCount === DEEP_DIVE_SECTIONS.length;
+
+  const svcType  = getEffectiveServiceType(order.service_type);
+  const tagColor = SERVICE_TAG_COLORS[svcType] ?? "bg-gray-100 text-gray-500";
+
+  // Q11 / Q12 stored outside q1-q10 in service_data.deep_dive_extra
+  const sd    = (order.service_data as Record<string, unknown>) ?? {};
+  const extra = (sd.deep_dive_extra as Record<string, string>) ?? {};
+
+  function flashSaved() {
+    setAutoSaved(true);
+    setTimeout(() => setAutoSaved(false), 2500);
+  }
+
+  async function persist(updates: Record<string, unknown>) {
+    await fetch("/api/update-order-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: order.id, ...updates }),
+    });
+    flashSaved();
+  }
+
+  function schedMeta(m: MetaMap) {
+    if (metaTimer.current) clearTimeout(metaTimer.current);
+    metaTimer.current = setTimeout(() => persist({ analyst_commentary: m }), 2000);
+  }
+
+  function schedNote(note: string) {
+    if (noteTimer.current) clearTimeout(noteTimer.current);
+    noteTimer.current = setTimeout(() => persist({ analyst_note: note }), 2000);
+  }
+
+  async function generateDraft() {
+    setGenerating(true);
+    setGenError(null);
+    setEditingKey(null);
+    try {
+      const res  = await fetch("/api/generate-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Generation failed");
+      setDraft(data.draft as Record<string, string>);
+      const reset = defaultMeta();
+      setMeta(reset);
+      persist({ analyst_commentary: reset });
+      setActiveSection(1);
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  async function regenerateSection(key: string) {
+    setRegenerating(p => ({ ...p, [key]: true }));
+    setRegenError(p => ({ ...p, [key]: undefined }));
+    try {
+      const res  = await fetch("/api/regenerate-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, sectionKey: key, analystNotes: meta[key]?.notes }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Regeneration failed");
+      setDraft(p => ({ ...p, [key]: data.content as string }));
+      flashSaved();
+    } catch (e) {
+      setRegenError(p => ({ ...p, [key]: e instanceof Error ? e.message : "Failed" }));
+    } finally {
+      setRegenerating(p => ({ ...p, [key]: false }));
+    }
+  }
+
+  function lockSection(key: string) {
+    const updated = { ...meta, [key]: { ...meta[key], locked: true } };
+    setMeta(updated);
+    setEditingKey(null);
+    persist({ analyst_commentary: updated });
+  }
+
+  function unlockSection(key: string) {
+    const updated = { ...meta, [key]: { ...meta[key], locked: false } };
+    setMeta(updated);
+    persist({ analyst_commentary: updated });
+  }
+
+  async function saveReport() {
+    setSaving(true);
+    setSaveMsg(null);
+    const newStatus = order.status === "new" ? "in_progress" : order.status;
+    await fetch("/api/update-order-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId: order.id, ai_draft: draft,
+        analyst_note: analystNote, analyst_commentary: meta, status: newStatus,
+      }),
+    });
+    setOrder(p => ({ ...p, status: newStatus as Order["status"] }));
+    setSaveMsg("All changes saved.");
+    setTimeout(() => setSaveMsg(null), 3000);
+    setSaving(false);
+  }
+
+  async function downloadDocx() {
+    setDownloadingDocx(true);
+    try {
+      const analystPerspectives = Object.fromEntries(
+        DEEP_DIVE_SECTIONS.map(s => [s.key, meta[s.key]?.callout ?? ""])
+      );
+      const res = await fetch("/api/generate-ddr-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, analystNote, aiDraft: draft, analystPerspectives }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "Report generation failed");
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-DeepDiveReport.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Report generation failed");
+    } finally {
+      setDownloadingDocx(false);
+    }
+  }
+
+  // ── Render one AI section (idx is 0-based index into DEEP_DIVE_SECTIONS) ─────
+
+  function renderAISection(idx: number) {
+    const section   = DEEP_DIVE_SECTIONS[idx];
+    const { key, label } = section;
+    const m         = meta[key] ?? { notes: "", locked: false, callout: "" };
+    const content   = draft[key] ?? "";
+    const isEditing = editingKey === key;
+    const isRegen   = !!regenerating[key];
+    const err       = regenError[key];
+    const isFirst   = idx === 0;
+    const isLast    = idx === DEEP_DIVE_SECTIONS.length - 1;
+
+    const lbl = "text-xs font-semibold text-gray-400 uppercase tracking-wide block";
+
+    return (
+      <div key={key}>
+        {/* Progress + section header */}
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full shrink-0">
+            Section {idx + 1} of {DEEP_DIVE_SECTIONS.length}
+          </span>
+          <h4 className="font-bold text-navy text-base" style={{ fontFamily: "Georgia, serif" }}>
+            {label}
+          </h4>
+          {m.locked && (
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+              ✓ Locked
+            </span>
+          )}
+        </div>
+
+        {/* Edit / Lock controls */}
+        <div className="flex items-center gap-2 mb-3 justify-end">
+          {!m.locked && !isEditing && content && (
+            <button
+              onClick={() => { setEditBuf(content); setEditingKey(key); }}
+              className="text-xs text-seafoam hover:text-navy border border-seafoam/40 hover:border-navy/40 rounded-full px-3 py-1 transition-colors font-medium">
+              Edit
+            </button>
+          )}
+          {m.locked ? (
+            <button onClick={() => unlockSection(key)}
+              className="text-xs text-gray-400 hover:text-orange-500 transition-colors">
+              Unlock
+            </button>
+          ) : (
+            content && (
+              <button onClick={() => lockSection(key)}
+                className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
+                Lock Section
+              </button>
+            )
+          )}
+        </div>
+
+        {/* Content or inline editor */}
+        {isEditing ? (
+          <div className="mb-4">
+            <textarea
+              rows={12} value={editBuf}
+              onChange={e => setEditBuf(e.target.value)}
+              className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed"
+              autoFocus
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => {
+                  const updated = { ...draft, [key]: editBuf };
+                  setDraft(updated);
+                  setEditingKey(null);
+                  persist({ ai_draft: updated });
+                }}
+                className="text-xs bg-seafoam text-navy font-semibold px-4 py-1.5 rounded-full hover:opacity-90 transition-colors">
+                Apply Changes
+              </button>
+              <button onClick={() => setEditingKey(null)}
+                className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5 transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : content ? (
+          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">{content}</p>
+        ) : (
+          <p className="text-sm text-gray-300 italic mb-4">No content for this section.</p>
+        )}
+
+        {/* Analyst Perspective callout — always visible once draft exists */}
+        <div className="mb-4 border-l-4 border-navy/60 pl-4 py-3 bg-slate-50 rounded-r-lg">
+          <label
+            className="block mb-2"
+            style={{
+              fontFamily: "'Montserrat', system-ui, sans-serif",
+              fontSize:   "0.65rem",
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              color:      "#0A2F61",
+              textTransform: "uppercase",
+            }}>
+            Analyst Perspective
+          </label>
+          <textarea
+            rows={3}
+            value={m.callout}
+            onChange={e => {
+              const updated = { ...meta, [key]: { ...m, callout: e.target.value } };
+              setMeta(updated);
+              schedMeta(updated);
+            }}
+            placeholder="Your expert take on what this finding means for this client specifically…"
+            disabled={m.locked}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-navy/20 resize-y placeholder-gray-300 bg-white disabled:bg-gray-50 disabled:text-gray-400"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Optional — appears in the report with a navy accent border if filled in.
+          </p>
+        </div>
+
+        {/* Analyst notes + regen — only when section is not locked */}
+        {!m.locked && (
+          <div className="mb-4 pt-3 border-t border-gray-50 space-y-2">
+            <label className={lbl}>Analyst Notes for Regeneration</label>
+            <textarea
+              rows={2} value={m.notes}
+              onChange={e => {
+                const updated = { ...meta, [key]: { ...m, notes: e.target.value } };
+                setMeta(updated);
+                schedMeta(updated);
+              }}
+              placeholder="Your direction for regenerating this section…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y placeholder-gray-300"
+            />
+            {err && <p className="text-red-500 text-xs">{err}</p>}
+            <button
+              onClick={() => regenerateSection(key)}
+              disabled={isRegen || !hasDraft}
+              className="inline-flex items-center gap-1.5 text-xs bg-navy text-white font-semibold px-4 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              {isRegen ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Regenerating…
+                </>
+              ) : "↺ Regenerate This Section"}
+            </button>
+          </div>
+        )}
+
+        {/* Back / Continue navigation */}
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+          {isFirst ? (
+            <div />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setActiveSection(idx)} // idx (0-based) == previous 1-based section number
+              className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+              ← Back
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => isLast ? setActiveSection(10) : setActiveSection(idx + 2)}
+            className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+            {isLast ? "Continue to Analyst Note →" : "Continue →"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Render closing analyst note (section 10 of 10) ────────────────────────────
+
+  function renderAnalystNote() {
+    return (
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+            Section 10 of 10
+          </span>
+          <h4 className="font-bold text-navy text-base" style={{ fontFamily: "Georgia, serif" }}>
+            A Note from the Analyst
+          </h4>
+        </div>
+        <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+          Write one warm, personal closing paragraph in your own voice. Auto-saved as you type.
+        </p>
+        <textarea
+          rows={6} value={analystNote}
+          onChange={e => { setAnalystNote(e.target.value); schedNote(e.target.value); }}
+          placeholder="Your personal note to the client…"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed mb-4"
+        />
+
+        {!allLocked && (
+          <p className="text-xs text-amber-600 font-medium mb-3">
+            Lock all sections to enable download ({lockedCount}/{DEEP_DIVE_SECTIONS.length} locked)
+          </p>
+        )}
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <button onClick={saveReport} disabled={saving}
+            className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
+            {saving ? "Saving…" : "Save Report"}
+          </button>
+          <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
+            className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+            {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+          </button>
+          {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
+        </div>
+
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => setActiveSection(DEEP_DIVE_SECTIONS.length)}
+            className="text-sm font-semibold text-gray-400 hover:text-navy transition-colors">
+            ← Back
+          </button>
+          <div />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main render ───────────────────────────────────────────────────────────────
+
+  const answers = [
+    order.q1, order.q2, order.q3, order.q4, order.q5,
+    order.q6, order.q7, order.q8, order.q9, order.q10,
+  ];
+  const questionLabels = [
+    "Business name and what you sell or offer",
+    "How long in business, and where are you located?",
+    "Who is your ideal customer?",
+    "Top 2–3 competitors",
+    "What makes you different from those competitors?",
+    "Biggest challenge right now",
+    "What does success look like in the next 12 months?",
+    "What marketing are you currently doing, if any?",
+    "What do you wish you knew about your market or customers?",
+    "Anything else you want the report to focus on or address?",
+  ];
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8 flex-wrap">
+        <button onClick={onBack} className="text-sm text-gray-400 hover:text-navy transition-colors">
+          ← All Orders
+        </button>
+        <div className="h-4 w-px bg-gray-200" />
+        <h2 className="text-navy text-2xl font-bold" style={{ fontFamily: "Georgia, serif" }}>
+          {order.business_name}
+        </h2>
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tagColor}`}>
+          {SERVICE_DISPLAY_NAMES[svcType]}
+        </span>
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLORS[order.status] ?? STATUS_COLORS.new}`}>
+          {order.status.replace("_", " ")}
+        </span>
+        {autoSaved && <span className="text-xs text-green-500 font-medium ml-auto">✓ Auto-saved</span>}
+      </div>
+
+      {/* Customer info */}
+      <div className="bg-white rounded-xl border border-gray-100 px-6 py-4 mb-6 flex flex-wrap gap-6 text-sm">
+        <div>
+          <span className="text-gray-400">Customer</span>
+          <p className="font-semibold text-navy mt-0.5">{order.customer_name}</p>
+        </div>
+        <div>
+          <span className="text-gray-400">Email</span>
+          <p className="font-semibold text-navy mt-0.5">{order.email}</p>
+        </div>
+        <div>
+          <span className="text-gray-400">Submitted</span>
+          <p className="font-semibold text-navy mt-0.5">
+            {new Date(order.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Order ID</span>
+          <p className="font-mono text-xs text-gray-400 mt-0.5">{order.id.slice(0, 8)}…</p>
+        </div>
+      </div>
+
+      {/* Intake answers */}
+      <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+        <h3 className="text-navy font-semibold mb-4" style={{ fontFamily: "Georgia, serif" }}>
+          Intake Answers
+        </h3>
+        <div className="space-y-4">
+          {questionLabels.map((q, i) => {
+            const a = answers[i];
+            if (!a) return null;
+            return (
+              <div key={i}>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                  Q{i + 1} — {q}
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{a}</p>
+              </div>
+            );
+          })}
+          {/* Deep Dive extra questions (Q11 / Q12) stored outside q1-q10 */}
+          {extra.q11 && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                {DEEP_DIVE_EXTRA_QUESTIONS[0].label}
+              </p>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{extra.q11}</p>
+            </div>
+          )}
+          {extra.q12 && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                {DEEP_DIVE_EXTRA_QUESTIONS[1].label}
+              </p>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{extra.q12}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Report Draft */}
+      <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
+            Report Draft
+          </h3>
+          <div className="flex items-center gap-3">
+            {hasDraft && (
+              <span className="text-xs text-gray-400 font-medium">
+                {allLocked
+                  ? "All sections locked ✓"
+                  : `${lockedCount}/${DEEP_DIVE_SECTIONS.length} sections locked`}
+              </span>
+            )}
+            <button onClick={generateDraft} disabled={generating}
+              className="bg-seafoam text-navy font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              {generating ? "Generating…" : hasDraft ? "Regenerate Full Draft" : "Generate AI Draft"}
+            </button>
+          </div>
+        </div>
+
+        {genError && <p className="text-red-500 text-sm mb-4">{genError}</p>}
+
+        {generating && (
+          <div className="flex items-center gap-3 py-8 justify-center text-gray-400">
+            <div className="w-5 h-5 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm">
+              Claude is researching the market and drafting your Deep Dive Report…
+            </span>
+          </div>
+        )}
+
+        {!hasDraft && !generating && (
+          <p className="text-sm text-gray-400 py-4 text-center">
+            Click &ldquo;Generate AI Draft&rdquo; to create the report using Claude with live web research.
+          </p>
+        )}
+
+        {hasDraft && !generating && (
+          <div>
+            {activeSection >= 1 && activeSection <= DEEP_DIVE_SECTIONS.length
+              ? renderAISection(activeSection - 1)
+              : renderAnalystNote()
+            }
+          </div>
+        )}
+      </div>
+
+      {/* Order Actions */}
+      <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-wrap gap-3">
+        <h3 className="w-full text-navy font-semibold mb-1" style={{ fontFamily: "Georgia, serif" }}>
+          Order Actions
+        </h3>
+        {order.status === "new" && (
+          <button
+            onClick={async () => {
+              await fetch("/api/update-order-status", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: order.id, status: "in_progress" }),
+              });
+              setOrder(p => ({ ...p, status: "in_progress" }));
+            }}
+            className="bg-yellow-100 text-yellow-700 font-semibold text-sm px-5 py-2 rounded-full hover:bg-yellow-200 transition-colors">
+            Mark In Progress
+          </button>
+        )}
+        {(order.status === "new" || order.status === "in_progress") && (
+          <button
+            onClick={async () => {
+              await fetch("/api/update-order-status", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: order.id, status: "delivered" }),
+              });
+              setOrder(p => ({ ...p, status: "delivered" }));
+            }}
+            className="bg-seagreen text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-opacity">
+            Mark Delivered
+          </button>
+        )}
+        {order.status === "delivered" && (
+          <span className="text-sm text-green-600 font-semibold py-2">Report delivered.</span>
+        )}
+      </div>
+    </div>
+  );
+}

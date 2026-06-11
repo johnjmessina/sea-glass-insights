@@ -130,6 +130,9 @@ export default function DeepDiveReportPage() {
                 </li>
               ))}
             </ul>
+            <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY, marginTop: "20px", lineHeight: 1.7, fontStyle: "italic" }}>
+              Every section includes an optional Analyst Perspective &mdash; your analyst&rsquo;s expert take on what the findings mean specifically for your business, your market, and your next move.
+            </p>
           </div>
           <div>
             <h2 style={{ fontFamily: CG, fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>How It Works</h2>

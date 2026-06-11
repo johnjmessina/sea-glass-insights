@@ -19,6 +19,7 @@ import {
 import GenericServiceDetail from "@/app/dashboard/components/GenericServiceDetail";
 import SecretShoppingDetail from "@/app/dashboard/components/SecretShoppingDetail";
 import VoCDetail from "@/app/dashboard/components/VoCDetail";
+import DeepDiveDetail from "@/app/dashboard/components/DeepDiveDetail";
 
 // Must be after all imports — const declarations between import groups cause
 // module-evaluation errors in strict ESM / Turbopack builds.
@@ -795,6 +796,7 @@ function ServiceOrderRouter({ order, onBack }: { order: Order; onBack: () => voi
   }
   if (svcType === "secret_shopping")         return <SecretShoppingDetail order={order} onBack={onBack} />;
   if (svcType === "voice_of_customer_survey") return <VoCDetail order={order} onBack={onBack} />;
+  if (svcType === "deep_dive_report")         return <DeepDiveDetail order={order} onBack={onBack} />;
   if (svcType !== "market_intelligence_report") return <GenericServiceDetail order={order} onBack={onBack} />;
 
   // Fall through to existing MIR OrderDetail below
