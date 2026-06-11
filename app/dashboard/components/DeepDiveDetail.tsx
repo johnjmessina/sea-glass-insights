@@ -65,6 +65,8 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState<string | null>(null);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
+  const [sendingReport, setSendingReport] = useState(false);
+  const [sendMsg, setSendMsg]             = useState<string | null>(null);
 
   const metaTimer = useRef<NodeJS.Timeout | null>(null);
   const noteTimer = useRef<NodeJS.Timeout | null>(null);
@@ -205,6 +207,29 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
       alert(e instanceof Error ? e.message : "Report generation failed");
     } finally {
       setDownloadingDocx(false);
+    }
+  }
+
+  async function sendReport() {
+    if (!confirm(`Send the report to ${order.email}?`)) return;
+    setSendingReport(true);
+    setSendMsg(null);
+    try {
+      const res  = await fetch("/api/send-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Send failed");
+      setOrder(p => ({ ...p, status: "delivered" }));
+      setSendMsg(`Report sent to ${order.email}`);
+      setTimeout(() => setSendMsg(null), 6000);
+    } catch (e) {
+      setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
+      setTimeout(() => setSendMsg(null), 8000);
+    } finally {
+      setSendingReport(false);
     }
   }
 
@@ -399,26 +424,8 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
           rows={6} value={analystNote}
           onChange={e => { setAnalystNote(e.target.value); schedNote(e.target.value); }}
           placeholder="Your personal note to the client…"
-          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed mb-4"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed"
         />
-
-        {!allLocked && (
-          <p className="text-xs text-amber-600 font-medium mb-3">
-            Lock all sections to enable download ({lockedCount}/{DEEP_DIVE_SECTIONS.length} locked)
-          </p>
-        )}
-
-        <div className="flex items-center gap-3 flex-wrap">
-          <button onClick={saveReport} disabled={saving}
-            className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-            {saving ? "Saving…" : "Save Report"}
-          </button>
-          <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
-            className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-            {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
-          </button>
-          {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-        </div>
 
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
           <button
@@ -538,19 +545,13 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
           <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
             Report Draft
           </h3>
-          <div className="flex items-center gap-3 flex-wrap justify-end">
+          <div className="flex items-center gap-3">
             {hasDraft && (
               <span className="text-xs text-gray-400 font-medium">
                 {allLocked
                   ? "All sections locked ✓"
                   : `${lockedCount}/${DEEP_DIVE_SECTIONS.length} sections locked`}
               </span>
-            )}
-            {hasDraft && allLocked && (
-              <button onClick={downloadDocx} disabled={downloadingDocx}
-                className="bg-seagreen text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-                {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
-              </button>
             )}
             <button onClick={generateDraft} disabled={generating}
               className="bg-seafoam text-navy font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
@@ -582,6 +583,36 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
               ? renderAISection(activeSection - 1)
               : renderAnalystNote()
             }
+          </div>
+        )}
+
+        {hasDraft && !generating && (
+          <div className="pt-5 mt-4 border-t border-dashed border-seagreen/30 flex items-center gap-3 flex-wrap">
+            <button onClick={saveReport} disabled={saving}
+              className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
+              {saving ? "Saving…" : "Save Report"}
+            </button>
+            <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
+              className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+              {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+            </button>
+            <button onClick={sendReport}
+              disabled={sendingReport || order.status === "delivered" || !allLocked}
+              className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
+              {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
+            </button>
+            {!allLocked && (
+              <p className="text-xs text-amber-600 font-medium">
+                Lock all {DEEP_DIVE_SECTIONS.length} sections to enable download and send
+                ({lockedCount}/{DEEP_DIVE_SECTIONS.length} locked)
+              </p>
+            )}
+            {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
+            {sendMsg && (
+              <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>
+                {sendMsg}
+              </span>
+            )}
           </div>
         )}
       </div>

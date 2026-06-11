@@ -205,6 +205,104 @@ const SERVICE_PICKER_ITEMS: {
   { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience",   desc: "Secret Shopping + Voice of Customer Survey", bundle: true },
 ];
 
+const TEST_DATA: Partial<Record<ServiceType, Partial<ManualForm>>> = {
+  market_intelligence_report: {
+    customerName: "John Kelly", businessName: "Sandy Soles Surf Shop",
+    email: "john@sandysolessurf.com", location: "Asbury Park, NJ",
+    q1: "Sandy Soles is a surf shop and beach lifestyle destination offering board sales, rentals, group surf lessons, apparel, and accessories for locals and tourists.",
+    q2: "Asbury Park, NJ — 4 years in business on the main beachblock",
+    q3: "Local surfers aged 18-35, summer tourists with families, and teens learning to surf. Middle to upper income, active and beach-oriented lifestyle.",
+    q4: "Ron Jon Surf Shop in Seaside Heights, Risers Surf Co. in Manasquan, East Coast Surf & Skate in Belmar",
+    q5: "We combine lessons, rentals, and retail under one roof. Tourists can walk in empty-handed and leave with a full session. Most competitors are retail-only or lessons-only.",
+    q6: "Revenue drops 80% after Labor Day. Difficult to sustain cash flow through fall and winter without a stronger local off-season customer base.",
+    q7: "Grow summer lesson bookings to 500, build an email list of 1,000 locals for off-season marketing, and open a second location within 3 years.",
+    q8: "Instagram and Facebook with organic posts. Google Ads June through August. No email newsletter or referral program yet.",
+    q9: "What makes tourists choose us over competitors on the same block? Which customer segment converts best? What would bring locals back off-season?",
+    q10: "Considering a second location in Cape May. Want to understand if the market there differs enough from Asbury Park to justify the investment.",
+  },
+  social_media_audit: {
+    customerName: "Marina Oakes", businessName: "Saltwater & Honey",
+    email: "marina@saltwaterandhoney.com", location: "Spring Lake, NJ",
+    q1: "Saltwater & Honey makes handmade soy candles and coastal lifestyle accessories inspired by the Jersey Shore, sold online and at local boutiques.",
+    q2: "Instagram @saltwaterandhoney (2.1k followers), Facebook page (800 followers), Pinterest (untended), no TikTok",
+    q3: "Product flat-lays, behind-the-scenes pours, Shore town scent stories, seasonal launches. Mostly static images, occasional Reels.",
+    q4: "Instagram engagement is declining despite daily posting. Stories outperform grid but neither is converting followers to buyers.",
+    q5: "Reach 10k Instagram followers, convert 5% to first-time buyers, and grow email list to 500 subscribers before peak summer.",
+    q6: "Reach is being suppressed. No paid ads budget. Hashtag strategy feels stale. Unclear which platform actually drives sales.",
+    q7: "", q8: "", q9: "", q10: "",
+  },
+  secret_shopping: {
+    customerName: "Tony DiPietro", businessName: "The Margate Grille",
+    email: "tony@margategrill.com", location: "Margate City, NJ",
+    q1: "A casual waterfront seafood and American grill open for lunch and dinner. Known for local catch, full bar, and outdoor seating overlooking the bay.",
+    q2: "6 Bar Ave, Margate City, NJ 08402",
+    q3: "Families with kids, local year-round residents, summer tourists from Philadelphia and South Jersey. Ages 30-60.",
+    q4: "Jersey Girl Grille, Bocce Bar, The Brighton Bar & Grill",
+    q5: "Table service, bar service",
+    q6: "First impression on arrival, server friendliness and product knowledge, food quality and presentation, cleanliness, wait times",
+    q7: "Yes — Brighton Bar & Grill, 8 S. Brig Ave, Brigantine, NJ 08203",
+    q8: "", q9: "",
+    q10: "Please pay close attention to how staff handles the high-volume weekend rush. We have received complaints about slow service during peak hours.",
+  },
+  deep_dive_report: {
+    customerName: "Dana Wills", businessName: "Jersey Shore Kayak Tours",
+    email: "dana@jskayaktours.com", location: "Point Pleasant Beach, NJ",
+    q1: "Guided kayak and paddleboard eco-tours along the Manasquan River and Barnegat Bay. Certified naturalist guides, conservation education included.",
+    q2: "3 years in business, Point Pleasant Beach, NJ",
+    q3: "Adventure couples aged 25-50, corporate team-building groups, nature enthusiasts, and families with older kids. Upper-middle income, active lifestyle.",
+    q4: "Kayak Jersey in Red Bank, Barnegat Bay Kayak Tours in Tuckerton, Toms River Outdoor Adventures",
+    q5: "Narrated eco-tours with certified naturalist guides who teach local ecology — not just a rental. Most competitors are paddle-and-go with no educational component.",
+    q6: "Capacity fills on summer weekends but weekday utilization is under 30%. Corporate bookings are sporadic with no systematic outreach.",
+    q7: "Add corporate group packages generating $25k in off-peak revenue, raise weekday utilization to 60%, launch a premium sunset tour series.",
+    q8: "Instagram, TripAdvisor, Google Business Profile. Partnerships with 3 local Airbnb hosts. No paid ads, no email list.",
+    q9: "What corporate segments are most likely to book? Is there demand for private charters at premium pricing? How are tourists vs. locals finding us?",
+    q10: "Adding either SUP yoga sessions or guided kayak fishing charters in 2025 — have capital for one but not both.",
+    dd_q11: "Whether to launch SUP yoga on-water classes or guided kayak fishing charters as the primary 2025 expansion offering",
+    dd_q12: "Customer survey of 200 guests: 43% interested in yoga-on-water, 28% in guided fishing. No formal revenue projections done yet.",
+  },
+  synthetic_survey_report: {
+    customerName: "Claire Bouchard", businessName: "Flip Flop Boutique",
+    email: "claire@flipflopboutique.com", location: "Beach Haven, NJ",
+    q1: "Women's coastal fashion boutique in Beach Haven on Long Beach Island carrying resort wear, accessories, and jewelry from regional and NJ-made designers.",
+    q2: "8 years in business, Beach Haven, Long Beach Island, NJ",
+    q3: "Women 30-55, Shore visitors with disposable income, local gift buyers. Household income $100k+. Value unique finds over chain retail.",
+    q4: "Coastal Chic Boutique in Barnegat Light, LBI Threads in Ship Bottom, boutiques in Belmar",
+    q5: "Curated NJ-made and Shore-inspired designers with personal styling included. Regional brands nobody else on LBI carries.",
+    q6: "1. What most influences where you shop for resort and beachwear?\n2. How much do you typically spend on a complete vacation outfit?\n3. Would a free styling session (with a $100 purchase) increase how often you visit?\n4. Do you prefer Shore-specific brands or familiar national labels?\n5. What would make you shop online from a boutique you loved on vacation?",
+    q7: "Increase summer revenue 15%, launch off-season online store, grow repeat customers with a loyalty program.",
+    q8: "Instagram daily, monthly email newsletter to 800 subscribers, occasional Facebook. Featured in Shore Living Magazine twice.",
+    q9: "Do tourists know about us before arriving or discover us by walking by? Would a loyalty program bring locals back off-season?",
+    q10: "Considering adding a personalized corporate gift box service. Need to know if our core customer would actually use it.",
+  },
+  voice_of_customer_survey: {
+    customerName: "Amanda Reyes", businessName: "Shore Yoga Studio",
+    email: "amanda@shoreyogastudio.com",
+    q1: "Shore Yoga offers group classes, private sessions, and wellness retreats in Ocean City, NJ. Styles include vinyasa, restorative, and beginner hatha.",
+    q2: "Yoga and wellness studio",
+    q3: "200-500",
+    q4: "Email newsletter and in-person sign-up sheets at the studio",
+    q5: "Improve student retention and understand why 20% of regulars stopped coming after a competing studio opened 3 blocks away.",
+    q6: "Yes — Google Form sent 18 months ago, 47 responses. Found people wanted more evening classes and 45-minute express options. Added both.",
+    q7: "Determine what would bring former students back and what would attract new students over the competitor.",
+    q8: "Current students and roughly 300 people who attended at least once in the past 2 years. Mostly Ocean City and Strathmere residents.",
+    q9: "", q10: "",
+  },
+  ai_starter_kit: {
+    customerName: "Nathan Ford", businessName: "Cape May Glass Works",
+    email: "nathan@capemayglass.com", location: "Cape May, NJ",
+    q1: "Custom stained glass studio creating architectural panels, art windows, and coastal artwork. Commissions, workshops, and gallery sales.",
+    q2: "12 years in business, Cape May, NJ — gallery and working studio on Washington Street",
+    q3: "Homeowners renovating Victorian-era homes, tourists visiting Cape May, art collectors, couples seeking unique gifts.",
+    q4: "Mass-produced stained glass on Etsy, regional studios in Philadelphia, local craft galleries with imported glass art",
+    q5: "Working artist with 12 years of original Cape May Victorian-specialty work — not a reseller. Every piece is created or customized in-house.",
+    q6: "ChatGPT, Google Workspace",
+    q7: "Writing custom commission proposals, drafting workshop descriptions, answering pricing inquiry emails, writing Instagram captions for finished pieces",
+    q8: "Formal but warm — clients spend $5k to $50k on a commission. Professional tone, never corporate or generic.",
+    q9: "",
+    q10: "Need prompts for commission proposals, workshop marketing emails, and pricing inquiry responses that do not sound transactional.",
+  },
+};
+
 function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) => void; onCancel: () => void }) {
   const [step, setStep]      = useState<"select" | "intake">("select");
   const [form, setForm]      = useState<ManualForm>(MANUAL_EMPTY);
@@ -227,6 +325,11 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
     setStep("intake");
     setBizType(""); setDuration(""); setDecisionType("");
     setYesQ12(null); setYesQ6(null);
+  }
+
+  function fillTestData() {
+    const data = TEST_DATA[form.serviceType] ?? TEST_DATA.market_intelligence_report ?? {};
+    setForm(prev => ({ ...prev, ...data }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -442,9 +545,18 @@ function ManualOrderForm({ onSuccess, onCancel }: { onSuccess: (order: Order) =>
 
         {/* Intake questions — all questions always rendered; structured inputs for specific fields */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
-          <div>
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Intake Answers</h3>
-            <p className="text-xs text-gray-400 mt-1">All fields optional — fill in whatever the client shared.</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Intake Answers</h3>
+              <p className="text-xs text-gray-400 mt-1">All fields optional — fill in whatever the client shared.</p>
+            </div>
+            <button
+              type="button"
+              onClick={fillTestData}
+              className="text-xs font-medium text-seafoam border border-seafoam/40 hover:border-seafoam hover:bg-seafoam/5 rounded-full px-3 py-1.5 shrink-0 transition-colors"
+            >
+              Fill with Test Data
+            </button>
           </div>
 
           {qKeys.map((key, i) => {
