@@ -538,13 +538,19 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
           <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
             Report Draft
           </h3>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap justify-end">
             {hasDraft && (
               <span className="text-xs text-gray-400 font-medium">
                 {allLocked
                   ? "All sections locked ✓"
                   : `${lockedCount}/${DEEP_DIVE_SECTIONS.length} sections locked`}
               </span>
+            )}
+            {hasDraft && allLocked && (
+              <button onClick={downloadDocx} disabled={downloadingDocx}
+                className="bg-seagreen text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+              </button>
             )}
             <button onClick={generateDraft} disabled={generating}
               className="bg-seafoam text-navy font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
