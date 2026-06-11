@@ -159,82 +159,91 @@ async function generateDeepDiveDraft(order: Order): Promise<Record<string, strin
     q12 ? `Q12 (Prior Research): ${q12}` : "",
   ].filter(Boolean).join("\n");
 
-  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+  const mandate = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.`;
 
-You are a senior market research analyst at Sea Glass Insights.
-Your job is to produce a professional Deep Dive Report grounded in REAL, RESEARCHED data — not just intake answers. This is a more rigorous, decision-focused version of the standard Market Intelligence Report.
+  // Helper: strip citation markup injected by web_search and extract clean text
+  function cleanWebText(resp: { content: Array<{ type: string }> }): string {
+    return resp.content
+      .filter(b => b.type === "text")
+      .map(b => (b as { type: "text"; text: string }).text)
+      .join("")
+      .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
+      .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
+      .replace(/<[a-z][^>]*\/?>/gi, "")
+      .replace(/\[\d+\]/g, "")
+      .replace(/^```(?:json)?\n?/i, "")
+      .replace(/\n?```$/i, "")
+      .trim();
+  }
 
-STEP 1 — WEB RESEARCH (use web_search for each item):
-• Search for the client's business to understand their current positioning, presence, and reputation.
-• Look up each competitor mentioned in the intake — research their strengths, weaknesses, pricing, positioning, and any recent changes.
-• Research industry trends, local market conditions, and macro factors relevant to this business type and location.
-• If Q11 mentions a specific decision (expansion, pricing change, new product, etc.), search for relevant data, benchmarks, or examples that directly inform that decision.
-• Note real facts you discover: market data, competitor details, industry context.
-
-STEP 2 — WRITE ALL 9 SECTIONS:
-Ground every section in what you actually researched. This is a Deep Dive — more depth, more sources, more context than a standard report. Address the specific decision from Q11 throughout all relevant sections.
-
-CRITICAL OUTPUT RULES — read carefully before writing your response:
-• Your ENTIRE response must be one valid JSON object and nothing else.
-• Do NOT include any citation tags, HTML tags, or markup of any kind inside JSON values.
-• Do NOT include web search attribution, reference numbers, bracketed citations like [1], or source annotations.
-• Do NOT include markdown, backticks, or any text before or after the JSON object.
-• Write all facts as plain prose sentences only.
-• No em-dashes. No corporate jargon. Tone: warm, credible, direct.
-
-Return ONLY a raw JSON object with exactly these 9 keys:
-
-{
-  "executive_summary": "2-3 paragraphs: where they stand today (grounded in research), biggest opportunity, most urgent action — informed by Q11",
-  "business_snapshot": "3-4 paragraphs: who they are, what makes them distinctive, their market context based on research",
-  "customer_segments": "4-5 distinct segments as readable prose — name, description, motivation, key need for each",
-  "competitive_intelligence": "deep per-competitor analysis grounded in research — actual strengths, vulnerabilities, positioning gaps",
-  "market_context": "industry trends, seasonal and local factors, macro conditions — based on researched current data",
-  "decision_specific_analysis": "directly address the specific decision or problem in Q11 — analysis, risks, considerations, recommendation",
-  "extended_recommendations": "5-6 specific recommendations with implementation guidance — informed by all research and Q11",
-  "priority_action_framework": "3-tier framework: Do Now / Do Soon / Do Eventually — each tier has 2-3 items with rationale tied to Q11",
-  "expanded_analyst_interpretation": "synthesis — the thread connecting all findings, what it means for this specific business and decision"
-}`;
-
-  const response = await client.messages.create({
+  // ── Call 1: Sections 1–5 ────────────────────────────────────────────────────
+  // Research: business overview, competitors, market context
+  const response1 = await client.messages.create({
     model:      "claude-sonnet-4-5",
-    max_tokens: 8000,
+    max_tokens: 4000,
     tools:      [{ type: "web_search_20250305", name: "web_search" }],
-    system,
+    system: `${mandate}
+
+You are a senior market research analyst at Sea Glass Insights. Research this business and write the first 5 sections of a Deep Dive Report.
+
+STEP 1 — WEB RESEARCH:
+• Search for the client's business: positioning, online presence, reputation.
+• Look up each competitor mentioned in the intake: strengths, weaknesses, pricing, recent changes.
+• Research industry trends and local market conditions relevant to this business.
+
+STEP 2 — WRITE SECTIONS 1–5. Ground every sentence in what you actually researched.
+Tone: warm, credible, direct. No em-dashes. No corporate jargon.
+No citation tags, HTML elements, [1] markers, or source annotations inside JSON values. Plain prose only.
+
+Return ONLY this JSON object with exactly these 5 keys:
+{
+  "executive_summary": "2-3 paragraphs: where they stand today based on research, biggest opportunity, most urgent action",
+  "business_snapshot": "3-4 paragraphs: who they are, what makes them distinctive, their market context from research",
+  "customer_segments": "4-5 distinct customer segments as readable prose — name, description, motivation, key need for each",
+  "competitive_intelligence": "deep per-competitor analysis grounded in research — actual strengths, vulnerabilities, positioning gaps",
+  "market_context": "industry trends, seasonal and local factors, macro conditions based on current research"
+}`,
     messages: [{
       role:    "user",
-      content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for this business's market, competitors, and industry conditions, then produce the complete Deep Dive Report.`,
+      content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for this business, its competitors, and market conditions, then write sections 1–5.`,
     }],
   });
 
-  const fullText = response.content
-    .filter(b => b.type === "text")
-    .map(b => (b as { type: "text"; text: string }).text)
-    .join("");
+  // ── Call 2: Sections 6–9 ────────────────────────────────────────────────────
+  // Research: focused on Q11 decision — benchmarks, data, examples
+  const response2 = await client.messages.create({
+    model:      "claude-sonnet-4-5",
+    max_tokens: 4000,
+    tools:      [{ type: "web_search_20250305", name: "web_search" }],
+    system: `${mandate}
 
-  const stripped = fullText
-    .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
-    .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
-    .replace(/<[a-z][^>]*\/?>/gi, "")
-    .replace(/\[\d+\]/g, "")
-    .replace(/^```(?:json)?\n?/i, "")
-    .replace(/\n?```$/i, "")
-    .trim();
+You are a senior market research analyst at Sea Glass Insights. Write the final 4 sections of a Deep Dive Report, focused on the specific decision stated in the intake.${q11 ? `\n\nSpecific decision being analyzed: ${q11}` : ""}
 
-  const firstBrace = stripped.indexOf("{");
-  const lastBrace  = stripped.lastIndexOf("}");
-  const raw = firstBrace !== -1 && lastBrace > firstBrace
-    ? stripped.slice(firstBrace, lastBrace + 1)
-    : stripped;
+STEP 1 — FOCUSED RESEARCH:
+• Search for data, benchmarks, and real-world examples directly relevant to the specific decision.
+• Look up market conditions, pricing data, or industry examples that inform the recommendation.
 
-  let parsed: Record<string, string>;
-  try {
-    parsed = JSON.parse(raw) as Record<string, string>;
-  } catch {
-    console.error("DDR generation — raw response that failed to parse:\n", fullText);
-    throw new Error(`DDR generation returned invalid JSON: ${raw.slice(0, 400)}`);
-  }
-  return parsed;
+STEP 2 — WRITE SECTIONS 6–9. Every section must directly address the specific decision.
+Tie every recommendation and framework item back to Q11. Tone: warm, credible, direct.
+No em-dashes. No corporate jargon. No citation tags, HTML, [1] markers, or source annotations inside values.
+
+Return ONLY this JSON object with exactly these 4 keys:
+{
+  "decision_specific_analysis": "focused analysis on the specific decision — analysis, risks, considerations, recommendation",
+  "extended_recommendations": "5-6 specific recommendations with implementation guidance, informed by all research",
+  "priority_action_framework": "3-tier: Do Now / Do Soon / Do Eventually — 2-3 items per tier with rationale tied to the decision",
+  "expanded_analyst_interpretation": "synthesis — the thread connecting all findings, what it means for this business and decision"
+}`,
+    messages: [{
+      role:    "user",
+      content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for data relevant to the specific decision, then write sections 6–9.`,
+    }],
+  });
+
+  const parts1 = parseJsonSections(cleanWebText(response1), "DDR sections 1–5");
+  const parts2 = parseJsonSections(cleanWebText(response2), "DDR sections 6–9");
+
+  return { ...parts1, ...parts2 };
 }
 
 // ── Synthetic Survey Report ────────────────────────────────────────────────────
