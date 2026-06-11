@@ -32,12 +32,21 @@ async function callClaude(system: string, user: string, maxTokens = 4096): Promi
   return raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
 }
 
-function parseJsonSections(raw: string): Record<string, string> {
+function parseJsonSections(raw: string, label = "Generation"): Record<string, string> {
+  // Brace extraction: discard any preamble or postamble around the JSON object
+  const firstBrace = raw.indexOf("{");
+  const lastBrace  = raw.lastIndexOf("}");
+  const extracted  = firstBrace !== -1 && lastBrace > firstBrace
+    ? raw.slice(firstBrace, lastBrace + 1)
+    : raw;
+
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(extracted);
     if (typeof parsed === "object" && parsed !== null) return parsed as Record<string, string>;
-  } catch { /* fall through */ }
-  throw new Error(`Claude returned invalid JSON: ${raw.slice(0, 300)}`);
+  } catch {
+    console.error(`${label} — raw response that failed to parse:\n`, raw);
+  }
+  throw new Error(`${label} returned invalid JSON: ${extracted.slice(0, 300)}`);
 }
 
 // ── Social Media Audit (web-search enabled) ────────────────────────────────────
@@ -150,7 +159,7 @@ async function generateDeepDiveDraft(order: Order): Promise<Record<string, strin
     q12 ? `Q12 (Prior Research): ${q12}` : "",
   ].filter(Boolean).join("\n");
 
-  const system = `You must respond with valid JSON only. Do not include any text, explanation, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
 
 You are a senior market research analyst at Sea Glass Insights.
 Your job is to produce a professional Deep Dive Report grounded in REAL, RESEARCHED data — not just intake answers. This is a more rigorous, decision-focused version of the standard Market Intelligence Report.
@@ -232,7 +241,9 @@ Return ONLY a raw JSON object with exactly these 9 keys:
 
 async function generateSyntheticDraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
-  const system = `You are a senior research analyst at Sea Glass Insights. Produce a Synthetic Survey Report for a small business. This report uses AI-generated customer personas to pressure-test the business's assumptions and surface directional insight. Be transparent about methodology. Return ONLY a valid JSON object with exactly these 7 keys. Each value is 2-4 paragraphs of plain text. No markdown. Tone: warm, clear, honest about limitations.
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+
+You are a senior research analyst at Sea Glass Insights. Produce a Synthetic Survey Report for a small business. This report uses AI-generated customer personas to pressure-test the business's assumptions and surface directional insight. Be transparent about methodology. Return ONLY a valid JSON object with exactly these 7 keys. Each value is 2-4 paragraphs of plain text. No markdown. Tone: warm, clear, honest about limitations.
 
 Keys required:
 - "research_question_framework" (what we're testing and why — restate the business's assumptions as research questions)
@@ -244,17 +255,19 @@ Keys required:
 - "honest_limitations_statement" (what this research can and cannot tell you — be genuinely direct)`;
 
   const raw = await callClaude(system, `Business intake:\n\n${intake}`);
-  return parseJsonSections(raw);
+  return parseJsonSections(raw, "Synthetic Survey");
 }
 
 // ── Voice of Customer — Phase 1 (Survey Design) ────────────────────────────────
 
 async function generateVoCSurveyDesign(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
-  const system = `You are a senior research analyst at Sea Glass Insights. Based on the business intake provided, design a customer survey of up to 10 questions. The survey should directly address what the business owner wants to learn from their customers. Output the survey as clean, copy-paste-ready text formatted for Google Forms — question text only, no numbering prose, organized with clear question labels. Return ONLY a valid JSON object with exactly 1 key: "survey_design". The value should be the formatted survey text ready to copy into Google Forms. Use question types like Short Answer, Paragraph, Multiple Choice, or Linear Scale where appropriate — note the type in brackets after each question.`;
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+
+You are a senior research analyst at Sea Glass Insights. Based on the business intake provided, design a customer survey of up to 10 questions. The survey should directly address what the business owner wants to learn from their customers. Output the survey as clean, copy-paste-ready text formatted for Google Forms — question text only, no numbering prose, organized with clear question labels. Return ONLY a valid JSON object with exactly 1 key: "survey_design". The value should be the formatted survey text ready to copy into Google Forms. Use question types like Short Answer, Paragraph, Multiple Choice, or Linear Scale where appropriate — note the type in brackets after each question.`;
 
   const raw = await callClaude(system, `Business intake:\n\n${intake}`);
-  return parseJsonSections(raw);
+  return parseJsonSections(raw, "VoC Survey Design");
 }
 
 // ── Voice of Customer — Phase 2 (Analysis) ────────────────────────────────────
@@ -264,7 +277,9 @@ async function generateVoCAnalysis(
   responses: string
 ): Promise<Record<string, string>> {
   const intake = buildIntake(order);
-  const system = `You are a senior research analyst at Sea Glass Insights. Analyze the following customer survey responses and produce a Voice of Customer report. Return ONLY a valid JSON object with exactly these 3 keys. Each value is 2-4 paragraphs of plain text. No markdown within values. Tone: clear, insightful, practical.
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+
+You are a senior research analyst at Sea Glass Insights. Analyze the following customer survey responses and produce a Voice of Customer report. Return ONLY a valid JSON object with exactly these 3 keys. Each value is 2-4 paragraphs of plain text. No markdown within values. Tone: clear, insightful, practical.
 
 Keys required:
 - "thematic_analysis" (identify 4-6 major themes from the responses — what customers care about, what comes up repeatedly)
@@ -273,14 +288,16 @@ Keys required:
 
   const user = `Business intake:\n\n${intake}\n\nSurvey responses:\n\n${responses}`;
   const raw = await callClaude(system, user);
-  return parseJsonSections(raw);
+  return parseJsonSections(raw, "VoC Analysis");
 }
 
 // ── AI Starter Kit ─────────────────────────────────────────────────────────────
 
 async function generateAIStarterKitDraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
-  const system = `You are a senior analyst at Sea Glass Insights. Produce an AI Starter Kit for a small business owner who is new to AI tools. This kit should be practical, warm, and immediately useful — not intimidating. Return ONLY a valid JSON object with exactly these 10 keys. Tone: approachable, specific, encouraging.
+  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
+
+You are a senior analyst at Sea Glass Insights. Produce an AI Starter Kit for a small business owner who is new to AI tools. This kit should be practical, warm, and immediately useful — not intimidating. Return ONLY a valid JSON object with exactly these 10 keys. Tone: approachable, specific, encouraging.
 
 Keys required:
 - "business_type_analysis" (2 paragraphs — who this business is and what AI can do for their specific situation)
@@ -295,7 +312,7 @@ Keys required:
 - "revision_notes" (leave blank — analyst fills this in manually)`;
 
   const raw = await callClaude(system, `Business intake:\n\n${intake}`);
-  const sections = parseJsonSections(raw);
+  const sections = parseJsonSections(raw, "AI Starter Kit");
   sections.revision_notes = "";  // always blank
   return sections;
 }
