@@ -434,6 +434,118 @@ const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   summary_and_recommendations:   "Write 3-4 paragraphs: standout strength, most urgent improvement, 3-4 specific actionable recommendations.",
 };
 
+// ── DDR: Standalone section generation with per-section focused search ────────
+//
+// Each section does its own focused web search for only what it needs.
+// Sections that don't benefit from search (analytics, synthesis) skip it.
+// All calls target <45 s to stay well under Vercel's 60 s limit.
+
+type DDRSectionConfig = {
+  useSearch: boolean;
+  searchDirective: string;
+  writeInstructions: string;
+};
+
+const DDR_SECTION_CONFIG: Record<string, DDRSectionConfig> = {
+  executive_summary: {
+    useSearch: true,
+    searchDirective: "Search for this business — find their website, Google reviews, and any recent coverage.",
+    writeInstructions: "Write 2-3 paragraphs: where they stand today, their biggest opportunity, and their most urgent action.",
+  },
+  business_snapshot: {
+    useSearch: true,
+    searchDirective: "Search for this business's website and online presence. Find specific details about what they offer and how they position themselves.",
+    writeInstructions: "Write 3-4 paragraphs: who they are, what makes them distinctive, their market position. Use specific details from your search.",
+  },
+  customer_segments: {
+    useSearch: false,
+    searchDirective: "",
+    writeInstructions: "Describe 4-5 distinct customer segments as prose. For each: name the segment, who they are, their motivation for choosing this business, and their key unmet need. No bullet points.",
+  },
+  competitive_intelligence: {
+    useSearch: true,
+    searchDirective: "Search for each competitor named in the intake. Find their pricing, strengths, weaknesses, reviews, and recent changes.",
+    writeInstructions: "Analyze each competitor. For each: actual strengths from research, specific vulnerabilities, and exactly where the client has a real edge.",
+  },
+  market_context: {
+    useSearch: true,
+    searchDirective: "Search for current trends in this industry and relevant local or regional market conditions.",
+    writeInstructions: "Write about industry trends, seasonal and local factors, and macro conditions. Focus on what is changing and why it matters to this business.",
+  },
+  decision_specific_analysis: {
+    useSearch: true,
+    searchDirective: "Search for data, benchmarks, and real examples directly relevant to the specific decision stated in Q11.",
+    writeInstructions: "Analyze the specific decision in Q11. Cover: the core tradeoffs, key risks, what research shows about each option, and a clear directional recommendation. Be specific.",
+  },
+  extended_recommendations: {
+    useSearch: false,
+    searchDirective: "",
+    writeInstructions: "Write 5-6 specific, actionable recommendations with implementation guidance. For each: what to do, why it matters, how to start.",
+  },
+  priority_action_framework: {
+    useSearch: false,
+    searchDirective: "",
+    writeInstructions: "Organize as three tiers — Do Now / Do Soon / Do Eventually — with 2-3 items per tier. For each: what it is, why it belongs in that tier, and sequencing rationale.",
+  },
+  expanded_analyst_interpretation: {
+    useSearch: false,
+    searchDirective: "",
+    writeInstructions: "Write a synthesis: the thread connecting all findings, what this means for this business and the specific decision, and the one insight that reframes everything. Warm, direct analyst voice.",
+  },
+};
+
+export async function generateDDRSectionWithSearch(
+  order: Order,
+  sectionKey: string,
+): Promise<string> {
+  const intake = buildIntake(order);
+  const sd     = (order.service_data as Record<string, unknown>) ?? {};
+  const extra  = (sd.deep_dive_extra as Record<string, string>) ?? {};
+  const q11    = extra.q11 ?? "";
+  const q12    = extra.q12 ?? "";
+  const extraContext = [
+    q11 ? `Specific Decision (Q11): ${q11}` : "",
+    q12 ? `Prior Research (Q12): ${q12}` : "",
+  ].filter(Boolean).join("\n");
+
+  const sectionLabel = DEEP_DIVE_SECTIONS.find(s => s.key === sectionKey)?.label ?? sectionKey;
+  const cfg = DDR_SECTION_CONFIG[sectionKey] ?? {
+    useSearch: false, searchDirective: "", writeInstructions: "Write 2-4 paragraphs of clear professional prose.",
+  };
+
+  const systemLines = [
+    `You are a senior market research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Deep Dive Report.`,
+    cfg.useSearch && cfg.searchDirective ? cfg.searchDirective : "",
+    `Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`,
+  ].filter(Boolean).join("\n\n");
+
+  const userPrompt = `BUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nWrite the "${sectionLabel}" section now. ${cfg.writeInstructions}`;
+
+  try {
+    if (cfg.useSearch) {
+      const msg = await client.messages.create({
+        model:    "claude-sonnet-4-5",
+        max_tokens: 1200,
+        tools:    [{ type: "web_search_20250305", name: "web_search" }],
+        system:   systemLines,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+      return cleanWebSearchResponse(msg);
+    } else {
+      const msg = await client.messages.create({
+        model:    "claude-sonnet-4-5",
+        max_tokens: 1200,
+        system:   systemLines,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+      return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    }
+  } catch (err) {
+    console.error(`[generateDDRSectionWithSearch] "${sectionKey}" failed:`, err);
+    throw new Error(`Section "${sectionLabel}" failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
 // ── DDR: Section-by-section generation (used by generate-ddr-research / generate-ddr-section routes) ──
 
 const DDR_SECTION_INSTRUCTIONS: Record<string, string> = {

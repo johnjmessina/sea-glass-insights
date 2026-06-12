@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateDDRSection } from "@/lib/claudeServices";
+import { generateDDRSectionWithSearch } from "@/lib/claudeServices";
 
 export const maxDuration = 60;
 
@@ -25,26 +25,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  const serviceData = (order.service_data as Record<string, unknown>) ?? {};
-  const researchContext = (serviceData.ddr_research_context as string) ?? "";
-  if (!researchContext) {
-    return NextResponse.json(
-      { error: "Research context missing. Run the research phase first." },
-      { status: 400 }
-    );
-  }
-
   const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(
-      () => reject(new Error(`Section timed out (55 s). Use the retry button.`)),
-      55_000
+      () => reject(new Error(`Section timed out (45 s). Use the retry button.`)),
+      45_000
     )
   );
 
   let content: string;
   try {
     content = await Promise.race([
-      generateDDRSection(order, sectionKey, researchContext),
+      generateDDRSectionWithSearch(order, sectionKey),
       timeoutPromise,
     ]);
   } catch (err) {

@@ -69,7 +69,7 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   const [sendMsg, setSendMsg]             = useState<string | null>(null);
 
   // Section-by-section generation progress
-  type GenPhase = "idle" | "research" | "sections";
+  type GenPhase = "idle" | "sections";
   const [genPhase, setGenPhase]         = useState<GenPhase>("idle");
   const [genSectionIdx, setGenSectionIdx] = useState(-1);
   const [genFailed, setGenFailed]       = useState<Record<string, string>>({});
@@ -116,23 +116,13 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   async function generateDraft() {
     setGenerating(true);
     setGenError(null);
-    setGenPhase("research");
+    setGenPhase("sections");
     setGenSectionIdx(-1);
     setGenFailed({});
     setEditingKey(null);
 
     try {
-      // Phase 1: web research — saved to service_data.ddr_research_context in Supabase
-      const researchRes = await fetch("/api/generate-ddr-research", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ orderId: order.id }),
-      });
-      const researchData = await researchRes.json();
-      if (!researchRes.ok) throw new Error(researchData.error ?? "Research phase failed");
-
-      // Phase 2: generate each section sequentially
-      setGenPhase("sections");
+      // Generate each section sequentially — each call does its own focused search
       for (let i = 0; i < DEEP_DIVE_SECTIONS.length; i++) {
         const section = DEEP_DIVE_SECTIONS[i];
         setGenSectionIdx(i);
@@ -631,46 +621,27 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
         {genError && <p className="text-red-500 text-sm mb-4">{genError}</p>}
 
         {generating && (
-          <div className="py-5 space-y-3">
-            {/* Research phase row */}
-            <div className="flex items-center gap-3">
-              {genPhase === "research" ? (
-                <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />
-              ) : (
-                <span className="text-green-500 text-sm font-bold shrink-0">✓</span>
-              )}
-              <span className={`text-sm ${genPhase === "research" ? "text-navy font-medium" : "text-gray-400"}`}>
-                {genPhase === "research"
-                  ? "Researching your market… (may take 20–40 seconds)"
-                  : "Market research complete"}
-              </span>
-            </div>
-
-            {/* Section generation rows — appear once research completes */}
-            {genPhase === "sections" && (
-              <div className="pl-7 space-y-1.5">
-                {DEEP_DIVE_SECTIONS.map((section, i) => {
-                  const isDone    = !!draft[section.key];
-                  const isActive  = genSectionIdx === i;
-                  const isPending = !isDone && !isActive;
-                  return (
-                    <div key={section.key} className="flex items-center gap-2.5">
-                      {isDone   && <span className="text-green-500 text-xs shrink-0">✓</span>}
-                      {isActive && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
-                      {isPending && <span className="text-gray-200 text-xs shrink-0">○</span>}
-                      <span className={`text-sm ${isDone ? "text-gray-500" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>
-                        {section.label}
-                        {isActive && (
-                          <span className="text-xs text-gray-400 ml-2 font-normal">
-                            {i + 1} of {DEEP_DIVE_SECTIONS.length}
-                          </span>
-                        )}
+          <div className="py-4 space-y-1.5">
+            {DEEP_DIVE_SECTIONS.map((section, i) => {
+              const isDone    = !!draft[section.key];
+              const isActive  = genSectionIdx === i;
+              const isPending = !isDone && !isActive;
+              return (
+                <div key={section.key} className="flex items-center gap-2.5">
+                  {isDone   && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                  {isActive && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
+                  {isPending && <span className="text-gray-200 text-xs shrink-0">○</span>}
+                  <span className={`text-sm ${isDone ? "text-gray-500" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>
+                    {section.label}
+                    {isActive && (
+                      <span className="text-xs text-gray-400 ml-2 font-normal">
+                        {i + 1} of {DEEP_DIVE_SECTIONS.length}
                       </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    )}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
 
