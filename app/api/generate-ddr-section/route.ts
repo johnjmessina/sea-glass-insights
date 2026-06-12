@@ -35,7 +35,11 @@ export async function POST(req: NextRequest) {
   let content: string;
   try {
     content = await Promise.race([
-      generateDDRSectionWithSearch(order, sectionKey),
+      generateDDRSectionWithSearch(
+        order,
+        sectionKey,
+        (order.ai_draft as Record<string, string>) ?? {},
+      ),
       timeoutPromise,
     ]);
   } catch (err) {

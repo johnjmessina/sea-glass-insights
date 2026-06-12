@@ -464,39 +464,49 @@ const DDR_SECTION_CONFIG: Record<string, DDRSectionConfig> = {
   },
   competitive_intelligence: {
     useSearch: true,
-    searchDirective: "Search for each competitor named in the intake. Find their pricing, strengths, weaknesses, reviews, and recent changes.",
-    writeInstructions: "Analyze each competitor. For each: actual strengths from research, specific vulnerabilities, and exactly where the client has a real edge.",
+    // Single combined query — do not search competitor-by-competitor
+    searchDirective: "Run ONE search combining the business type and the competitor names from the intake to get an overview of each competitor's positioning, pricing, and reputation.",
+    writeInstructions: "Analyze each competitor from the intake. For each: strengths from research, specific vulnerabilities, and where the client has a real edge.",
   },
   market_context: {
     useSearch: true,
-    searchDirective: "Search for current trends in this industry and relevant local or regional market conditions.",
+    searchDirective: "Search once for current trends in this industry and relevant local or regional market conditions.",
     writeInstructions: "Write about industry trends, seasonal and local factors, and macro conditions. Focus on what is changing and why it matters to this business.",
   },
   decision_specific_analysis: {
-    useSearch: true,
-    searchDirective: "Search for data, benchmarks, and real examples directly relevant to the specific decision stated in Q11.",
-    writeInstructions: "Analyze the specific decision in Q11. Cover: the core tradeoffs, key risks, what research shows about each option, and a clear directional recommendation. Be specific.",
+    useSearch: false,
+    searchDirective: "",
+    writeInstructions: "Analyze the specific decision in Q11 using the intake answers and prior analysis above. Cover: the core tradeoffs, key risks, the strongest option, and a clear directional recommendation. Be specific.",
   },
   extended_recommendations: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Write 5-6 specific, actionable recommendations with implementation guidance. For each: what to do, why it matters, how to start.",
+    writeInstructions: "Write 5-6 specific, actionable recommendations grounded in the prior analysis above. For each: what to do, why it matters, how to start.",
   },
   priority_action_framework: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Organize as three tiers — Do Now / Do Soon / Do Eventually — with 2-3 items per tier. For each: what it is, why it belongs in that tier, and sequencing rationale.",
+    writeInstructions: "Organize as three tiers — Do Now / Do Soon / Do Eventually — with 2-3 items per tier. Ground each item in the prior analysis. For each: what it is, why it belongs in that tier, and sequencing rationale.",
   },
   expanded_analyst_interpretation: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Write a synthesis: the thread connecting all findings, what this means for this business and the specific decision, and the one insight that reframes everything. Warm, direct analyst voice.",
+    writeInstructions: "Write a synthesis using the prior analysis above: the thread connecting all findings, what this means for this business and the specific decision, and the one insight that reframes everything. Warm, direct analyst voice.",
   },
 };
+
+// Keys for sections that skip web search and need prior context instead
+const DDR_NO_SEARCH_SECTIONS = new Set([
+  "decision_specific_analysis",
+  "extended_recommendations",
+  "priority_action_framework",
+  "expanded_analyst_interpretation",
+]);
 
 export async function generateDDRSectionWithSearch(
   order: Order,
   sectionKey: string,
+  previousSections?: Record<string, string>,
 ): Promise<string> {
   const intake = buildIntake(order);
   const sd     = (order.service_data as Record<string, unknown>) ?? {};
@@ -513,33 +523,67 @@ export async function generateDDRSectionWithSearch(
     useSearch: false, searchDirective: "", writeInstructions: "Write 2-4 paragraphs of clear professional prose.",
   };
 
-  const systemLines = [
-    `You are a senior market research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Deep Dive Report.`,
-    cfg.useSearch && cfg.searchDirective ? cfg.searchDirective : "",
-    `Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`,
-  ].filter(Boolean).join("\n\n");
+  const baseSystem = `You are a senior market research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Deep Dive Report.`;
+  const styleRule  = `Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
 
-  const userPrompt = `BUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nWrite the "${sectionLabel}" section now. ${cfg.writeInstructions}`;
+  const searchSystem   = [baseSystem, cfg.searchDirective, `Perform at most ONE focused web search with a short, specific query.`, styleRule].join("\n\n");
+  const noSearchSystem = [baseSystem, styleRule].join("\n\n");
+
+  // Build condensed prior-sections block for no-search sections (6–9)
+  let priorContext = "";
+  if (DDR_NO_SEARCH_SECTIONS.has(sectionKey) && previousSections) {
+    const ordered = ["executive_summary", "business_snapshot", "customer_segments", "competitive_intelligence", "market_context", "decision_specific_analysis", "extended_recommendations", "priority_action_framework"];
+    const blocks = ordered
+      .filter(k => k !== sectionKey && previousSections[k])
+      .map(k => {
+        const lbl = DEEP_DIVE_SECTIONS.find(s => s.key === k)?.label ?? k;
+        const txt = (previousSections[k] ?? "").slice(0, 500);
+        return `${lbl}:\n${txt}${(previousSections[k]?.length ?? 0) > 500 ? "…" : ""}`;
+      });
+    if (blocks.length > 0) {
+      priorContext = "\n\nPRIOR ANALYSIS (for context and continuity):\n" + blocks.join("\n\n");
+    }
+  }
+
+  const userPrompt = `BUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${cfg.writeInstructions}`;
 
   try {
     if (cfg.useSearch) {
-      const msg = await client.messages.create({
-        model:    "claude-sonnet-4-5",
-        max_tokens: 1200,
-        tools:    [{ type: "web_search_20250305", name: "web_search" }],
-        system:   systemLines,
-        messages: [{ role: "user", content: userPrompt }],
-      });
-      return cleanWebSearchResponse(msg);
-    } else {
-      const msg = await client.messages.create({
-        model:    "claude-sonnet-4-5",
-        max_tokens: 1200,
-        system:   systemLines,
-        messages: [{ role: "user", content: userPrompt }],
-      });
-      return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+      // Race web-search call against 30 s — abandon search and fall back to intake-only if slow
+      let searchResult: string | null = null;
+      try {
+        const msg = await Promise.race([
+          client.messages.create({
+            model:      "claude-sonnet-4-5",
+            max_tokens: 1200,
+            tools:      [{ type: "web_search_20250305", name: "web_search" }],
+            system:     searchSystem,
+            messages:   [{ role: "user", content: userPrompt }],
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("__search_timeout__")), 30_000)
+          ),
+        ]);
+        searchResult = cleanWebSearchResponse(msg);
+      } catch (err) {
+        if (err instanceof Error && err.message === "__search_timeout__") {
+          console.warn(`[DDR] "${sectionKey}" web search timed out after 30 s — writing from intake only`);
+        } else {
+          throw err;
+        }
+      }
+      if (searchResult !== null) return searchResult;
     }
+
+    // No-search path: used directly for no-search sections, or as fallback when search timed out
+    const msg = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 1200,
+      system:     noSearchSystem,
+      messages:   [{ role: "user", content: userPrompt }],
+    });
+    return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+
   } catch (err) {
     console.error(`[generateDDRSectionWithSearch] "${sectionKey}" failed:`, err);
     throw new Error(`Section "${sectionLabel}" failed: ${err instanceof Error ? err.message : String(err)}`);
