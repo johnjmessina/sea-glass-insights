@@ -28,6 +28,13 @@ Current to-do list organized by priority.
 
 - Social Media Audit docx: make more visual and dynamic (charts, callouts, visual hierarchy)
 - Global design pass across all docx templates for consistency
+- Global report redesign across all docx templates — incorporate more visual elements, less text. Specific elements:
+  - Executive Summary as a visual scorecard
+  - Customer Segments as profile cards
+  - Competitive Intelligence as a comparison table
+  - Priority Action Framework as a visual tiered grid
+  - Key metrics as visual callouts
+  - Consistent visual design language across MIR, Social Media Audit, Secret Shopping, Deep Dive, Synthetic Survey, VOC, and AI Starter Kit
 
 ---
 
