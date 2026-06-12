@@ -178,11 +178,13 @@ async function generateDeepDiveDraft(order: Order): Promise<Record<string, strin
 
   // ── Call 1: Sections 1–5 ────────────────────────────────────────────────────
   // Research: business overview, competitors, market context
-  const response1 = await client.messages.create({
-    model:      "claude-sonnet-4-5",
-    max_tokens: 4000,
-    tools:      [{ type: "web_search_20250305", name: "web_search" }],
-    system: `${mandate}
+  let response1: Awaited<ReturnType<typeof client.messages.create>>;
+  try {
+    response1 = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 4000,
+      tools:      [{ type: "web_search_20250305", name: "web_search" }],
+      system: `${mandate}
 
 You are a senior market research analyst at Sea Glass Insights. Research this business and write the first 5 sections of a Deep Dive Report.
 
@@ -203,19 +205,27 @@ Return ONLY this JSON object with exactly these 5 keys:
   "competitive_intelligence": "deep per-competitor analysis grounded in research — actual strengths, vulnerabilities, positioning gaps",
   "market_context": "industry trends, seasonal and local factors, macro conditions based on current research"
 }`,
-    messages: [{
-      role:    "user",
-      content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for this business, its competitors, and market conditions, then write sections 1–5.`,
-    }],
-  });
+      messages: [{
+        role:    "user",
+        content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for this business, its competitors, and market conditions, then write sections 1–5.`,
+      }],
+    });
+  } catch (err) {
+    console.error("[generateDeepDiveDraft] API call 1 (sections 1–5) failed:", err);
+    throw new Error(
+      `Deep Dive Report generation failed on sections 1–5: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 
   // ── Call 2: Sections 6–9 ────────────────────────────────────────────────────
   // Research: focused on Q11 decision — benchmarks, data, examples
-  const response2 = await client.messages.create({
-    model:      "claude-sonnet-4-5",
-    max_tokens: 4000,
-    tools:      [{ type: "web_search_20250305", name: "web_search" }],
-    system: `${mandate}
+  let response2: Awaited<ReturnType<typeof client.messages.create>>;
+  try {
+    response2 = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 4000,
+      tools:      [{ type: "web_search_20250305", name: "web_search" }],
+      system: `${mandate}
 
 You are a senior market research analyst at Sea Glass Insights. Write the final 4 sections of a Deep Dive Report, focused on the specific decision stated in the intake.${q11 ? `\n\nSpecific decision being analyzed: ${q11}` : ""}
 
@@ -234,11 +244,17 @@ Return ONLY this JSON object with exactly these 4 keys:
   "priority_action_framework": "3-tier: Do Now / Do Soon / Do Eventually — 2-3 items per tier with rationale tied to the decision",
   "expanded_analyst_interpretation": "synthesis — the thread connecting all findings, what it means for this business and decision"
 }`,
-    messages: [{
-      role:    "user",
-      content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for data relevant to the specific decision, then write sections 6–9.`,
-    }],
-  });
+      messages: [{
+        role:    "user",
+        content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for data relevant to the specific decision, then write sections 6–9.`,
+      }],
+    });
+  } catch (err) {
+    console.error("[generateDeepDiveDraft] API call 2 (sections 6–9) failed:", err);
+    throw new Error(
+      `Deep Dive Report generation failed on sections 6–9: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 
   const parts1 = parseJsonSections(cleanWebText(response1), "DDR sections 1–5");
   const parts2 = parseJsonSections(cleanWebText(response2), "DDR sections 6–9");
