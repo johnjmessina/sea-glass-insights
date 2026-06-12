@@ -7,7 +7,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Order } from "@/lib/supabase";
 import type { ServiceType } from "@/lib/serviceConfig";
-import { DEEP_DIVE_SECTIONS } from "@/lib/serviceConfig";
+import { DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS } from "@/lib/serviceConfig";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -262,7 +262,69 @@ Return ONLY this JSON object with exactly these 4 keys:
   return { ...parts1, ...parts2 };
 }
 
-// ── Synthetic Survey Report ────────────────────────────────────────────────────
+// ── SSR: Standalone section generation ────────────────────────────────────────
+
+const SSR_SECTION_CONFIG: Record<string, string> = {
+  research_question_framework:
+    "Reframe the assumptions and research questions from the intake as a clear research framework. What are we testing and why? 2-3 paragraphs of prose.",
+  customer_personas:
+    "Build 3-5 distinct customer personas for this business based on the intake. Each persona: a name, brief demographics, their motivation for engaging with this type of business, and their relationship to this specific business. Flowing prose per persona — no bullet lists.",
+  persona_response_simulation:
+    "Simulate how each persona responds to the research questions from the intake. Organize by persona. For each: their likely reaction, key objections or enthusiasm points, and what would drive their decision. Prose paragraphs, not lists.",
+  thematic_analysis:
+    "Identify 4-5 patterns across the persona responses above. What do the personas agree on? Where do they diverge meaningfully? What is the most important theme for the business to act on? 3-4 prose paragraphs.",
+  directional_recommendations:
+    "Write 5-6 directional recommendations grounded in the persona findings above. Clearly label each as directional insight, not statistically validated data. For each: what to consider, why the personas point this way, and what to watch for in practice.",
+  methodology_disclosure:
+    "Explain in plain language what AI persona simulation is, how this report was created, and how to interpret and use these findings appropriately. Warm, transparent tone. 2-3 paragraphs.",
+  honest_limitations_statement:
+    "Write a direct, honest statement about what this research can and cannot tell you. Where should the reader apply caution? What would real customer data add that this approach cannot? Be genuinely direct, not just boilerplate. 2-3 paragraphs.",
+};
+
+export async function generateSSRSection(
+  order: Order,
+  sectionKey: string,
+  previousSections?: Record<string, string>,
+): Promise<string> {
+  const intake = buildIntake(order);
+  const sectionLabel = SYNTHETIC_SECTIONS.find(s => s.key === sectionKey)?.label
+    ?? (sectionKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()));
+
+  const instructions = SSR_SECTION_CONFIG[sectionKey]
+    ?? "Write 2-4 paragraphs of clear professional prose.";
+
+  // Sections that benefit from prior context
+  const contextKeys = ["research_question_framework", "customer_personas", "persona_response_simulation", "thematic_analysis"];
+  let priorContext = "";
+  if (previousSections) {
+    const blocks = contextKeys
+      .filter(k => k !== sectionKey && previousSections[k])
+      .map(k => {
+        const lbl = k.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+        const txt = (previousSections[k] ?? "").slice(0, 500);
+        return `${lbl}:\n${txt}${(previousSections[k]?.length ?? 0) > 500 ? "…" : ""}`;
+      });
+    if (blocks.length > 0) priorContext = "\n\nPRIOR SECTIONS:\n" + blocks.join("\n\n");
+  }
+
+  const system = `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Synthetic Survey Report. Return plain prose only — no JSON, no headers, no bullet points, no markdown. Tone: warm, credible, transparent. No em-dashes. No corporate jargon.`;
+  const user   = `BUSINESS INTAKE:\n${intake}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${instructions}`;
+
+  try {
+    const msg = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 1200,
+      system,
+      messages:   [{ role: "user", content: user }],
+    });
+    return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+  } catch (err) {
+    console.error(`[generateSSRSection] "${sectionKey}" failed:`, err);
+    throw new Error(`Section "${sectionLabel}" failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+// ── Synthetic Survey Report (legacy monolithic — kept for fallback) ────────────
 
 async function generateSyntheticDraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);

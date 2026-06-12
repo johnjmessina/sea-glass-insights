@@ -54,6 +54,9 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
   const [activeSection, setActiveSection] = useState(1);
   const [generating, setGenerating]       = useState(false);
   const [genError, setGenError]           = useState<string | null>(null);
+  const [genSectionIdx, setGenSectionIdx] = useState(-1);
+  const [genFailed, setGenFailed]         = useState<Record<string, string>>({});
+  const [retrying, setRetrying]           = useState<Record<string, boolean>>({});
   const [regenerating, setRegenerating]   = useState<Record<string, boolean>>({});
   const [regenError, setRegenError]       = useState<Record<string, string | undefined>>({});
   const [editingKey, setEditingKey]       = useState<string | null>(null);
@@ -103,16 +106,27 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
   async function generateDraft() {
     setGenerating(true);
     setGenError(null);
+    setGenSectionIdx(-1);
+    setGenFailed({});
     setEditingKey(null);
+
     try {
-      const res  = await fetch("/api/generate-draft", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Generation failed");
-      setDraft(data.draft as Record<string, string>);
+      for (let i = 0; i < SYNTHETIC_SECTIONS.length; i++) {
+        const section = SYNTHETIC_SECTIONS[i];
+        setGenSectionIdx(i);
+        try {
+          const res  = await fetch("/api/generate-ssr-section", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ orderId: order.id, sectionKey: section.key }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error ?? "Section generation failed");
+          setDraft(prev => ({ ...prev, [section.key]: data.content as string }));
+        } catch (e) {
+          setGenFailed(prev => ({ ...prev, [section.key]: e instanceof Error ? e.message : "Failed" }));
+        }
+      }
       const reset = defaultMeta();
       setMeta(reset);
       persist({ analyst_commentary: reset });
@@ -121,6 +135,26 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
       setGenError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setGenerating(false);
+      setGenSectionIdx(-1);
+    }
+  }
+
+  async function retrySection(key: string) {
+    setGenFailed(prev => { const n = { ...prev }; delete n[key]; return n; });
+    setRetrying(prev => ({ ...prev, [key]: true }));
+    try {
+      const res  = await fetch("/api/generate-ssr-section", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ orderId: order.id, sectionKey: key }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Retry failed");
+      setDraft(prev => ({ ...prev, [key]: data.content as string }));
+    } catch (e) {
+      setGenFailed(prev => ({ ...prev, [key]: e instanceof Error ? e.message : "Retry failed" }));
+    } finally {
+      setRetrying(prev => ({ ...prev, [key]: false }));
     }
   }
 
@@ -240,6 +274,8 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
     const isFirst        = idx === 0;
     const isLast         = idx === SYNTHETIC_SECTIONS.length - 1;
     const lbl            = "text-xs font-semibold text-gray-400 uppercase tracking-wide block";
+    const isFailed       = !!genFailed[key];
+    const isRetrying     = !!retrying[key];
 
     return (
       <div key={key}>
@@ -260,7 +296,7 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
 
         {/* Edit / Lock controls */}
         <div className="flex items-center gap-2 mb-3 justify-end">
-          {!m.locked && !isEditing && content && (
+          {!m.locked && !isEditing && content && !isFailed && !isRetrying && (
             <button
               onClick={() => { setEditBuf(content); setEditingKey(key); }}
               className="text-xs text-seafoam hover:text-navy border border-seafoam/40 hover:border-navy/40 rounded-full px-3 py-1 transition-colors font-medium">
@@ -273,7 +309,7 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
               Unlock
             </button>
           ) : (
-            content && (
+            content && !isFailed && !isRetrying && (
               <button onClick={() => lockSection(key)}
                 className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
                 Lock Section
@@ -282,8 +318,22 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
           )}
         </div>
 
-        {/* Content or inline editor */}
-        {isEditing ? (
+        {/* Content, inline editor, retry state, or failure */}
+        {isRetrying ? (
+          <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+            <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
+            <span>Retrying…</span>
+          </div>
+        ) : isFailed ? (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-600 mb-3">{genFailed[key]}</p>
+            <button
+              onClick={() => retrySection(key)}
+              className="inline-flex items-center gap-1.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 font-semibold px-4 py-2 rounded-full transition-colors">
+              ↺ Retry this section
+            </button>
+          </div>
+        ) : isEditing ? (
           <div className="mb-4">
             <textarea
               rows={12} value={editBuf}
@@ -314,7 +364,7 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
           <p className="text-sm text-gray-300 italic mb-4">No content for this section.</p>
         )}
 
-        {/* Analyst Perspective callout — always visible once draft exists */}
+        {/* Analyst Perspective callout */}
         <div className="mb-4 border-l-4 border-navy/60 pl-4 py-3 bg-slate-50 rounded-r-lg">
           <label
             className="block mb-2"
@@ -526,9 +576,27 @@ export default function SyntheticSurveyDetail({ order: initialOrder, onBack }: P
         {genError && <p className="text-red-500 text-sm mb-4">{genError}</p>}
 
         {generating && (
-          <div className="py-6 flex items-center gap-3 text-sm text-gray-500">
-            <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />
-            <span>Generating personas and analysis from intake answers…</span>
+          <div className="py-4 space-y-1.5">
+            {SYNTHETIC_SECTIONS.map((section, i) => {
+              const isDone    = !!draft[section.key];
+              const isActive  = genSectionIdx === i;
+              const isPending = !isDone && !isActive;
+              return (
+                <div key={section.key} className="flex items-center gap-2.5">
+                  {isDone    && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                  {isActive  && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
+                  {isPending && <span className="text-gray-200 text-xs shrink-0">○</span>}
+                  <span className={`text-sm ${isDone ? "text-gray-500" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>
+                    {section.label}
+                    {isActive && (
+                      <span className="text-xs text-gray-400 ml-2 font-normal">
+                        {i + 1} of {SYNTHETIC_SECTIONS.length}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
 
