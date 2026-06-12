@@ -7,6 +7,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Order } from "@/lib/supabase";
 import type { ServiceType } from "@/lib/serviceConfig";
+import { DEEP_DIVE_SECTIONS } from "@/lib/serviceConfig";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -140,12 +141,26 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
   return parsed;
 }
 
+// ── Shared web-search response cleaner ───────────────────────────────────────
+// Strips citation markup injected by the web_search tool and extracts plain text.
+function cleanWebSearchResponse(resp: { content: Array<{ type: string }> }): string {
+  return resp.content
+    .filter(b => b.type === "text")
+    .map(b => (b as { type: "text"; text: string }).text)
+    .join("")
+    .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
+    .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
+    .replace(/<[a-z][^>]*\/?>/gi, "")
+    .replace(/\[\d+\]/g, "")
+    .replace(/^```(?:json)?\n?/i, "")
+    .replace(/\n?```$/i, "")
+    .trim();
+}
+
 // ── Deep Dive Report (web-search enabled) ─────────────────────────────────────
 //
-// Uses Anthropic's built-in web_search_20250305 tool to research the client's
-// market, competitors, and industry before writing the report.
-// Q11 (specific decision) and Q12 (prior research) are pulled from
-// service_data.deep_dive_extra and woven into the generation prompt.
+// Legacy monolithic generation — superseded by the section-by-section approach
+// (generate-ddr-research + generate-ddr-section routes). Kept for reference.
 
 async function generateDeepDiveDraft(order: Order): Promise<Record<string, string>> {
   const intake = buildIntake(order);
@@ -160,21 +175,6 @@ async function generateDeepDiveDraft(order: Order): Promise<Record<string, strin
   ].filter(Boolean).join("\n");
 
   const mandate = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.`;
-
-  // Helper: strip citation markup injected by web_search and extract clean text
-  function cleanWebText(resp: { content: Array<{ type: string }> }): string {
-    return resp.content
-      .filter(b => b.type === "text")
-      .map(b => (b as { type: "text"; text: string }).text)
-      .join("")
-      .replace(/<cite[^>]*>[\s\S]*?<\/cite>/gi, "")
-      .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z][^>]*>/gi, "")
-      .replace(/<[a-z][^>]*\/?>/gi, "")
-      .replace(/\[\d+\]/g, "")
-      .replace(/^```(?:json)?\n?/i, "")
-      .replace(/\n?```$/i, "")
-      .trim();
-  }
 
   // ── Call 1: Sections 1–5 ────────────────────────────────────────────────────
   // Research: business overview, competitors, market context
@@ -256,8 +256,8 @@ Return ONLY this JSON object with exactly these 4 keys:
     );
   }
 
-  const parts1 = parseJsonSections(cleanWebText(response1), "DDR sections 1–5");
-  const parts2 = parseJsonSections(cleanWebText(response2), "DDR sections 6–9");
+  const parts1 = parseJsonSections(cleanWebSearchResponse(response1), "DDR sections 1–5");
+  const parts2 = parseJsonSections(cleanWebSearchResponse(response2), "DDR sections 6–9");
 
   return { ...parts1, ...parts2 };
 }
@@ -433,6 +433,99 @@ const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   narrative_lasting_impression:  "Write 1-2 paragraphs narrating the lasting impression based on the scores.",
   summary_and_recommendations:   "Write 3-4 paragraphs: standout strength, most urgent improvement, 3-4 specific actionable recommendations.",
 };
+
+// ── DDR: Section-by-section generation (used by generate-ddr-research / generate-ddr-section routes) ──
+
+const DDR_SECTION_INSTRUCTIONS: Record<string, string> = {
+  executive_summary:               "Write 2-3 paragraphs: where they stand today based on research, their biggest opportunity, and their most urgent action. This is the first thing the client reads — be direct and specific.",
+  business_snapshot:               "Write 3-4 paragraphs: who they are, what makes them distinctive, and their broader market context. Ground every claim in the research.",
+  customer_segments:               "Describe 4-5 distinct customer segments as readable prose. For each: name the segment, who they are, their motivation for choosing this business, and their key unmet need. Flowing paragraphs, not bullet lists.",
+  competitive_intelligence:        "Analyze each competitor from the intake. For each: actual strengths found in research, specific vulnerabilities, and exactly where the client has a real edge. Ground every claim in what was researched.",
+  market_context:                  "Write about industry trends, seasonal and local factors, and macro conditions that directly affect this business. Focus on what is changing and why it matters to the client's future.",
+  decision_specific_analysis:      "Write a focused analysis of the specific decision in Q11. Cover the core tradeoffs, key risks, what the research says about each option, and a clear directional recommendation. Be specific — the client needs a decision, not a hedge.",
+  extended_recommendations:        "Write 5-6 specific, actionable recommendations with implementation guidance. For each: what to do, why the research supports it, and how to get started. Tie each back to the decision and research.",
+  priority_action_framework:       "Organize as three tiers — Do Now / Do Soon / Do Eventually — with 2-3 items per tier. For each item: what it is, why it belongs in that tier, and how it connects to the decision and research.",
+  expanded_analyst_interpretation: "Write a synthesis: the thread connecting all findings, what this means for this business and the specific decision, and the one insight that reframes everything. Warm, direct, credible analyst voice.",
+};
+
+export async function generateDDRResearch(order: Order): Promise<string> {
+  const intake = buildIntake(order);
+  const sd    = (order.service_data as Record<string, unknown>) ?? {};
+  const extra = (sd.deep_dive_extra as Record<string, string>) ?? {};
+  const q11   = extra.q11 ?? "";
+  const q12   = extra.q12 ?? "";
+  const extraContext = [
+    q11 ? `Specific Decision Being Analyzed (Q11): ${q11}` : "",
+    q12 ? `Prior Research Done (Q12): ${q12}` : "",
+  ].filter(Boolean).join("\n");
+
+  let resp: Awaited<ReturnType<typeof client.messages.create>>;
+  try {
+    resp = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 4096,
+      tools:      [{ type: "web_search_20250305", name: "web_search" }],
+      system: `You are a senior market research analyst preparing a research briefing for a Deep Dive Report. Search the web to gather everything a section writer will need.
+
+Search for:
+1. The client's business — website, reviews, social presence, positioning, recent news
+2. Each competitor mentioned — strengths, weaknesses, pricing, reputation, recent changes
+3. Industry and local market trends relevant to this business
+4. Data, benchmarks, and real-world examples relevant to the specific decision in Q11
+
+Write a comprehensive research briefing in organized prose. Include specific facts, numbers, and observations.
+This briefing will be passed word-for-word to individual section writers — make it thorough and specific.
+No JSON. No citation tags, HTML elements, or [1] markers. Plain prose only.`,
+      messages: [{
+        role:    "user",
+        content: `Business intake:\n\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nSearch for this business, its competitors, and market conditions. Write a thorough research briefing.`,
+      }],
+    });
+  } catch (err) {
+    console.error("[generateDDRResearch] API call failed:", err);
+    throw new Error(`Research phase failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  return cleanWebSearchResponse(resp);
+}
+
+export async function generateDDRSection(
+  order: Order,
+  sectionKey: string,
+  researchContext: string,
+): Promise<string> {
+  const intake = buildIntake(order);
+  const sd    = (order.service_data as Record<string, unknown>) ?? {};
+  const extra = (sd.deep_dive_extra as Record<string, string>) ?? {};
+  const q11   = extra.q11 ?? "";
+  const q12   = extra.q12 ?? "";
+  const extraContext = [
+    q11 ? `Specific Decision (Q11): ${q11}` : "",
+    q12 ? `Prior Research (Q12): ${q12}` : "",
+  ].filter(Boolean).join("\n");
+
+  const sectionLabel = DEEP_DIVE_SECTIONS.find(s => s.key === sectionKey)?.label ?? sectionKey;
+  const instructions = DDR_SECTION_INSTRUCTIONS[sectionKey]
+    ?? "Write 2-4 paragraphs of clear, professional prose grounded in the research.";
+
+  let msg: Awaited<ReturnType<typeof client.messages.create>>;
+  try {
+    msg = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 1500,
+      system:     `You are a senior market research analyst at Sea Glass Insights. Your task is to write ONLY the "${sectionLabel}" section of a Deep Dive Report. Return plain prose text only — no JSON, no section headers, no bullet points, no markdown. Just 2-4 flowing prose paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`,
+      messages:   [{
+        role:    "user",
+        content: `RESEARCH BRIEFING:\n${researchContext}\n\nBUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}\n\nWrite the "${sectionLabel}" section now.\n\n${instructions}`,
+      }],
+    });
+  } catch (err) {
+    console.error(`[generateDDRSection] "${sectionKey}" API call failed:`, err);
+    throw new Error(`Section "${sectionLabel}" generation failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+}
 
 export async function regenerateServiceSection(
   order: Order,

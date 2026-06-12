@@ -68,6 +68,13 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   const [sendingReport, setSendingReport] = useState(false);
   const [sendMsg, setSendMsg]             = useState<string | null>(null);
 
+  // Section-by-section generation progress
+  type GenPhase = "idle" | "research" | "sections";
+  const [genPhase, setGenPhase]         = useState<GenPhase>("idle");
+  const [genSectionIdx, setGenSectionIdx] = useState(-1);
+  const [genFailed, setGenFailed]       = useState<Record<string, string>>({});
+  const [retrying, setRetrying]         = useState<Record<string, boolean>>({});
+
   const metaTimer = useRef<NodeJS.Timeout | null>(null);
   const noteTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -109,24 +116,69 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   async function generateDraft() {
     setGenerating(true);
     setGenError(null);
+    setGenPhase("research");
+    setGenSectionIdx(-1);
+    setGenFailed({});
     setEditingKey(null);
+
     try {
-      const res  = await fetch("/api/generate-draft", {
-        method: "POST",
+      // Phase 1: web research — saved to service_data.ddr_research_context in Supabase
+      const researchRes = await fetch("/api/generate-ddr-research", {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
+        body:    JSON.stringify({ orderId: order.id }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Generation failed");
-      setDraft(data.draft as Record<string, string>);
+      const researchData = await researchRes.json();
+      if (!researchRes.ok) throw new Error(researchData.error ?? "Research phase failed");
+
+      // Phase 2: generate each section sequentially
+      setGenPhase("sections");
+      for (let i = 0; i < DEEP_DIVE_SECTIONS.length; i++) {
+        const section = DEEP_DIVE_SECTIONS[i];
+        setGenSectionIdx(i);
+        try {
+          const sectionRes = await fetch("/api/generate-ddr-section", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ orderId: order.id, sectionKey: section.key }),
+          });
+          const sectionData = await sectionRes.json();
+          if (!sectionRes.ok) throw new Error(sectionData.error ?? "Section generation failed");
+          setDraft(prev => ({ ...prev, [section.key]: sectionData.content as string }));
+        } catch (e) {
+          setGenFailed(prev => ({ ...prev, [section.key]: e instanceof Error ? e.message : "Failed" }));
+        }
+      }
+
       const reset = defaultMeta();
       setMeta(reset);
       persist({ analyst_commentary: reset });
       setActiveSection(1);
     } catch (e) {
-      setGenError(e instanceof Error ? e.message : "Unknown error");
+      setGenError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setGenerating(false);
+      setGenPhase("idle");
+      setGenSectionIdx(-1);
+    }
+  }
+
+  async function retrySection(key: string) {
+    setGenFailed(prev => { const n = { ...prev }; delete n[key]; return n; });
+    setRetrying(prev => ({ ...prev, [key]: true }));
+    try {
+      const res  = await fetch("/api/generate-ddr-section", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ orderId: order.id, sectionKey: key }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Retry failed");
+      setDraft(prev => ({ ...prev, [key]: data.content as string }));
+    } catch (e) {
+      setGenFailed(prev => ({ ...prev, [key]: e instanceof Error ? e.message : "Retry failed" }));
+    } finally {
+      setRetrying(prev => ({ ...prev, [key]: false }));
     }
   }
 
@@ -246,7 +298,9 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
     const isFirst   = idx === 0;
     const isLast    = idx === DEEP_DIVE_SECTIONS.length - 1;
 
-    const lbl = "text-xs font-semibold text-gray-400 uppercase tracking-wide block";
+    const lbl       = "text-xs font-semibold text-gray-400 uppercase tracking-wide block";
+    const isFailed  = !!genFailed[key];
+    const isRetrying = !!retrying[key];
 
     return (
       <div key={key}>
@@ -267,7 +321,7 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
 
         {/* Edit / Lock controls */}
         <div className="flex items-center gap-2 mb-3 justify-end">
-          {!m.locked && !isEditing && content && (
+          {!m.locked && !isEditing && content && !isFailed && !isRetrying && (
             <button
               onClick={() => { setEditBuf(content); setEditingKey(key); }}
               className="text-xs text-seafoam hover:text-navy border border-seafoam/40 hover:border-navy/40 rounded-full px-3 py-1 transition-colors font-medium">
@@ -280,7 +334,7 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
               Unlock
             </button>
           ) : (
-            content && (
+            content && !isFailed && !isRetrying && (
               <button onClick={() => lockSection(key)}
                 className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
                 Lock Section
@@ -289,8 +343,22 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
           )}
         </div>
 
-        {/* Content or inline editor */}
-        {isEditing ? (
+        {/* Content, inline editor, retry state, or failure */}
+        {isRetrying ? (
+          <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+            <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
+            <span>Retrying…</span>
+          </div>
+        ) : isFailed ? (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-600 mb-3">{genFailed[key]}</p>
+            <button
+              onClick={() => retrySection(key)}
+              className="inline-flex items-center gap-1.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 font-semibold px-4 py-2 rounded-full transition-colors">
+              ↺ Retry this section
+            </button>
+          </div>
+        ) : isEditing ? (
           <div className="mb-4">
             <textarea
               rows={12} value={editBuf}
@@ -563,11 +631,46 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
         {genError && <p className="text-red-500 text-sm mb-4">{genError}</p>}
 
         {generating && (
-          <div className="flex items-center gap-3 py-8 justify-center text-gray-400">
-            <div className="w-5 h-5 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm">
-              Claude is researching the market and drafting your Deep Dive Report…
-            </span>
+          <div className="py-5 space-y-3">
+            {/* Research phase row */}
+            <div className="flex items-center gap-3">
+              {genPhase === "research" ? (
+                <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />
+              ) : (
+                <span className="text-green-500 text-sm font-bold shrink-0">✓</span>
+              )}
+              <span className={`text-sm ${genPhase === "research" ? "text-navy font-medium" : "text-gray-400"}`}>
+                {genPhase === "research"
+                  ? "Researching your market… (may take 20–40 seconds)"
+                  : "Market research complete"}
+              </span>
+            </div>
+
+            {/* Section generation rows — appear once research completes */}
+            {genPhase === "sections" && (
+              <div className="pl-7 space-y-1.5">
+                {DEEP_DIVE_SECTIONS.map((section, i) => {
+                  const isDone    = !!draft[section.key];
+                  const isActive  = genSectionIdx === i;
+                  const isPending = !isDone && !isActive;
+                  return (
+                    <div key={section.key} className="flex items-center gap-2.5">
+                      {isDone   && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                      {isActive && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
+                      {isPending && <span className="text-gray-200 text-xs shrink-0">○</span>}
+                      <span className={`text-sm ${isDone ? "text-gray-500" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>
+                        {section.label}
+                        {isActive && (
+                          <span className="text-xs text-gray-400 ml-2 font-normal">
+                            {i + 1} of {DEEP_DIVE_SECTIONS.length}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
