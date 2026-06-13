@@ -16,19 +16,12 @@ export const VOC_GOOGLE_FORM_TYPE_LABELS: Record<VocQuestionType, string> = {
   open_ended:      "Paragraph",
 };
 
-export const BANNER_STANDARD = ["Demographics", "Visit Frequency", "Customer Type"] as const;
-
-export interface VocBannerCutConfig {
-  enabled: boolean;
-  banners: string[]; // from BANNER_STANDARD or custom
-}
-
 export interface VocQuestion {
   id:              string;
   text:            string;
   type:            VocQuestionType;
   options:         string[];           // MC / select_all answer options
-  bannerCut:       VocBannerCutConfig;
+  bannerCut:       boolean;            // use this question as a banner cut variable; question text is the label
   t2bB2b:          boolean;            // scale_1_7 only: flag T2B/B2B for reporting
   segmentationVar: boolean;            // MC / select_all only: use as cross-tab banner
 }

@@ -13,7 +13,7 @@ import type {
   VocQuestion, VocQuestionType, VocQuantData, ParsedCSV, ColumnMapping,
 } from "@/lib/vocTypes";
 import {
-  VOC_QUESTION_TYPE_LABELS, VOC_GOOGLE_FORM_TYPE_LABELS, BANNER_STANDARD,
+  VOC_QUESTION_TYPE_LABELS, VOC_GOOGLE_FORM_TYPE_LABELS,
 } from "@/lib/vocTypes";
 import { parseCSV, autoMapColumns, calculateStats } from "@/lib/vocDataProcessing";
 
@@ -47,7 +47,7 @@ function newQuestion(idx: number): VocQuestion {
     text:           "",
     type:           "open_ended",
     options:        [],
-    bannerCut:      { enabled: false, banners: [] },
+    bannerCut:      false,
     t2bB2b:         false,
     segmentationVar:false,
   };
@@ -102,19 +102,12 @@ function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown 
     });
   }
 
-  function toggleBanner(name: string) {
-    const has  = q.bannerCut.banners.includes(name);
-    const next = has ? q.bannerCut.banners.filter(b => b !== name) : [...q.bannerCut.banners, name];
-    onChange({ ...q, bannerCut: { ...q.bannerCut, banners: next } });
-  }
-
   function setOption(i: number, v: string) {
     const opts = [...q.options]; opts[i] = v; set("options", opts);
   }
   function addOption() { set("options", [...q.options, ""]); }
   function removeOption(i: number) { set("options", q.options.filter((_, j) => j !== i)); }
 
-  const inp = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam";
   const hasBanner = q.type === "multiple_choice" || q.type === "select_all";
   const hasOptions = q.type === "multiple_choice" || q.type === "select_all";
 
@@ -141,11 +134,7 @@ function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown 
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${Q_TYPE_COLOR[q.type]}`}>
               {VOC_GOOGLE_FORM_TYPE_LABELS[q.type]}
             </span>
-            {q.bannerCut.enabled && q.bannerCut.banners.length > 0 && (
-              q.bannerCut.banners.map(b => (
-                <span key={b} className="text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full">{b}</span>
-              ))
-            )}
+            {q.bannerCut && <span className="text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full">Banner Cut</span>}
             {q.t2bB2b && <span className="text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-full">T2B/B2B</span>}
             {q.segmentationVar && <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">Seg. Var</span>}
           </div>
@@ -189,31 +178,15 @@ function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown 
 
           {/* Banner cut */}
           <div>
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Banner Cut Variable</label>
-            <div className="flex items-center gap-2 mb-2">
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
               <input
                 type="checkbox"
-                checked={q.bannerCut.enabled}
-                onChange={e => onChange({ ...q, bannerCut: { ...q.bannerCut, enabled: e.target.checked } })}
+                checked={q.bannerCut}
+                onChange={e => set("bannerCut", e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm text-gray-600">Use this question as a banner cut variable</span>
-            </div>
-            {q.bannerCut.enabled && (
-              <div className="flex gap-2 flex-wrap pl-5">
-                {BANNER_STANDARD.map(b => (
-                  <label key={b} className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={q.bannerCut.banners.includes(b)}
-                      onChange={() => toggleBanner(b)}
-                      className="rounded"
-                    />
-                    {b}
-                  </label>
-                ))}
-              </div>
-            )}
+              Use as banner cut variable (question text becomes the banner label)
+            </label>
           </div>
 
           {/* Scale-specific */}

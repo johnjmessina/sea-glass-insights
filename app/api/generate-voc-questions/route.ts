@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       text:           d.text ?? "",
       type:           d.type ?? "open_ended",
       options:        Array.isArray(d.options) ? d.options : [],
-      bannerCut:      { enabled: (d.suggestedBanners?.length ?? 0) > 0, banners: d.suggestedBanners ?? [] },
+      bannerCut:      (d.suggestedBanners?.length ?? 0) > 0,
       t2bB2b:         !!d.t2bB2b,
       segmentationVar:!!d.segmentationVar,
     }));
