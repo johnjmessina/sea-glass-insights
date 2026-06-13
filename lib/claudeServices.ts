@@ -7,7 +7,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Order } from "@/lib/supabase";
 import type { ServiceType } from "@/lib/serviceConfig";
-import { DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS } from "@/lib/serviceConfig";
+import { DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS, VOC_PHASE1_SECTIONS, VOC_PHASE2_SECTIONS } from "@/lib/serviceConfig";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -343,6 +343,71 @@ Keys required:
 
   const raw = await callClaude(system, `Business intake:\n\n${intake}`);
   return parseJsonSections(raw, "Synthetic Survey");
+}
+
+// ── VOC: Standalone section generation ───────────────────────────────────────
+
+const VOC_SECTION_CONFIG: Record<string, string> = {
+  survey_design:
+    "Write up to 10 clear, unbiased survey questions based on what the business most wants to learn from their customers. Questions should be appropriate for a general customer audience, easy to answer, and free of leading language. Format as a numbered list. After each question, add the question type in brackets: [Multiple Choice], [Short Answer], [Paragraph], or [Linear Scale 1–5]. Output the numbered questions only — no prose, no headers.",
+  thematic_analysis:
+    "Analyze the survey responses provided. Identify 4-6 major recurring themes — what customers care about most, what comes up repeatedly, and any surprising patterns or notable contradictions. Write 3-4 clear prose paragraphs.",
+  visual_findings_summary:
+    "Based on the survey responses, write a structured summary of the most important findings as clear, scannable statements — not paragraphs. Think of what a chart or infographic would show: percentages where relevant, most common answers, notable splits, standout data points. Write 8-12 clear finding statements, one per line.",
+  analyst_interpretation:
+    "Based on all of the above — the survey questions, the raw responses, and the themes and findings — write what these customer responses mean for this specific business. Be concrete and actionable. What should the business prioritize? What is the single most important thing the data is telling them? 3-4 focused prose paragraphs.",
+};
+
+const VOC_ALL_SECTIONS = [...VOC_PHASE1_SECTIONS, ...VOC_PHASE2_SECTIONS];
+
+export async function generateVOCSection(
+  order: Order,
+  sectionKey: string,
+  vocResponses?: string,
+  previousSections?: Record<string, string>,
+): Promise<string> {
+  const intake = buildIntake(order);
+  const sectionLabel = VOC_ALL_SECTIONS.find(s => s.key === sectionKey)?.label
+    ?? sectionKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+  const instructions = VOC_SECTION_CONFIG[sectionKey]
+    ?? "Write 2-4 paragraphs of clear professional prose.";
+
+  const isPhase2 = ["thematic_analysis", "visual_findings_summary", "analyst_interpretation"].includes(sectionKey);
+
+  let contextBlock = "";
+
+  if (isPhase2 && vocResponses?.trim()) {
+    contextBlock += `\n\nSURVEY RESPONSES (collected from customers):\n${vocResponses}`;
+  }
+
+  if (isPhase2 && previousSections) {
+    const contextKeys = ["survey_design", "thematic_analysis", "visual_findings_summary"];
+    const blocks = contextKeys
+      .filter(k => k !== sectionKey && previousSections[k])
+      .map(k => {
+        const lbl = VOC_ALL_SECTIONS.find(s => s.key === k)?.label ?? k;
+        const txt = (previousSections[k] ?? "").slice(0, 500);
+        return `${lbl}:\n${txt}${(previousSections[k]?.length ?? 0) > 500 ? "…" : ""}`;
+      });
+    if (blocks.length > 0) contextBlock += "\n\nPRIOR SECTIONS:\n" + blocks.join("\n\n");
+  }
+
+  const system = `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Voice of Customer Survey report. Return plain text only — no JSON, no headers, no markdown. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
+  const user   = `BUSINESS INTAKE:\n${intake}${contextBlock}\n\nWrite the "${sectionLabel}" section now. ${instructions}`;
+
+  try {
+    const msg = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 1200,
+      system,
+      messages:   [{ role: "user", content: user }],
+    });
+    return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+  } catch (err) {
+    console.error(`[generateVOCSection] "${sectionKey}" failed:`, err);
+    throw new Error(`Section "${sectionLabel}" failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 // ── Voice of Customer — Phase 1 (Survey Design) ────────────────────────────────

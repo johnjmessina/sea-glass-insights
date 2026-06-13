@@ -107,6 +107,9 @@ export default function VoiceOfCustomerPage() {
                 </li>
               ))}
             </ul>
+            <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY, lineHeight: 1.7, marginTop: "20px", borderTop: "1px solid #E5E7EB", paddingTop: "16px" }}>
+              Every section includes an optional <strong style={{ color: NAVY }}>Analyst Perspective</strong> — your analyst&rsquo;s expert interpretation of what your customers are actually telling you and what it means for your business.
+            </p>
           </div>
           <div>
             <h2 style={{ fontFamily: CG, fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>How It Works</h2>
