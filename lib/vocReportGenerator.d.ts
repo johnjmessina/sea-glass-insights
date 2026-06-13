@@ -1,7 +1,10 @@
+import type { VocQuestion, VocQuantData } from "./vocTypes";
+
 export function generateVOCReport(
-  orderData: Record<string, unknown>,
-  aiDraft: Record<string, string>,
-  analystNote: string,
+  orderData:           Record<string, unknown>,
+  aiDraft:             Record<string, string>,
+  analystNote:         string,
   analystPerspectives: Record<string, string>,
-  vocResponses: string,
+  questionMap:         VocQuestion[],
+  quantData?:          VocQuantData,
 ): Promise<Buffer>;

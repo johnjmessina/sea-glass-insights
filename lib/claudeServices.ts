@@ -7,7 +7,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Order } from "@/lib/supabase";
 import type { ServiceType } from "@/lib/serviceConfig";
-import { DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS, VOC_PHASE1_SECTIONS, VOC_PHASE2_SECTIONS } from "@/lib/serviceConfig";
+import { DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS, VOC_PHASE2_SECTIONS } from "@/lib/serviceConfig";
+import type { VocQuantData, VocQuestion } from "@/lib/vocTypes";
+import { formatQuantDataForAI, formatOpenEndedForAI } from "@/lib/vocDataProcessing";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -345,61 +347,111 @@ Keys required:
   return parseJsonSections(raw, "Synthetic Survey");
 }
 
-// ── VOC: Standalone section generation ───────────────────────────────────────
+// ── VOC: Question map generation (Phase 1) ────────────────────────────────────
+
+export interface VocQuestionDraft {
+  text:            string;
+  type:            "scale_1_7" | "multiple_choice" | "select_all" | "open_ended";
+  options:         string[];
+  suggestedBanners:string[];
+  t2bB2b:          boolean;
+  segmentationVar: boolean;
+}
+
+export async function generateVOCQuestions(order: Order): Promise<VocQuestionDraft[]> {
+  const intake = buildIntake(order);
+  const system = `You must respond with valid JSON only. No prose, no markdown, no backticks. Your entire response must be a valid JSON array and nothing else.
+
+You are a senior research analyst at Sea Glass Insights. Design 8-10 survey questions for a real customer survey based on the business intake provided. The questions must directly address what the business owner wants to learn.
+
+Include a mix of:
+- At least 3 rating questions (scale_1_7) for key satisfaction dimensions
+- At least 2 multiple_choice or select_all questions that will work well as banner/segmentation variables (e.g., visit frequency, customer type, how they heard about the business)
+- At least 1 open_ended question for qualitative feedback
+
+Return a JSON array where each element has:
+- "text": the question exactly as it will appear in Google Forms (clear, unbiased, customer-facing language)
+- "type": one of "scale_1_7", "multiple_choice", "select_all", "open_ended"
+- "options": array of answer choices for multiple_choice and select_all (4-6 options each); empty array for scale_1_7 and open_ended
+- "suggestedBanners": array of banner variable names this question could feed — choose from ["Demographics","Visit Frequency","Customer Type"] or leave empty
+- "t2bB2b": true if this is a scale_1_7 question where T2B/B2B analysis is meaningful (most rating questions)
+- "segmentationVar": true if this multiple_choice or select_all question should be used to cross-tabulate other results`;
+
+  try {
+    const msg = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: 2000,
+      system,
+      messages:   [{ role: "user", content: `Business intake:\n\n${intake}` }],
+    });
+    const raw = msg.content[0].type === "text" ? msg.content[0].text.trim() : "[]";
+    const clean = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
+    const parsed = JSON.parse(clean);
+    if (!Array.isArray(parsed)) throw new Error("Expected JSON array");
+    return parsed as VocQuestionDraft[];
+  } catch (err) {
+    console.error("[generateVOCQuestions] failed:", err);
+    throw new Error(`Question generation failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+// ── VOC: Section-by-section generation (Phase 2) ─────────────────────────────
 
 const VOC_SECTION_CONFIG: Record<string, string> = {
-  survey_design:
-    "Write up to 10 clear, unbiased survey questions based on what the business most wants to learn from their customers. Questions should be appropriate for a general customer audience, easy to answer, and free of leading language. Format as a numbered list. After each question, add the question type in brackets: [Multiple Choice], [Short Answer], [Paragraph], or [Linear Scale 1–5]. Output the numbered questions only — no prose, no headers.",
+  quant_summary:
+    "Write a clear narrative summary of the quantitative survey findings. Reference specific T2B and B2B percentages, mean scores, and notable differences between segments where relevant. Explain what these numbers actually mean in plain language. Where banner cut data shows meaningful segment differences (more than 10 percentage points in T2B), call those out specifically. 3-4 focused prose paragraphs.",
   thematic_analysis:
-    "Analyze the survey responses provided. Identify 4-6 major recurring themes — what customers care about most, what comes up repeatedly, and any surprising patterns or notable contradictions. Write 3-4 clear prose paragraphs.",
+    "Analyze the open-ended survey responses provided. Identify 4-6 major recurring themes — what customers say most, what comes up repeatedly, and any surprising patterns or notable contradictions. Group themes by sentiment where relevant. Include specific verbatim quotes to illustrate each theme. 3-4 clear prose paragraphs.",
   visual_findings_summary:
-    "Based on the survey responses, write a structured summary of the most important findings as clear, scannable statements — not paragraphs. Think of what a chart or infographic would show: percentages where relevant, most common answers, notable splits, standout data points. Write 8-12 clear finding statements, one per line.",
+    "Based on the quantitative findings and open-end themes provided, write 8-12 clear headline statements — one per line — that summarize the most important findings. Each statement should be scannable and specific: include a number or percentage wherever the data supports it. These statements should be designed to translate easily into a presentation or infographic. No prose paragraphs — just the headline statements, one per line.",
   analyst_interpretation:
-    "Based on all of the above — the survey questions, the raw responses, and the themes and findings — write what these customer responses mean for this specific business. Be concrete and actionable. What should the business prioritize? What is the single most important thing the data is telling them? 3-4 focused prose paragraphs.",
+    "Based on all of the above — the quantitative findings, banner cut differences, open-end themes, and visual summary — write what these results mean strategically for this specific business. Be concrete and actionable. What should the business prioritize? What is the single most important thing the data is telling them? Where do the segments disagree and why does that matter? Reference specific scores and segment differences where relevant. 3-4 focused prose paragraphs.",
 };
-
-const VOC_ALL_SECTIONS = [...VOC_PHASE1_SECTIONS, ...VOC_PHASE2_SECTIONS];
 
 export async function generateVOCSection(
   order: Order,
   sectionKey: string,
-  vocResponses?: string,
+  quantData?: VocQuantData | null,
+  questionMap?: VocQuestion[],
   previousSections?: Record<string, string>,
 ): Promise<string> {
-  const intake = buildIntake(order);
-  const sectionLabel = VOC_ALL_SECTIONS.find(s => s.key === sectionKey)?.label
+  const intake       = buildIntake(order);
+  const sectionLabel = VOC_PHASE2_SECTIONS.find(s => s.key === sectionKey)?.label
     ?? sectionKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-
-  const instructions = VOC_SECTION_CONFIG[sectionKey]
-    ?? "Write 2-4 paragraphs of clear professional prose.";
-
-  const isPhase2 = ["thematic_analysis", "visual_findings_summary", "analyst_interpretation"].includes(sectionKey);
+  const instructions = VOC_SECTION_CONFIG[sectionKey] ?? "Write 3-4 paragraphs of clear professional prose.";
 
   let contextBlock = "";
 
-  if (isPhase2 && vocResponses?.trim()) {
-    contextBlock += `\n\nSURVEY RESPONSES (collected from customers):\n${vocResponses}`;
+  if (quantData && questionMap) {
+    if (sectionKey === "quant_summary") {
+      contextBlock += `\n\nQUANTITATIVE DATA:\n${formatQuantDataForAI(quantData, questionMap)}`;
+    } else if (sectionKey === "thematic_analysis") {
+      contextBlock += `\n\nOPEN-ENDED RESPONSES:\n${formatOpenEndedForAI(quantData, questionMap)}`;
+    } else if (sectionKey === "visual_findings_summary" || sectionKey === "analyst_interpretation") {
+      contextBlock += `\n\nQUANTITATIVE SUMMARY:\n${formatQuantDataForAI(quantData, questionMap).slice(0, 1200)}`;
+      contextBlock += `\n\nOPEN-ENDED THEMES:\n${formatOpenEndedForAI(quantData, questionMap).slice(0, 600)}`;
+    }
   }
 
-  if (isPhase2 && previousSections) {
-    const contextKeys = ["survey_design", "thematic_analysis", "visual_findings_summary"];
+  if (previousSections) {
+    const contextKeys = ["quant_summary", "thematic_analysis", "visual_findings_summary"];
     const blocks = contextKeys
       .filter(k => k !== sectionKey && previousSections[k])
       .map(k => {
-        const lbl = VOC_ALL_SECTIONS.find(s => s.key === k)?.label ?? k;
-        const txt = (previousSections[k] ?? "").slice(0, 500);
-        return `${lbl}:\n${txt}${(previousSections[k]?.length ?? 0) > 500 ? "…" : ""}`;
+        const lbl = VOC_PHASE2_SECTIONS.find(s => s.key === k)?.label ?? k;
+        const txt = (previousSections[k] ?? "").slice(0, 600);
+        return `${lbl}:\n${txt}${(previousSections[k]?.length ?? 0) > 600 ? "…" : ""}`;
       });
     if (blocks.length > 0) contextBlock += "\n\nPRIOR SECTIONS:\n" + blocks.join("\n\n");
   }
 
-  const system = `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Voice of Customer Survey report. Return plain text only — no JSON, no headers, no markdown. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
+  const system = `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Voice of Customer Survey report. Return plain text only — no JSON, no section headers, no markdown. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
   const user   = `BUSINESS INTAKE:\n${intake}${contextBlock}\n\nWrite the "${sectionLabel}" section now. ${instructions}`;
 
   try {
     const msg = await client.messages.create({
       model:      "claude-sonnet-4-5",
-      max_tokens: 1200,
+      max_tokens: 1400,
       system,
       messages:   [{ role: "user", content: user }],
     });
@@ -408,39 +460,6 @@ export async function generateVOCSection(
     console.error(`[generateVOCSection] "${sectionKey}" failed:`, err);
     throw new Error(`Section "${sectionLabel}" failed: ${err instanceof Error ? err.message : String(err)}`);
   }
-}
-
-// ── Voice of Customer — Phase 1 (Survey Design) ────────────────────────────────
-
-async function generateVoCSurveyDesign(order: Order): Promise<Record<string, string>> {
-  const intake = buildIntake(order);
-  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
-
-You are a senior research analyst at Sea Glass Insights. Based on the business intake provided, design a customer survey of up to 10 questions. The survey should directly address what the business owner wants to learn from their customers. Output the survey as clean, copy-paste-ready text formatted for Google Forms — question text only, no numbering prose, organized with clear question labels. Return ONLY a valid JSON object with exactly 1 key: "survey_design". The value should be the formatted survey text ready to copy into Google Forms. Use question types like Short Answer, Paragraph, Multiple Choice, or Linear Scale where appropriate — note the type in brackets after each question.`;
-
-  const raw = await callClaude(system, `Business intake:\n\n${intake}`);
-  return parseJsonSections(raw, "VoC Survey Design");
-}
-
-// ── Voice of Customer — Phase 2 (Analysis) ────────────────────────────────────
-
-async function generateVoCAnalysis(
-  order: Order,
-  responses: string
-): Promise<Record<string, string>> {
-  const intake = buildIntake(order);
-  const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
-
-You are a senior research analyst at Sea Glass Insights. Analyze the following customer survey responses and produce a Voice of Customer report. Return ONLY a valid JSON object with exactly these 3 keys. Each value is 2-4 paragraphs of plain text. No markdown within values. Tone: clear, insightful, practical.
-
-Keys required:
-- "thematic_analysis" (identify 4-6 major themes from the responses — what customers care about, what comes up repeatedly)
-- "visual_findings_summary" (a structured summary of key data points — percentages, top answers, notable splits — formatted as readable prose that describes what charts would show)
-- "analyst_interpretation" (what these findings mean for the business — specific, actionable, grounded in the actual data)`;
-
-  const user = `Business intake:\n\n${intake}\n\nSurvey responses:\n\n${responses}`;
-  const raw = await callClaude(system, user);
-  return parseJsonSections(raw, "VoC Analysis");
 }
 
 // ── AI Starter Kit ─────────────────────────────────────────────────────────────
@@ -850,10 +869,8 @@ export async function generateServiceDraft(
       return generateSyntheticDraft(order);
 
     case "voice_of_customer_survey":
-      if ((options?.vocPhase ?? 1) === 2 && options?.vocResponses) {
-        return generateVoCAnalysis(order, options.vocResponses);
-      }
-      return generateVoCSurveyDesign(order);
+      // VOC uses dedicated API routes (generate-voc-questions / generate-voc-section)
+      throw new Error("VOC: use generate-voc-questions or generate-voc-section API routes");
 
     case "ai_starter_kit":
       return generateAIStarterKitDraft(order);

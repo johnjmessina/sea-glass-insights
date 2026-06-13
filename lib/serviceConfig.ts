@@ -83,17 +83,17 @@ export const SYNTHETIC_SECTIONS: ServiceSection[] = [
   { key: "honest_limitations_statement",  label: "Honest Limitations Statement",         aiGenerated: true },
 ];
 
-export const VOC_PHASE1_SECTIONS: ServiceSection[] = [
-  { key: "survey_design", label: "Survey Design", aiGenerated: true,
-    description: "AI drafts up to 10 survey questions from intake answers. Output is clean copy-paste text ready for Google Forms." },
-];
+// Phase 1: question map editor (no AI text sections — the question map IS the output)
+export const VOC_PHASE1_SECTIONS: ServiceSection[] = [];
 
+// Phase 2: all four are AI-generated narrative sections
 export const VOC_PHASE2_SECTIONS: ServiceSection[] = [
-  { key: "response_summary",        label: "Response Summary",                    aiGenerated: false, humanOnly: true,
-    description: "Paste the collected survey responses here." },
-  { key: "thematic_analysis",       label: "Thematic Analysis",                   aiGenerated: true },
-  { key: "visual_findings_summary", label: "Visual Findings Summary",             aiGenerated: true },
-  { key: "analyst_interpretation",  label: "Analyst Interpretation & Recommendations", aiGenerated: true },
+  { key: "quant_summary",          label: "Quantitative Summary",                   aiGenerated: true,
+    description: "AI narrative of T2B/B2B scores, frequency breakdowns, and banner cut highlights." },
+  { key: "thematic_analysis",      label: "Thematic Analysis",                      aiGenerated: true,
+    description: "AI analysis of open-ended responses — themes, quotes, sentiment." },
+  { key: "visual_findings_summary",label: "Visual Findings Summary",                aiGenerated: true },
+  { key: "analyst_interpretation", label: "Analyst Interpretation & Recommendations", aiGenerated: true },
 ];
 
 export const AI_STARTER_KIT_SECTIONS: ServiceSection[] = [
