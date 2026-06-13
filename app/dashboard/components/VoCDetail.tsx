@@ -379,6 +379,8 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
   const [parsedCSV,setParsed] = useState<ParsedCSV | null>(null);
   const [mappingReady, setMappingReady] = useState(false);
   const [statsReady,   setStatsReady]   = useState(!!quant);
+  const [uploadMode,   setUploadMode]   = useState<"upload" | "paste">("upload");
+  const [pasteText,    setPasteText]    = useState("");
 
   const [genQs,      setGenQs]     = useState(false);
   const [genQsErr,   setGenQsErr]  = useState<string | null>(null);
@@ -486,19 +488,20 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     });
   }
 
-  // CSV upload
+  // Shared CSV processing — used by both file upload and manual paste
+  function processCSVText(text: string) {
+    const parsed = parseCSV(text);
+    if (parsed.headers.length === 0) return;
+    const autoMap = autoMapColumns(questions, parsed.headers);
+    setParsed(parsed);
+    setMapping(autoMap);
+    setMappingReady(true);
+    setStatsReady(false);
+  }
+
   function handleCSVUpload(file: File) {
     const reader = new FileReader();
-    reader.onload = e => {
-      const text  = e.target?.result as string;
-      const parsed= parseCSV(text);
-      if (parsed.headers.length === 0) return;
-      const autoMap = autoMapColumns(questions, parsed.headers);
-      setParsed(parsed);
-      setMapping(autoMap);
-      setMappingReady(true);
-      setStatsReady(false);
-    };
+    reader.onload = e => processCSVText(e.target?.result as string);
     reader.readAsText(file);
   }
 
@@ -916,22 +919,58 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
 
         {phase === 2 && (
           <>
-            {/* Section 1 — CSV Upload */}
+            {/* Section 1 — Data Upload */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full shrink-0">Section 1</span>
-                <h5 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>Data Upload</h5>
+                <h5 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>Response Data</h5>
                 {statsReady && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Processed</span>}
               </div>
-              <p className="text-xs text-gray-400 mb-3">Upload the Google Forms CSV export. Columns will be auto-mapped to your survey questions.</p>
-              <label className="inline-flex items-center gap-2 cursor-pointer bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors">
-                <span>{statsReady ? "Re-upload CSV" : "Upload CSV"}</span>
-                <input type="file" accept=".csv" className="hidden" onChange={e => {
-                  const f = e.target.files?.[0];
-                  if (f) handleCSVUpload(f);
-                  e.target.value = "";
-                }} />
-              </label>
+
+              {/* Mode toggle */}
+              <div className="inline-flex rounded-full border border-gray-200 p-0.5 mb-4 bg-gray-50">
+                <button
+                  onClick={() => setUploadMode("upload")}
+                  className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${uploadMode === "upload" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                  Upload CSV
+                </button>
+                <button
+                  onClick={() => setUploadMode("paste")}
+                  className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${uploadMode === "paste" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                  Paste Responses
+                </button>
+              </div>
+
+              {uploadMode === "upload" ? (
+                <div>
+                  <p className="text-xs text-gray-400 mb-3">Upload the Google Forms CSV export. Columns will be auto-mapped to your survey questions.</p>
+                  <label className="inline-flex items-center gap-2 cursor-pointer bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors">
+                    <span>{statsReady ? "Re-upload CSV" : "Upload CSV"}</span>
+                    <input type="file" accept=".csv" className="hidden" onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) handleCSVUpload(f);
+                      e.target.value = "";
+                    }} />
+                  </label>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs text-gray-400 mb-3">Paste CSV text directly — e.g. copied from a Google Forms export or a spreadsheet. The first row must be column headers. Columns will be auto-mapped to your survey questions.</p>
+                  <textarea
+                    rows={6}
+                    value={pasteText}
+                    onChange={e => setPasteText(e.target.value)}
+                    placeholder={"Timestamp,How satisfied were you overall?,How likely are you to recommend us?,…\n5/1/2025 10:22:34,6,7,Great service…"}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-seafoam resize-y placeholder-gray-300 mb-3"
+                  />
+                  <button
+                    onClick={() => { processCSVText(pasteText); setPasteText(""); }}
+                    disabled={pasteText.trim().length === 0}
+                    className="bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-40">
+                    Process Responses
+                  </button>
+                </div>
+              )}
 
               {mappingReady && parsedCSV && (
                 <MappingUI
