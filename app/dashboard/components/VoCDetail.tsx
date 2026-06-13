@@ -15,7 +15,7 @@ import type {
 import {
   VOC_QUESTION_TYPE_LABELS, VOC_GOOGLE_FORM_TYPE_LABELS,
 } from "@/lib/vocTypes";
-import { parseCSV, autoMapColumns, calculateStats } from "@/lib/vocDataProcessing";
+import { parseCSV, parseNarrativeResponses, autoMapColumns, calculateStats } from "@/lib/vocDataProcessing";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -488,9 +488,19 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     });
   }
 
-  // Shared CSV processing — used by both file upload and manual paste
-  function processCSVText(text: string) {
-    const parsed = parseCSV(text);
+  // Shared processing — file upload always uses parseCSV (forceCSV=true).
+  // Paste auto-detects: if the first line has a colon before any comma (e.g. "Overall satisfaction: 6/7"),
+  // it's narrative "Label: value" format → parseNarrativeResponses. Otherwise → parseCSV.
+  function processCSVText(text: string, forceCSV = false) {
+    let parsed;
+    if (forceCSV) {
+      parsed = parseCSV(text);
+    } else {
+      const firstLine = text.trimStart().split("\n")[0]?.trim() ?? "";
+      const colonIdx  = firstLine.indexOf(":");
+      const isNarrative = colonIdx > 0 && !firstLine.slice(0, colonIdx).includes(",");
+      parsed = isNarrative ? parseNarrativeResponses(text) : parseCSV(text);
+    }
     if (parsed.headers.length === 0) return;
     const autoMap = autoMapColumns(questions, parsed.headers);
     setParsed(parsed);
@@ -501,7 +511,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
 
   function handleCSVUpload(file: File) {
     const reader = new FileReader();
-    reader.onload = e => processCSVText(e.target?.result as string);
+    reader.onload = e => processCSVText(e.target?.result as string, true);
     reader.readAsText(file);
   }
 

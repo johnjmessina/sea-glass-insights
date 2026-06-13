@@ -43,6 +43,49 @@ export function parseCSV(text: string): ParsedCSV {
   return { headers, rows };
 }
 
+// ── Narrative response parser ─────────────────────────────────────────────────
+// Handles pasted unstructured text in "Label: value" format, where responses
+// are separated by blank lines, ---, or === delimiters.
+// "Overall satisfaction: 6/7" → column "Overall satisfaction", value "6"
+// "Customer type: Regular local member" → column "Customer type", value "Regular local member"
+
+export function parseNarrativeResponses(text: string): ParsedCSV {
+  const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  // Split into per-respondent blocks
+  const blocks = normalized
+    .split(/\n{2,}|(?:^|\n)[-=]{3,}(?:\n|$)/)
+    .map(b => b.trim())
+    .filter(b => b.includes(":"));
+
+  const keyOrder: string[] = [];
+  const keySet   = new Set<string>();
+  const rows: Record<string, string>[] = [];
+
+  for (const block of blocks) {
+    const row: Record<string, string> = {};
+    for (const rawLine of block.split("\n")) {
+      const line  = rawLine.trim();
+      const colon = line.indexOf(":");
+      if (colon < 1) continue;
+      const label    = line.slice(0, colon).trim();
+      const rawValue = line.slice(colon + 1).trim();
+      if (!label || !rawValue) continue;
+
+      // Strip "X/N" or "X out of N" → keep just the leading integer
+      const scoreMatch = /^(\d+)\s*\/\s*\d+/.exec(rawValue)
+                      ?? /^(\d+)\s+out\s+of\s+\d+/i.exec(rawValue);
+      const value = scoreMatch ? scoreMatch[1] : rawValue;
+
+      row[label] = value;
+      if (!keySet.has(label)) { keySet.add(label); keyOrder.push(label); }
+    }
+    if (Object.keys(row).length > 0) rows.push(row);
+  }
+
+  return { headers: keyOrder, rows };
+}
+
 // ── Column auto-mapping ───────────────────────────────────────────────────────
 
 export function autoMapColumns(questions: VocQuestion[], csvHeaders: string[]): ColumnMapping {
