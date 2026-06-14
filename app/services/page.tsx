@@ -86,14 +86,14 @@ const GRID_SERVICES: GridSvc[] = [
   {
     name: "Social Media Audit",
     price: "$199", turnaround: "48-72 hrs",
-    desc: "A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and how you stack up against competitors.",
+    desc: "We score your Facebook, Instagram, TikTok, and other active platforms across multiple dimensions to show you exactly where your social presence stands.",
     bundles: ["Starter Intelligence"],
     href: "/services/social-media-audit",
   },
   {
     name: "Secret Shopping",
     price: "$299", turnaround: "5-7 days",
-    desc: "A professional visit to your business, or a competitor's, scored across seven dimensions of the customer experience. You will see your business the way a first-time customer does.",
+    desc: "A local researcher visits your business as a real customer, scores the experience across seven dimensions, and delivers a detailed report. Every visit is customized to the scenario that matters most to you.",
     bundles: ["The Field Report", "Complete Shopper Experience"],
     href: "/services/secret-shopping",
   },
@@ -107,14 +107,14 @@ const GRID_SERVICES: GridSvc[] = [
   {
     name: "Synthetic Survey Report",
     price: "$399", turnaround: "48-72 hrs",
-    desc: "AI-generated customer personas to pressure-test your assumptions and surface directional insight, with full transparency about the methodology.",
+    desc: "We work with you to build the exact customer profiles you want to understand, then use AI to simulate how they would respond to your business, whether they are customers you already have or ones you are trying to attract.",
     bundles: ["Market & Mind"],
     href: "/services/synthetic-survey-report",
   },
   {
     name: "Voice of Customer Survey",
     price: "$499", turnaround: "1-2 weeks",
-    desc: "Real feedback from your real customers. We design the survey, help you send it to your existing contact list, and deliver a visual analysis report.",
+    desc: "Real feedback from your real customers, analyzed and delivered by a market research professional.",
     bundles: ["Complete Shopper Experience"],
     href: "/services/voice-of-customer",
   },
@@ -137,7 +137,7 @@ export default function ServicesPage() {
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,4vw,2.8rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "16px" }}>
           What We Offer
         </h1>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
+        <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, maxWidth: "700px", margin: "0 auto", lineHeight: 1.4 }}>
           Seven research and intelligence services for small businesses on the Jersey Shore and beyond. Every service is analyst-reviewed, flat fee, and built to give you a real edge.
         </p>
       </section>
@@ -251,7 +251,7 @@ export default function ServicesPage() {
             Not sure which service is right for you?
           </h2>
           <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.93rem", color: GRAY, lineHeight: 1.8, marginBottom: "32px" }}>
-            Reach out — we are happy to talk through your situation and recommend the best fit.
+            Reach out anytime. We&rsquo;re happy to talk through your situation and recommend the best fit.
           </p>
           <Link href="/contact" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>
             Contact John →
