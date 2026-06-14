@@ -32,6 +32,8 @@ Each service has a public-facing landing page with an intake form and Stripe pay
 
 Secret Shopping intake form uses a 3-step Continue/Back flow with progress indicator (Step 1 of 3) to prevent state loss on multi-select and address fields.
 
+AI Starter Kit landing page checklist updated with specificity line: "Every prompt is written specifically for your business type, your tone, and your real use cases — not generic templates you could find anywhere online."
+
 ### Bundles Page
 - `/bundles` landing page with four bundle packages
 - Starter Intelligence
@@ -74,6 +76,46 @@ Secret Shopping intake form uses a 3-step Continue/Back flow with progress indic
 - Lock count correctly tracks 7 narratives + summary separately
 - docx download with cover page, Visit Overview table, Experience Scorecard table, Analyst Observations, all narrative sections, Summary & Recommendations with analyst notes, and personal Analyst Note closing
 - All in-memory state (unsaved within the 2s debounce window) passed directly to docx generator — report always reflects current screen state
+
+**Deep Dive Report**
+- Section-by-section AI generation to avoid serverless timeout limits
+- 9 sections: Executive Summary, Business Snapshot, Customer Segments, Competitive Intelligence, Market Context & Trend Analysis, Decision-Specific Analysis, Extended Recommendations, Priority Action Framework, Expanded Analyst Interpretation
+- Each section has Edit, Lock, Unlock, Regenerate, and Analyst Notes controls
+- Analyst Perspective callout per section (optional; appears in docx with navy accent border)
+- Generate All button with per-section progress display and per-section retry on failure
+- docx download — all 9 sections plus Analyst Note closing
+
+**Synthetic Survey Report**
+- Section-by-section AI generation (7 sections)
+- Research Question Framework, Customer Personas, Persona Response Simulation, Thematic Analysis, Directional Recommendations, Methodology Disclosure, Honest Limitations Statement
+- Each section has Edit, Lock, Unlock, Regenerate, and Analyst Notes controls
+- Analyst Perspective callout per section
+- Generate All button with per-section progress and retry
+- docx download — all 7 sections plus Analyst Note closing
+
+**Voice of Customer Survey**
+- Phase 1: AI-generated survey design — question map editor with per-question type (scale 1–7, multiple choice, select all, open-ended), banner cut variable toggle, T2B/B2B flag, segmentation variable flag
+- Phase 2: Quantitative data upload — CSV file upload or manual text paste (auto-detected by format)
+- Pasted narrative responses parsed from "Label: value" format; "X/7" scores stripped to bare integer
+- Column auto-mapping from CSV headers to question map
+- MappingUI confirmation for CSV uploads; bypassed for narrative paste (direct to stats)
+- T2B/B2B calculations, frequency distributions, mean scores, banner cut cross-tabulations
+- 4 AI-generated narrative sections: Quantitative Summary, Thematic Analysis, Visual Findings Summary, Analyst Interpretation & Recommendations
+- Analyst Perspective callout per narrative section
+- docx download — quantitative tables, all 4 narrative sections, Analyst Note closing
+
+**AI Starter Kit**
+- Section-by-section AI generation (9 AI sections + 1 human-only)
+- Business Type Analysis, AI Best Practices Introduction, 6 custom prompts (marketing copy, review responses, social media captions, customer email, promotional brainstorm, business-specific custom prompt), Real Use Case Examples
+- Custom prompts use prompt---instructions delimiter: prompt text rendered in a distinct styled box in both dashboard and docx
+- Revision Notes section: human-only textarea (no AI generation)
+- Each AI section has Edit, Lock, Unlock, Regenerate, and Analyst Notes controls
+- No Analyst Perspective callouts (prompts are the deliverable)
+- Generate All button with per-section progress and retry
+- docx download — all sections with custom prompts in teal-bordered Courier New styled box, Analyst Note closing
+
+**All Services**
+- Markdown formatting symbols (##, **, *, __, _, backticks) stripped from all docx output — plain text only in Word documents
 
 **Business Pulse**
 - Two-page 4×6 print-ready PDF generator
