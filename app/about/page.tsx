@@ -26,7 +26,7 @@ export default function AboutPage() {
       <SiteNav />
 
       {/* LOGO BANNER */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "72px 24px 56px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 32px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -36,8 +36,8 @@ export default function AboutPage() {
       </section>
 
       {/* TAGLINE */}
-      <section style={{ textAlign: "center", padding: "48px 24px 0", maxWidth: "700px", margin: "0 auto" }}>
-        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.25rem, 3vw, 1.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
+      <section style={{ textAlign: "center", padding: "40px 24px 0", maxWidth: "860px", margin: "0 auto" }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
           Market research built locally, for local small businesses. Analyst-reviewed and priced to be accessible.
         </p>
       </section>
