@@ -488,25 +488,50 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     });
   }
 
-  // Shared processing — file upload always uses parseCSV (forceCSV=true).
-  // Paste auto-detects: if the first line has a colon before any comma (e.g. "Overall satisfaction: 6/7"),
-  // it's narrative "Label: value" format → parseNarrativeResponses. Otherwise → parseCSV.
+  // Calculate stats from a parsed dataset + mapping, update state, and persist.
+  function applyStats(parsed: ParsedCSV, map: ColumnMapping) {
+    const calculated = calculateStats(parsed, questions, map);
+    setQuant(calculated);
+    setStatsReady(true);
+    setMappingReady(false);
+    persist({
+      service_data: {
+        ...sd, voc_quant_data: calculated, voc_column_mapping: map,
+        voc_phase: phase, voc_question_map: questions,
+      },
+    });
+  }
+
+  // File upload always uses parseCSV and shows the mapping confirmation UI.
+  // Paste auto-detects format: "Label: value" lines (colon before any comma) → narrative parser,
+  // which skips the mapping UI and goes straight to stats. CSV paste → mapping UI as normal.
   function processCSVText(text: string, forceCSV = false) {
-    let parsed;
     if (forceCSV) {
-      parsed = parseCSV(text);
-    } else {
-      const firstLine = text.trimStart().split("\n")[0]?.trim() ?? "";
-      const colonIdx  = firstLine.indexOf(":");
-      const isNarrative = colonIdx > 0 && !firstLine.slice(0, colonIdx).includes(",");
-      parsed = isNarrative ? parseNarrativeResponses(text) : parseCSV(text);
+      const parsed = parseCSV(text);
+      if (parsed.headers.length === 0) return;
+      const autoMap = autoMapColumns(questions, parsed.headers);
+      setParsed(parsed);
+      setMapping(autoMap);
+      setMappingReady(true);
+      setStatsReady(false);
+      return;
     }
+    const firstLine   = text.trimStart().split("\n")[0]?.trim() ?? "";
+    const colonIdx    = firstLine.indexOf(":");
+    const isNarrative = colonIdx > 0 && !firstLine.slice(0, colonIdx).includes(",");
+    const parsed      = isNarrative ? parseNarrativeResponses(text) : parseCSV(text);
     if (parsed.headers.length === 0) return;
     const autoMap = autoMapColumns(questions, parsed.headers);
-    setParsed(parsed);
-    setMapping(autoMap);
-    setMappingReady(true);
-    setStatsReady(false);
+    if (isNarrative) {
+      // Narrative: mapping is already resolved — go straight to stats.
+      applyStats(parsed, autoMap);
+    } else {
+      // CSV paste: show the mapping confirmation UI.
+      setParsed(parsed);
+      setMapping(autoMap);
+      setMappingReady(true);
+      setStatsReady(false);
+    }
   }
 
   function handleCSVUpload(file: File) {
@@ -517,16 +542,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
 
   function confirmMapping() {
     if (!parsedCSV) return;
-    const calculated = calculateStats(parsedCSV, questions, mapping);
-    setQuant(calculated);
-    setStatsReady(true);
-    setMappingReady(false);
-    persist({
-      service_data: {
-        ...sd, voc_quant_data: calculated, voc_column_mapping: mapping,
-        voc_phase: phase, voc_question_map: questions,
-      },
-    });
+    applyStats(parsedCSV, mapping);
   }
 
   async function generatePhase2() {
