@@ -132,16 +132,13 @@ export default function ServicesPage() {
     <div className={`${cormorant.variable} ${montserrat.variable}`} style={{ backgroundColor: SAND, color: NAVY }}>
       <SiteNav />
 
-      {/* ── PAGE HERO ─────────────────────────────────────────── */}
-      <section style={{ backgroundColor: NAVY, textAlign: "center", padding: "64px 24px 72px" }}>
-        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.2rem,5vw,3.2rem)", fontWeight: 700, color: WHITE, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 16px" }}>
-          Every small business has an edge. Let&rsquo;s refine yours.
+      {/* ── PAGE HEADER ───────────────────────────────────────── */}
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 48px" }}>
+        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,4vw,2.8rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "16px" }}>
+          What We Offer
         </h1>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", color: "#CBD5E1", maxWidth: "540px", margin: "0 auto 12px", lineHeight: 1.8 }}>
-          Professional market research for small businesses. AI generates the foundation. A real analyst reviews, refines, and makes sure the insights that reach you actually matter.
-        </p>
-        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.78rem", color: TEAL }}>
-          Look for bundle tags on select services to save.
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.92rem", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
+          Seven research and intelligence services for small businesses on the Jersey Shore and beyond. Every service is analyst-reviewed, flat fee, and built to give you a real edge.
         </p>
       </section>
 
@@ -214,9 +211,6 @@ export default function ServicesPage() {
       {/* ── 6-SERVICE GRID ────────────────────────────────────── */}
       <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.4rem,2.5vw,1.8rem)", fontWeight: 700, color: NAVY, marginBottom: "20px" }}>
-            More Services
-          </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
             {GRID_SERVICES.map(svc => (
               <Link key={svc.name} href={svc.href} style={{ textDecoration: "none", display: "block" }}>
