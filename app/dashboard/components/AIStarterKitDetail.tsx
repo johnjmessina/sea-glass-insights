@@ -77,9 +77,6 @@ export default function AIStarterKitDetail({ order: initialOrder, onBack }: Prop
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState<string | null>(null);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
-  const [sendingReport, setSendingReport] = useState(false);
-  const [sendMsg, setSendMsg]             = useState<string | null>(null);
-
   const metaTimer = useRef<NodeJS.Timeout | null>(null);
   const noteTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -244,29 +241,6 @@ export default function AIStarterKitDetail({ order: initialOrder, onBack }: Prop
       alert(e instanceof Error ? e.message : "Report generation failed");
     } finally {
       setDownloadingDocx(false);
-    }
-  }
-
-  async function sendReport() {
-    if (!confirm(`Send the report to ${order.email}?`)) return;
-    setSendingReport(true);
-    setSendMsg(null);
-    try {
-      const res  = await fetch("/api/send-report", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-      setOrder(p => ({ ...p, status: "delivered" }));
-      setSendMsg(`Report sent to ${order.email}`);
-      setTimeout(() => setSendMsg(null), 6000);
-    } catch (e) {
-      setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
-      setTimeout(() => setSendMsg(null), 8000);
-    } finally {
-      setSendingReport(false);
     }
   }
 
@@ -663,23 +637,13 @@ export default function AIStarterKitDetail({ order: initialOrder, onBack }: Prop
               className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
               {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
             </button>
-            <button onClick={sendReport}
-              disabled={sendingReport || order.status === "delivered" || !allLocked}
-              className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-              {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
-            </button>
             {!allLocked && (
               <p className="text-xs text-amber-600 font-medium">
-                Lock all {AI_SECTIONS.length} sections to enable download and send
+                Lock all {AI_SECTIONS.length} sections to enable download
                 ({lockedCount}/{AI_SECTIONS.length} locked)
               </p>
             )}
             {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-            {sendMsg && (
-              <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>
-                {sendMsg}
-              </span>
-            )}
           </div>
         )}
       </div>

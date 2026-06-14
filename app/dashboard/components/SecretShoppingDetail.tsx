@@ -64,8 +64,6 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
   const [autoSaved, setAutoSaved]   = useState(false);
   const [saving, setSaving]         = useState(false);
   const [saveMsg, setSaveMsg]       = useState<string | null>(null);
-  const [sendingReport, setSending] = useState(false);
-  const [sendMsg, setSendMsg]       = useState<string | null>(null);
   const [scorecardStep, setScorecardStep] = useState(0);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
   const [narrativeStep, setNarrativeStep] = useState(0);
@@ -214,22 +212,6 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
     } finally {
       setDownloadingDocx(false);
     }
-  }
-
-  async function sendReport() {
-    if (!confirm(`Send the report to ${order.email}?`)) return;
-    setSending(true); setSendMsg(null);
-    try {
-      const res = await fetch("/api/send-report", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-      setOrder(p => ({ ...p, status: "delivered" }));
-      setSendMsg(`Report sent to ${order.email}`);
-    } catch (e) { setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown"}`); }
-    finally { setSending(false); setTimeout(() => setSendMsg(null), 6000); }
   }
 
   const inp  = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam";
@@ -667,11 +649,6 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
               className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50">
               {saving ? "Saving…" : "Save Report"}
             </button>
-            <button onClick={sendReport}
-              disabled={sendingReport || order.status === "delivered" || !hasDraft || !allLocked}
-              className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-              {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
-            </button>
             {hasDraft && (
               <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
                 className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
@@ -684,7 +661,6 @@ export default function SecretShoppingDetail({ order: initialOrder, onBack }: { 
               </p>
             )}
             {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-            {sendMsg && <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>{sendMsg}</span>}
           </div>
 
           {/* Status actions */}

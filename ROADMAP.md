@@ -48,7 +48,8 @@ Current to-do list organized by priority.
 - Synthetic Survey Report — 7-section generation, docx download
 - Voice of Customer Survey — Phase 1 survey design + Phase 2 quant analysis + AI narratives, docx download
 - AI Starter Kit — 9-section generation with custom prompt box rendering, docx download
-- Markdown stripping across all docx generators (no raw ## / ** in Word output)
+- Markdown stripping across all docx generators (##, **, bullet/numbered lists, blockquotes, fenced code blocks)
+- Send to Customer button removed from all service order views
 
 **Voice of Customer Survey**
 - Phase 1: question map editor with per-question type, banner cut toggle, T2B/B2B flag, segmentation variable flag

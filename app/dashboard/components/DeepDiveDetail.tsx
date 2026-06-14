@@ -65,9 +65,6 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState<string | null>(null);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
-  const [sendingReport, setSendingReport] = useState(false);
-  const [sendMsg, setSendMsg]             = useState<string | null>(null);
-
   // Section-by-section generation progress
   type GenPhase = "idle" | "sections";
   const [genPhase, setGenPhase]         = useState<GenPhase>("idle");
@@ -252,28 +249,7 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
     }
   }
 
-  async function sendReport() {
-    if (!confirm(`Send the report to ${order.email}?`)) return;
-    setSendingReport(true);
-    setSendMsg(null);
-    try {
-      const res  = await fetch("/api/send-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-      setOrder(p => ({ ...p, status: "delivered" }));
-      setSendMsg(`Report sent to ${order.email}`);
-      setTimeout(() => setSendMsg(null), 6000);
-    } catch (e) {
-      setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
-      setTimeout(() => setSendMsg(null), 8000);
-    } finally {
-      setSendingReport(false);
-    }
-  }
+
 
   // ── Render one AI section (idx is 0-based index into DEEP_DIVE_SECTIONS) ─────
 
@@ -670,23 +646,13 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
               className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
               {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
             </button>
-            <button onClick={sendReport}
-              disabled={sendingReport || order.status === "delivered" || !allLocked}
-              className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-              {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
-            </button>
             {!allLocked && (
               <p className="text-xs text-amber-600 font-medium">
-                Lock all {DEEP_DIVE_SECTIONS.length} sections to enable download and send
+                Lock all {DEEP_DIVE_SECTIONS.length} sections to enable download
                 ({lockedCount}/{DEEP_DIVE_SECTIONS.length} locked)
               </p>
             )}
             {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-            {sendMsg && (
-              <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>
-                {sendMsg}
-              </span>
-            )}
           </div>
         )}
       </div>

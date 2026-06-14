@@ -115,7 +115,8 @@ AI Starter Kit landing page checklist updated with specificity line: "Every prom
 - docx download — all sections with custom prompts in teal-bordered Courier New styled box, Analyst Note closing
 
 **All Services**
-- Markdown formatting symbols (##, **, *, __, _, backticks) stripped from all docx output — plain text only in Word documents
+- Markdown formatting symbols (##, **, *, __, _, backticks, bullet prefixes, numbered list prefixes, blockquotes, fenced code blocks) stripped from all docx output — plain text only in Word documents
+- Send to Customer button removed from all service order views — Word document download is the delivery mechanism
 
 **Business Pulse**
 - Two-page 4×6 print-ready PDF generator

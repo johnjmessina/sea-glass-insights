@@ -942,13 +942,10 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   const [regenerating, setRegenerating]           = useState<Partial<Record<SectionKey, boolean>>>({});
   const [saving, setSaving]                       = useState(false);
   const [downloadingReport, setDownloadingReport] = useState(false);
-  const [sendingReport, setSendingReport]         = useState(false);
-
   // Messages
   const [genError, setGenError]     = useState<string | null>(null);
   const [regenError, setRegenError] = useState<Partial<Record<SectionKey, string>>>({});
   const [saveMsg, setSaveMsg]       = useState<string | null>(null);
-  const [sendMsg, setSendMsg]       = useState<string | null>(null);
   const [autoSaved, setAutoSaved]   = useState(false);
 
   // Debounce refs
@@ -1184,28 +1181,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
     }
   }
 
-  async function sendReport() {
-    if (!confirm(`Send the report to ${order.email}?`)) return;
-    setSendingReport(true);
-    setSendMsg(null);
-    try {
-      const res  = await fetch("/api/send-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-      setOrder(prev => ({ ...prev, status: "delivered" }));
-      setSendMsg(`Report sent to ${order.email}`);
-      setTimeout(() => setSendMsg(null), 6000);
-    } catch (e) {
-      setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
-      setTimeout(() => setSendMsg(null), 8000);
-    } finally {
-      setSendingReport(false);
-    }
-  }
+
 
   async function updateStatus(status: string) {
     await fetch("/api/update-order-status", {
@@ -1597,18 +1573,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
                   className="bg-navy text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50">
                   {saving ? "Saving…" : "Save Report"}
                 </button>
-                <button
-                  onClick={sendReport}
-                  disabled={sendingReport || order.status === "delivered"}
-                  className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-                  {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
-                </button>
                 {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-                {sendMsg && (
-                  <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>
-                    {sendMsg}
-                  </span>
-                )}
               </div>
             </div>
           </div>

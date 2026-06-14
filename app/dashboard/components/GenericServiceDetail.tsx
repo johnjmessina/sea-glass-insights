@@ -63,8 +63,6 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
   const [autoSaved, setAutoSaved]       = useState(false);
   const [saving, setSaving]             = useState(false);
   const [saveMsg, setSaveMsg]           = useState<string | null>(null);
-  const [sendingReport, setSendingReport] = useState(false);
-  const [sendMsg, setSendMsg]           = useState<string | null>(null);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
 
   const metaTimer  = useRef<NodeJS.Timeout | null>(null);
@@ -208,28 +206,6 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
       alert(e instanceof Error ? e.message : "Report generation failed");
     } finally {
       setDownloadingDocx(false);
-    }
-  }
-
-  async function sendReport() {
-    if (!confirm(`Send the report to ${order.email}?`)) return;
-    setSendingReport(true);
-    setSendMsg(null);
-    try {
-      const res  = await fetch("/api/send-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-      setOrder(p => ({ ...p, status: "delivered" }));
-      setSendMsg(`Report sent to ${order.email}`);
-    } catch (e) {
-      setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
-    } finally {
-      setSendingReport(false);
-      setTimeout(() => setSendMsg(null), 6000);
     }
   }
 
@@ -473,22 +449,12 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
                   {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
                 </button>
               )}
-              <button onClick={sendReport}
-                disabled={sendingReport || order.status === "delivered" || !hasDraft || !allLocked}
-                className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-                {sendingReport ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
-              </button>
               {!allLocked && hasDraft && (
                 <p className="text-xs text-amber-600 font-medium">
-                  Lock all {aiSections.length} AI sections to enable sending
+                  Lock all {aiSections.length} AI sections to enable download
                 </p>
               )}
               {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-              {sendMsg && (
-                <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>
-                  {sendMsg}
-                </span>
-              )}
             </div>
           </div>
         )}

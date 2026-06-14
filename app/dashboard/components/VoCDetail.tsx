@@ -396,8 +396,6 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
   const [saveMsg,    setSaveMsg]   = useState<string | null>(null);
   const [autoSaved,  setAutoSaved] = useState(false);
   const [dlDocx,     setDlDocx]    = useState(false);
-  const [sending,    setSending]   = useState(false);
-  const [sendMsg,    setSendMsg]   = useState<string | null>(null);
   const [dlLink,     setDlLink]    = useState<string | null>(null);
   const [dlLinkLoad, setDlLinkLoad]= useState(false);
 
@@ -645,22 +643,6 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
       a.click(); URL.revokeObjectURL(url);
     } catch (e) { alert(e instanceof Error ? e.message : "Failed"); }
     finally { setDlDocx(false); }
-  }
-
-  async function sendReport() {
-    if (!confirm(`Send the report to ${order.email}?`)) return;
-    setSending(true); setSendMsg(null);
-    try {
-      const res  = await fetch("/api/send-report", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed");
-      setOrder(p => ({ ...p, status: "delivered" }));
-      setSendMsg(`Report sent to ${order.email}`);
-    } catch (e) { setSendMsg(`Error: ${e instanceof Error ? e.message : "Unknown"}`); }
-    finally { setSending(false); setTimeout(() => setSendMsg(null), 6000); }
   }
 
   async function fetchDlLink() {
@@ -1061,17 +1043,12 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
                 className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
                 {dlDocx ? "Building…" : "⬇ Save as Word Document"}
               </button>
-              <button onClick={sendReport} disabled={sending || order.status === "delivered" || !allLocked}
-                className="bg-seafoam text-navy font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-                {sending ? "Sending…" : order.status === "delivered" ? "✓ Sent" : "✉ Send to Customer"}
-              </button>
               {!allLocked && hasDraft && (
                 <p className="text-xs text-amber-600 font-medium">
-                  Lock all {AI_SECTIONS.length} sections to enable download and send ({lockedCount}/{AI_SECTIONS.length} locked)
+                  Lock all {AI_SECTIONS.length} sections to enable download ({lockedCount}/{AI_SECTIONS.length} locked)
                 </p>
               )}
               {saveMsg && <span className="text-green-600 text-sm font-medium">{saveMsg}</span>}
-              {sendMsg && <span className={`text-sm font-medium ${sendMsg.startsWith("Error") ? "text-red-500" : "text-green-600"}`}>{sendMsg}</span>}
             </div>
           </>
         )}
