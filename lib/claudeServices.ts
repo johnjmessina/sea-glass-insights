@@ -7,7 +7,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Order } from "@/lib/supabase";
 import type { ServiceType } from "@/lib/serviceConfig";
-import { DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS, VOC_PHASE2_SECTIONS } from "@/lib/serviceConfig";
+import { AI_STARTER_KIT_SECTIONS, DEEP_DIVE_SECTIONS, SYNTHETIC_SECTIONS, VOC_PHASE2_SECTIONS } from "@/lib/serviceConfig";
 import type { VocQuantData, VocQuestion } from "@/lib/vocTypes";
 import { formatQuantDataForAI, formatOpenEndedForAI } from "@/lib/vocDataProcessing";
 
@@ -488,6 +488,103 @@ Keys required:
   return sections;
 }
 
+// ── AI Starter Kit: Section-by-section generation ─────────────────────────────
+
+const AISK_SECTION_CONFIG: Record<string, { instructions: string; maxTokens: number }> = {
+  business_type_analysis: {
+    instructions: "Write 2 paragraphs: who this business is and what AI can do specifically for them. Be concrete — what daily tasks would AI realistically save them time on? What communication challenges does a business like this face? Ground it in their intake answers.",
+    maxTokens: 600,
+  },
+  ai_best_practices_introduction: {
+    instructions: "Write 3-4 paragraphs as a warm, practical guide for a small business owner who has never used AI. Cover: (1) be specific — the more context you give, the better the output; (2) have a conversation — push back and refine, don't just accept the first response; (3) ask AI to interview you before it writes anything — this is the single most powerful technique for small business owners; (4) treat every output as a first draft. Close with a note that these prompts work in ChatGPT, Claude, or any major AI chatbot. Tone: encouraging, practical, not technical.",
+    maxTokens: 900,
+  },
+  custom_prompt_1: {
+    instructions: "Write a marketing copy prompt for this business. The prompt text first (copy-paste ready, with [BRACKET PLACEHOLDERS] for parts the owner customizes), then a line with exactly three dashes (---), then 1-2 sentences of practical instructions. Focus: marketing copy, promotions, or product/service descriptions specific to their business type.",
+    maxTokens: 500,
+  },
+  custom_prompt_2: {
+    instructions: "Write a prompt for responding to online reviews (Google, Yelp, etc.) for this business. Prompt text first, then ---, then 1-2 sentences of instructions. Include a placeholder like [PASTE THE REVIEW HERE]. Works for both positive and negative reviews. Matches their brand tone.",
+    maxTokens: 500,
+  },
+  custom_prompt_3: {
+    instructions: "Write a social media caption prompt for this business. Prompt text first, then ---, then 1-2 sentences of instructions. Include placeholders for what they want to post about. Specific to their content style, audience, and platforms.",
+    maxTokens: 500,
+  },
+  custom_prompt_4: {
+    instructions: "Write a customer email or newsletter prompt for this business. Prompt text first, then ---, then 1-2 sentences of instructions. Useful for regular customer communication — promotions, seasonal updates, relationship messages. Matches their voice.",
+    maxTokens: 500,
+  },
+  custom_prompt_5: {
+    instructions: "Write a prompt for brainstorming promotional ideas, seasonal campaigns, or special offers for this business. Prompt text first, then ---, then 1-2 sentences of instructions. Generates multiple ideas they can choose from, specific to their business season and customer type.",
+    maxTokens: 500,
+  },
+  custom_prompt_6: {
+    instructions: "Based on this client's intake — especially the tasks they want help with and anything specific about their business — write a prompt for the use case most relevant to THEIR specific situation not covered by prompts 1-5. Good candidates: staff scripts, FAQ responses, product descriptions, event promotion, client follow-up emails, or anything they specifically mentioned. Prompt text first, then ---, then 1-2 sentences of instructions.",
+    maxTokens: 500,
+  },
+  real_use_case_examples: {
+    instructions: "Show how 3 of the custom prompts in this kit apply specifically to this business. For each: name the prompt, show a realistic example of what the owner would actually type in (with their specific business details filled in), and show a brief snippet of what AI might output. Ground every example in their real business situation. 3-4 paragraphs.",
+    maxTokens: 1000,
+  },
+};
+
+export async function generateAISKSection(
+  order: Order,
+  sectionKey: string,
+  previousSections?: Record<string, string>,
+): Promise<string> {
+  if (sectionKey === "revision_notes") {
+    throw new Error("revision_notes is a human-only section and cannot be AI-generated.");
+  }
+
+  const intake = buildIntake(order);
+  const sectionLabel = AI_STARTER_KIT_SECTIONS.find(s => s.key === sectionKey)?.label
+    ?? sectionKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+  const config = AISK_SECTION_CONFIG[sectionKey];
+  if (!config) throw new Error(`Unknown AISK section key: "${sectionKey}"`);
+
+  // real_use_case_examples benefits from seeing the generated custom prompts
+  let priorContext = "";
+  if (sectionKey === "real_use_case_examples" && previousSections) {
+    const promptKeys = [
+      "custom_prompt_1", "custom_prompt_2", "custom_prompt_3",
+      "custom_prompt_4", "custom_prompt_5", "custom_prompt_6",
+    ];
+    const blocks = promptKeys
+      .filter(k => previousSections[k])
+      .map((k, i) => {
+        const txt = (previousSections[k] ?? "").slice(0, 300);
+        return `Prompt ${i + 1}:\n${txt}${(previousSections[k]?.length ?? 0) > 300 ? "…" : ""}`;
+      });
+    if (blocks.length > 0) {
+      priorContext = "\n\nTHE CUSTOM PROMPTS (reference these for examples):\n" + blocks.join("\n\n");
+    }
+  }
+
+  const isPromptSection = /^custom_prompt_\d+$/.test(sectionKey);
+  const formatNote = isPromptSection
+    ? " IMPORTANT: Output the prompt text first (with [BRACKET PLACEHOLDERS]), then a line with exactly three dashes (---), then 1-2 sentences of instructions. No other formatting."
+    : "";
+
+  const system = `You are a senior analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of an AI Starter Kit for a small business owner. Return plain text only — no JSON, no headers, no markdown. Tone: warm, specific, practical, encouraging. No corporate jargon. No em-dashes.${formatNote}`;
+  const user   = `BUSINESS INTAKE:\n${intake}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${config.instructions}`;
+
+  try {
+    const msg = await client.messages.create({
+      model:      "claude-sonnet-4-5",
+      max_tokens: config.maxTokens,
+      system,
+      messages:   [{ role: "user", content: user }],
+    });
+    return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+  } catch (err) {
+    console.error(`[generateAISKSection] "${sectionKey}" failed:`, err);
+    throw new Error(`Section "${sectionLabel}" failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
 // ── Secret Shopping — Narrative Sections ─────────────────────────────────────
 
 async function generateSSNarratives(
@@ -562,12 +659,12 @@ const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   // AI Starter Kit
   business_type_analysis:        "Write 2 paragraphs summarizing this business type and what AI can do for their specific situation.",
   ai_best_practices_introduction:"Write 3-4 paragraphs: be specific, have a conversation, ask AI to interview you before writing. Approachable for AI beginners.",
-  custom_prompt_1:               "Write a marketing copy prompt + 1-2 sentences of instructions for how to use it.",
-  custom_prompt_2:               "Write a review response prompt + 1-2 sentences of instructions.",
-  custom_prompt_3:               "Write a social media captions prompt + 1-2 sentences of instructions.",
-  custom_prompt_4:               "Write a customer email/newsletter prompt + 1-2 sentences of instructions.",
-  custom_prompt_5:               "Write a competitive intelligence research prompt + 1-2 sentences of instructions.",
-  custom_prompt_6:               "Write a promotions/seasonal campaigns brainstorm prompt + 1-2 sentences of instructions.",
+  custom_prompt_1:               "Write a marketing copy prompt with [BRACKET PLACEHOLDERS], then a line with exactly three dashes (---), then 1-2 sentences of instructions for how to use it.",
+  custom_prompt_2:               "Write a review response prompt with a [PASTE THE REVIEW HERE] placeholder, then ---, then 1-2 sentences of instructions.",
+  custom_prompt_3:               "Write a social media captions prompt with [BRACKET PLACEHOLDERS], then ---, then 1-2 sentences of instructions.",
+  custom_prompt_4:               "Write a customer email/newsletter prompt with [BRACKET PLACEHOLDERS], then ---, then 1-2 sentences of instructions.",
+  custom_prompt_5:               "Write a promotions/brainstorm prompt with [BRACKET PLACEHOLDERS], then ---, then 1-2 sentences of instructions.",
+  custom_prompt_6:               "Write a custom prompt for the most relevant unused use case for this business, with [BRACKET PLACEHOLDERS], then ---, then 1-2 sentences of instructions.",
   real_use_case_examples:        "Write 3-4 paragraphs showing how 3 of the prompts apply specifically to this business with example output snippets.",
   // Secret Shopping narratives
   narrative_first_impression:    "Write 1-2 paragraphs narrating the first impression experience based on the scores.",

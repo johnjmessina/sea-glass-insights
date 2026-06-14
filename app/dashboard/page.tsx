@@ -21,6 +21,7 @@ import SecretShoppingDetail from "@/app/dashboard/components/SecretShoppingDetai
 import VoCDetail from "@/app/dashboard/components/VoCDetail";
 import DeepDiveDetail from "@/app/dashboard/components/DeepDiveDetail";
 import SyntheticSurveyDetail from "@/app/dashboard/components/SyntheticSurveyDetail";
+import AIStarterKitDetail from "@/app/dashboard/components/AIStarterKitDetail";
 
 // Must be after all imports — const declarations between import groups cause
 // module-evaluation errors in strict ESM / Turbopack builds.
@@ -911,6 +912,7 @@ function ServiceOrderRouter({ order, onBack }: { order: Order; onBack: () => voi
   if (svcType === "voice_of_customer_survey") return <VoCDetail order={order} onBack={onBack} />;
   if (svcType === "deep_dive_report")         return <DeepDiveDetail order={order} onBack={onBack} />;
   if (svcType === "synthetic_survey_report")  return <SyntheticSurveyDetail order={order} onBack={onBack} />;
+  if (svcType === "ai_starter_kit")           return <AIStarterKitDetail order={order} onBack={onBack} />;
   if (svcType !== "market_intelligence_report") return <GenericServiceDetail order={order} onBack={onBack} />;
 
   // Fall through to existing MIR OrderDetail below

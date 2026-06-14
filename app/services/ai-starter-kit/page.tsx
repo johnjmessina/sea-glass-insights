@@ -20,6 +20,7 @@ const CHECKLIST = [
   "Works with ChatGPT, Claude, or any major AI tool",
   "Built for real use cases: marketing, responses, social captions",
   "One Round of Revisions",
+  "Every prompt is written specifically for your business type, your tone, and your real use cases — not generic templates you could find anywhere online.",
 ];
 const HIW = [
   { num: "1", title: "Tell Us About Your Business", body: "Fill out the short form below. Tell us your business type, your brand voice, what AI tool you're using, and the tasks where you most need help." },
