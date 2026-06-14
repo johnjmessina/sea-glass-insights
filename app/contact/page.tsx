@@ -46,13 +46,20 @@ export default function ContactPage() {
     <div style={{ backgroundColor: WHITE, minHeight: "100vh", fontFamily: "'Montserrat', sans-serif" }}>
       <SiteNav />
 
-      {/* HERO */}
-      <section style={{ backgroundColor: NAVY, textAlign: "center", padding: "64px 24px 72px" }}>
-        <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2rem,5vw,3rem)", fontWeight: 700, color: WHITE, marginBottom: "16px" }}>
-          Let&rsquo;s talk about your business.
-        </h1>
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", color: "#CBD5E1", maxWidth: "500px", margin: "0 auto", lineHeight: 1.8 }}>
-          Have a question about a service, want a recommendation, or ready to get started? Reach out directly.
+      {/* LOGO BANNER */}
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 32px" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logos/logo_transparent_FINAL.png"
+          alt="Sea Glass Insights"
+          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto" }}
+        />
+      </section>
+
+      {/* TAGLINE */}
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 0", maxWidth: "860px", margin: "0 auto" }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
+          Every small business has an edge. Let&rsquo;s refine yours.
         </p>
       </section>
 
