@@ -33,6 +33,9 @@ export default function AboutPage() {
           alt="Sea Glass Insights"
           style={{ width: "220px", height: "auto", display: "inline-block" }}
         />
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9rem", color: GRAY, fontWeight: 400, lineHeight: 1.7, marginTop: "20px", marginBottom: 0 }}>
+          Market research built locally, for local small businesses. Analyst-reviewed and priced to be accessible.
+        </p>
       </section>
 
       {/* PHOTO + TEXT — two columns on desktop, stacked on mobile */}
