@@ -133,7 +133,7 @@ export default function ServicesPage() {
       <SiteNav />
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 72px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 40px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -149,7 +149,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── MIR FEATURED CARD ─────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, padding: "48px 24px 0" }}>
+      <section style={{ backgroundColor: SAND, padding: "24px 24px 0" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div
             style={{
@@ -251,7 +251,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── BOTTOM CTA ────────────────────────────────────────── */}
-      <section style={{ backgroundColor: WHITE, padding: "72px 24px", textAlign: "center" }}>
+      <section style={{ backgroundColor: SAND, padding: "72px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, color: NAVY, marginBottom: "16px", lineHeight: 1.3 }}>
             Not sure which service is right for you?
