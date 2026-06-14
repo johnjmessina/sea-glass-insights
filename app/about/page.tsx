@@ -25,11 +25,14 @@ export default function AboutPage() {
     <div className={`${cormorant.variable} ${montserrat.variable}`} style={{ backgroundColor: WHITE, color: NAVY }}>
       <SiteNav />
 
-      {/* HERO */}
-      <section style={{ backgroundColor: NAVY, textAlign: "center", padding: "72px 24px 80px" }}>
-        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 700, color: WHITE, lineHeight: 1.2, maxWidth: "700px", margin: "0 auto" }}>
-          Local market research for local small businesses.
-        </h1>
+      {/* LOGO BANNER */}
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logos/logo_transparent_FINAL.png"
+          alt="Sea Glass Insights"
+          style={{ height: "40px", width: "auto", display: "inline-block" }}
+        />
       </section>
 
       {/* PHOTO + TEXT — two columns on desktop, stacked on mobile */}
