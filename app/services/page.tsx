@@ -251,7 +251,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── BOTTOM CTA ────────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, padding: "72px 24px", textAlign: "center" }}>
+      <section style={{ backgroundColor: SAND, padding: "40px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, color: NAVY, marginBottom: "16px", lineHeight: 1.3 }}>
             Not sure which service is right for you?
