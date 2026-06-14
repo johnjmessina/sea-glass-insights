@@ -44,17 +44,25 @@ export default function AboutPage() {
           {/* Text — left column on desktop, appears first on mobile */}
           <div style={{ flex: 1, minWidth: "280px" }}>
             <P>
-              Hi, I&rsquo;m John Messina. I started Sea Glass Insights because I have over ten years of market research experience and I wanted to put it to work for small businesses right here on the Jersey Shore.
+              Hi, I&rsquo;m John Messina. I have spent the last ten years as a market research professional, working with large organizations to study markets, understand customers, and turn data into decisions. I started Sea Glass Insights to bring that same level of research to local small businesses, at a price point built for small business.
             </P>
             <P>
-              Sea Glass Insights delivers professional market research reports, competitive intelligence, and customer analysis to small business owners on the Jersey Shore and beyond. We are based in Bradley Beach, New Jersey, which means we understand the specific rhythms of a shore community business: the seasonal swings, the tourist economy, the year-round local base, and the pressure of competing in a market where word of mouth travels fast and reputation is everything.
+              I grew up vacationing on the Jersey Shore and eventually made it my home. I want to play a role in keeping it the kind of place people love to come back to. The small businesses here are what make these towns worth visiting, and I believe they deserve the same quality of research and intelligence that large companies invest in.
             </P>
             <P>
-              My background is in professional market research — studying markets, understanding customers, and translating data into decisions. I have done this work at scale, for organizations with real resources and real stakes. AI made it possible to deliver that same quality of work faster and at a price point that actually works for small businesses. Every report that leaves Sea Glass Insights has my name on it. I review every submission personally. The AI generates the foundation. I make sure it is worth your time.
+              I offer research services focused on what small businesses actually need to know about their customers, their competition, and their market. What makes this work is knowing how to ask the right questions. AI is only as good as the direction you give it. With over ten years of research experience, I know how to ask the right questions, frame the right problems, and make sure what comes back is actually useful for your business. The findings you receive are not generic. They are built around you. My goal is to be a genuine asset, not just another vendor.
             </P>
             <P>
-              Every small business has an edge. Sometimes it is obvious. Sometimes it is buried in a Google review, hiding in plain sight. Sometimes it is a positioning opportunity that no competitor has claimed yet. My job is to help you find it.
+              Based in Bradley Beach, we work with small businesses across the Jersey Shore and beyond. I live and work in the same community you do. That local knowledge is part of what you get.
             </P>
+            <P>
+              Every small business has an edge. Let&rsquo;s refine yours.
+            </P>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", lineHeight: 1.85, marginBottom: "18px" }}>
+              <Link href="/contact" style={{ color: TEAL, textDecoration: "underline", textUnderlineOffset: "3px" }}>
+                Whether you know exactly what you need or are not sure where to start, I am happy to talk it through.
+              </Link>
+            </p>
           </div>
 
           {/* Photo — right column on desktop, appears below text on mobile */}
