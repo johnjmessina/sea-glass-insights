@@ -151,12 +151,9 @@ export default function ServicesPage() {
 
       {/* ── PAGE HEADER ───────────────────────────────────────── */}
       <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 48px" }}>
-        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,4vw,2.8rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: "16px" }}>
+        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,4vw,2.8rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: 0 }}>
           What We Offer
         </h1>
-        <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, maxWidth: "700px", margin: "0 auto", lineHeight: 1.4 }}>
-          Seven research and intelligence services for small businesses on the Jersey Shore and beyond. Every service is analyst-reviewed, flat fee, and built to give you a real edge.
-        </p>
       </section>
 
       {/* ── MIR FEATURED CARD ─────────────────────────────────── */}
