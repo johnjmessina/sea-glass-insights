@@ -14,11 +14,11 @@ const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
 const GRID_6 = [
-  { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "A scored assessment of your social media presence across seven dimensions.",         href: "/services/social-media-audit" },
-  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "See your business the way your customers do.",                              href: "/services/secret-shopping" },
+  { name: "Social Media Audit",       price: "$199", turnaround: "48-72 hrs", desc: "We score your Facebook, Instagram, TikTok, and other active platforms across multiple dimensions to show you exactly where your social presence stands.",         href: "/services/social-media-audit" },
+  { name: "Secret Shopping",          price: "$299", turnaround: "5-7 days",  desc: "A local researcher visits your business as a real customer, scores the experience across seven dimensions, and delivers a detailed report. Every visit is customized to the scenario that matters most to you.", href: "/services/secret-shopping" },
   { name: "Deep Dive Report",         price: "$399", turnaround: "5-7 days",  desc: "Deeper competitive intelligence for businesses facing a major decision.",                                 href: "/services/deep-dive-report" },
-  { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "AI-generated customer personas to surface directional insight when you do not have a customer list.", href: "/services/synthetic-survey-report" },
-  { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered as a visual report.",                   href: "/services/voice-of-customer" },
+  { name: "Synthetic Survey Report",  price: "$399", turnaround: "48-72 hrs", desc: "We work with you to build the exact customer profiles you want to understand, then use AI to simulate how they would respond to your business, whether they are customers you already have or ones you are trying to attract.", href: "/services/synthetic-survey-report" },
+  { name: "Voice of Customer Survey", price: "$499", turnaround: "1-2 weeks", desc: "Real feedback from your real customers, analyzed and delivered by a market research professional.",     href: "/services/voice-of-customer" },
   { name: "AI Starter Kit",           price: "$99 / $79 add-on", turnaround: "48 hrs", desc: "Custom AI prompts built specifically for your business type.",                                href: "/services/ai-starter-kit" },
 ];
 
@@ -90,7 +90,7 @@ export default function Home() {
             What We Offer
           </h2>
           <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.88rem", color: LGRAY, textAlign: "center", marginBottom: "40px" }}>
-            Seven research and intelligence services — all analyst-reviewed.
+            Seven research and intelligence services, all analyst-reviewed.
           </p>
 
           {/* MIR hero card */}
@@ -110,7 +110,7 @@ export default function Home() {
                 <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.8rem", color: LGRAY }}>Flat fee</span>
               </div>
               <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.9rem", color: GRAY, lineHeight: 1.75, marginBottom: "0" }}>
-                Your market, your customers, your competitors in one professionally written report. AI generates the research foundation. A real analyst reviews, refines, and makes sure every insight is relevant to your business.
+                Your market, your customers, and your competitors in one professionally written report. AI generates the foundation. A real analyst refines it to ensure every insight is relevant to your business.
               </p>
             </div>
             <div style={{ flexShrink: 0 }}>
