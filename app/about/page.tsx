@@ -26,20 +26,24 @@ export default function AboutPage() {
       <SiteNav />
 
       {/* LOGO BANNER */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "72px 24px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "72px 24px 56px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
-          style={{ width: "220px", height: "auto", display: "inline-block" }}
+          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto" }}
         />
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9rem", color: GRAY, fontWeight: 400, lineHeight: 1.7, marginTop: "20px", marginBottom: 0 }}>
+      </section>
+
+      {/* TAGLINE */}
+      <section style={{ textAlign: "center", padding: "48px 24px 0", maxWidth: "700px", margin: "0 auto" }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.25rem, 3vw, 1.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
           Market research built locally, for local small businesses. Analyst-reviewed and priced to be accessible.
         </p>
       </section>
 
       {/* PHOTO + TEXT — two columns on desktop, stacked on mobile */}
-      <section style={{ maxWidth: "1040px", margin: "0 auto", padding: "72px 24px 0" }}>
+      <section style={{ maxWidth: "1040px", margin: "0 auto", padding: "56px 24px 0" }}>
         <div style={{
           display: "flex",
           flexWrap: "wrap",
