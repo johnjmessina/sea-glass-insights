@@ -142,18 +142,18 @@ export default function ServicesPage() {
         />
       </section>
 
-      {/* ── TAGLINE ───────────────────────────────────────────── */}
-      <section style={{ textAlign: "center", padding: "40px 24px 0", maxWidth: "860px", margin: "0 auto" }}>
-        <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
-          Professional market research powered by AI, refined by a local analyst, and built for small businesses on the Jersey Shore.
-        </p>
-      </section>
-
       {/* ── PAGE HEADER ───────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 48px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 8px" }}>
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,4vw,2.8rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: 0 }}>
           What We Offer
         </h1>
+      </section>
+
+      {/* ── TAGLINE ───────────────────────────────────────────── */}
+      <section style={{ textAlign: "center", padding: "12px 24px 0", maxWidth: "860px", margin: "0 auto" }}>
+        <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
+          Professional market research powered by AI, refined by a local analyst, and built for small businesses on the Jersey Shore.
+        </p>
       </section>
 
       {/* ── MIR FEATURED CARD ─────────────────────────────────── */}
