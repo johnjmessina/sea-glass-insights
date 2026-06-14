@@ -25,19 +25,15 @@ export default function AboutPage() {
     <div className={`${cormorant.variable} ${montserrat.variable}`} style={{ backgroundColor: WHITE, color: NAVY }}>
       <SiteNav />
 
-      {/* LOGO BANNER */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 32px" }}>
+      {/* HERO */}
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 72px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
-          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto" }}
+          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
-      </section>
-
-      {/* TAGLINE */}
-      <section style={{ textAlign: "center", padding: "40px 24px 0", maxWidth: "860px", margin: "0 auto" }}>
-        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto" }}>
           Market research built locally, for local small businesses. Analyst-reviewed and priced to be accessible.
         </p>
       </section>

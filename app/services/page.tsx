@@ -132,26 +132,18 @@ export default function ServicesPage() {
     <div className={`${cormorant.variable} ${montserrat.variable}`} style={{ backgroundColor: SAND, color: NAVY }}>
       <SiteNav />
 
-      {/* ── LOGO BANNER ───────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 32px" }}>
+      {/* ── HERO ──────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 72px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
-          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto" }}
+          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
-      </section>
-
-      {/* ── PAGE HEADER ───────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "40px 24px 8px" }}>
-        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2rem,4vw,2.8rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, marginBottom: 0 }}>
+        <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
           What We Offer
         </h1>
-      </section>
-
-      {/* ── TAGLINE ───────────────────────────────────────────── */}
-      <section style={{ textAlign: "center", padding: "12px 24px 0", maxWidth: "860px", margin: "0 auto" }}>
-        <p style={{ fontFamily: "var(--font-cormorant)", fontSize: "1.15rem", fontWeight: 700, color: NAVY, lineHeight: 1.4, margin: 0 }}>
+        <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
           Professional market research powered by AI, refined by a local analyst, and built for small businesses on the Jersey Shore.
         </p>
       </section>
