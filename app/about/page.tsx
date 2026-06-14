@@ -26,12 +26,12 @@ export default function AboutPage() {
       <SiteNav />
 
       {/* LOGO BANNER */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "72px 24px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
-          style={{ height: "40px", width: "auto", display: "inline-block" }}
+          style={{ width: "220px", height: "auto", display: "inline-block" }}
         />
       </section>
 
