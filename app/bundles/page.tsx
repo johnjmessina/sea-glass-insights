@@ -162,13 +162,16 @@ export default function BundlesPage() {
           alt="Sea Glass Insights"
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
-        <p style={{ fontFamily: CG, fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto" }}>
+        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
+          Bundle two services and save.
+        </h1>
+        <p style={{ fontFamily: MT, fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
           Two services. One focused engagement. A clearer picture of your business than you have ever had.
         </p>
       </section>
 
       {/* TRUST LINE */}
-      <div style={{ backgroundColor: WHITE, padding: "14px 24px", textAlign: "center", borderBottom: "1px solid #F3F4F6" }}>
+      <div style={{ backgroundColor: SAND, padding: "14px 24px", textAlign: "center", borderBottom: "1px solid #F3F4F6" }}>
         <p style={{ fontFamily: MT, fontSize: "0.8rem", color: NAVY, opacity: 0.55, letterSpacing: "0.04em" }}>Analyst-reviewed. Flat fee. No surprises.</p>
       </div>
 
@@ -196,6 +199,7 @@ export default function BundlesPage() {
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$349</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
                 </div>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Market Intelligence Report + Social Media Audit</p>
               </div>
               <Chevron open={expanded === 'starter-intelligence'} />
             </div>
@@ -267,6 +271,7 @@ export default function BundlesPage() {
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$449</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
                 </div>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Market Intelligence Report + Secret Shopping</p>
               </div>
               <Chevron open={expanded === 'the-field-report'} />
             </div>
@@ -341,6 +346,7 @@ export default function BundlesPage() {
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$549</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
                 </div>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Market Intelligence Report + Synthetic Survey Report</p>
               </div>
               <Chevron open={expanded === 'market-and-mind'} />
             </div>
@@ -414,6 +420,7 @@ export default function BundlesPage() {
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$699</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $99</span>
                 </div>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Secret Shopping + Voice of Customer Survey</p>
               </div>
               <Chevron open={expanded === 'complete-shopper-experience'} />
             </div>
