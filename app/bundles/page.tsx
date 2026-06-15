@@ -32,25 +32,6 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-function BundleHero({ id, name, price, savings, service1, price1, service2, price2, desc, formId }: {
-  id: string; name: string; price: string; savings: string;
-  service1: string; price1: string; service2: string; price2: string;
-  desc: string; formId: string;
-}) {
-  return (
-    <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: "16px", padding: "36px 40px", marginBottom: "0" }}>
-      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
-        {[[service1, price1], [service2, price2]].map(([svc, p]) => (
-          <div key={svc} style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>{svc}</span>
-            <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>{p}</span>
-          </div>
-        ))}
-      </div>
-      <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, lineHeight: 1.75 }}>{desc}</p>
-    </div>
-  );
-}
 
 // ── Page component ────────────────────────────────────────────────────────────
 
@@ -187,31 +168,39 @@ export default function BundlesPage() {
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
         <div id="starter-intelligence" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('starter-intelligence')}
-            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
             aria-expanded={expanded === 'starter-intelligence'}
           >
-            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Starter Intelligence</h2>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$349</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
                 </div>
-                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Market Intelligence Report + Social Media Audit</p>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Market Intelligence Report + Social Media Audit</p>
+                <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>Understand your market and see exactly how your social presence stacks up against it. The essential starting point for any small business ready to compete.</p>
               </div>
               <Chevron open={expanded === 'starter-intelligence'} />
             </div>
           </button>
           {/* Expanded content */}
           {expanded === 'starter-intelligence' && (
-          <div>
-          <BundleHero id="starter-intelligence" name="Starter Intelligence" price="$349" savings="save $49"
-            service1="Market Intelligence Report" price1="$199" service2="Social Media Audit" price2="$199"
-            desc="Understand your market and see exactly how your social presence stacks up against it. The essential starting point for any small business ready to compete."
-            formId="si-form" />
-          <div id="si-form" style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ padding: '0 32px 32px', borderTop: '1px solid #E5E7EB' }}>
+          <div style={{ display: "flex", gap: "12px", margin: "24px 0", flexWrap: "wrap" }}>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Market Intelligence Report</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$199</span>
+            </div>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Social Media Audit</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$199</span>
+            </div>
+          </div>
+          <div id="si-form" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <form onSubmit={siSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={card}>
                 <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Your Contact Information</h3>
@@ -254,36 +243,45 @@ export default function BundlesPage() {
           </div>
           </div>
           )}
+          </div>
         </div>
 
         {/* ── THE FIELD REPORT ──────────────────────────────────────────────── */}
         <div id="the-field-report" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('the-field-report')}
-            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
             aria-expanded={expanded === 'the-field-report'}
           >
-            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>The Field Report</h2>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$449</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
                 </div>
-                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Market Intelligence Report + Secret Shopping</p>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Market Intelligence Report + Secret Shopping</p>
+                <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>Know your market from the outside and your customer experience from the inside. Market intelligence meets boots-on-the-ground research.</p>
               </div>
               <Chevron open={expanded === 'the-field-report'} />
             </div>
           </button>
           {/* Expanded content */}
           {expanded === 'the-field-report' && (
-          <div>
-          <BundleHero id="the-field-report" name="The Field Report" price="$449" savings="save $49"
-            service1="Market Intelligence Report" price1="$199" service2="Secret Shopping" price2="$299"
-            desc="Know your market from the outside and your customer experience from the inside. Market intelligence meets boots-on-the-ground research."
-            formId="fr-form" />
-          <div id="fr-form" style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ padding: '0 32px 32px', borderTop: '1px solid #E5E7EB' }}>
+          <div style={{ display: "flex", gap: "12px", margin: "24px 0", flexWrap: "wrap" }}>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Market Intelligence Report</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$199</span>
+            </div>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Secret Shopping</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$299</span>
+            </div>
+          </div>
+          <div id="fr-form" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <form onSubmit={frSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={card}>
                 <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Your Contact Information</h3>
@@ -329,36 +327,45 @@ export default function BundlesPage() {
           </div>
           </div>
           )}
+          </div>
         </div>
 
         {/* ── MARKET & MIND ────────────────────────────────────────────────── */}
         <div id="market-and-mind" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('market-and-mind')}
-            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
             aria-expanded={expanded === 'market-and-mind'}
           >
-            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Market & Mind</h2>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$549</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
                 </div>
-                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Market Intelligence Report + Synthetic Survey Report</p>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Market Intelligence Report + Synthetic Survey Report</p>
+                <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>Understand your market and your customer without needing an existing contact list. Two research streams working together to give you the full picture.</p>
               </div>
               <Chevron open={expanded === 'market-and-mind'} />
             </div>
           </button>
           {/* Expanded content */}
           {expanded === 'market-and-mind' && (
-          <div>
-          <BundleHero id="market-and-mind" name="Market & Mind" price="$549" savings="save $49"
-            service1="Market Intelligence Report" price1="$199" service2="Synthetic Survey Report" price2="$399"
-            desc="Understand your market and your customer without needing an existing contact list. Two research streams working together to give you the full picture."
-            formId="mm-form" />
-          <div id="mm-form" style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ padding: '0 32px 32px', borderTop: '1px solid #E5E7EB' }}>
+          <div style={{ display: "flex", gap: "12px", margin: "24px 0", flexWrap: "wrap" }}>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Market Intelligence Report</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$199</span>
+            </div>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Synthetic Survey Report</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$399</span>
+            </div>
+          </div>
+          <div id="mm-form" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <form onSubmit={mmSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={card}>
                 <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Your Contact Information</h3>
@@ -403,36 +410,45 @@ export default function BundlesPage() {
           </div>
           </div>
           )}
+          </div>
         </div>
 
         {/* ── COMPLETE SHOPPER EXPERIENCE ───────────────────────────────────── */}
         <div id="complete-shopper-experience" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('complete-shopper-experience')}
-            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
             aria-expanded={expanded === 'complete-shopper-experience'}
           >
-            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Complete Shopper Experience</h2>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$699</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $99</span>
                 </div>
-                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginTop: '6px' }}>Secret Shopping + Voice of Customer Survey</p>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Secret Shopping + Voice of Customer Survey</p>
+                <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>See what your customers experience walking through your door, then hear what they actually think. The most complete view of your customer experience available.</p>
               </div>
               <Chevron open={expanded === 'complete-shopper-experience'} />
             </div>
           </button>
           {/* Expanded content */}
           {expanded === 'complete-shopper-experience' && (
-          <div>
-          <BundleHero id="complete-shopper-experience" name="Complete Shopper Experience" price="$699" savings="save $99"
-            service1="Secret Shopping" price1="$299" service2="Voice of Customer Survey" price2="$499"
-            desc="See what your customers experience walking through your door, then hear what they actually think. The most complete view of your customer experience available."
-            formId="cs-form" />
-          <div id="cs-form" style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ padding: '0 32px 32px', borderTop: '1px solid #E5E7EB' }}>
+          <div style={{ display: "flex", gap: "12px", margin: "24px 0", flexWrap: "wrap" }}>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Secret Shopping</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$299</span>
+            </div>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Voice of Customer Survey</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$499</span>
+            </div>
+          </div>
+          <div id="cs-form" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <form onSubmit={csSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={card}>
                 <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Your Contact Information</h3>
@@ -478,6 +494,7 @@ export default function BundlesPage() {
           </div>
           </div>
           )}
+          </div>
         </div>
 
       </div>
