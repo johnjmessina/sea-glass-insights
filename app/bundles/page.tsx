@@ -136,14 +136,14 @@ export default function BundlesPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 40px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "36px 24px 24px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
-          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
+          style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 24px" }}
         />
-        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
+        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 14px" }}>
           See Every Edge.
         </h1>
         <p style={{ fontFamily: MT, fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
@@ -163,7 +163,7 @@ export default function BundlesPage() {
         ))}
       </div>
 
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "56px 24px", display: "flex", flexDirection: "column", gap: "80px", width: "100%" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px", display: "flex", flexDirection: "column", gap: "40px", width: "100%" }}>
 
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
         <div id="starter-intelligence" style={{ scrollMarginTop: "120px" }}>
