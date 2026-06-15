@@ -163,7 +163,7 @@ export default function BundlesPage() {
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
-          Intelligence from every angle.
+          See Every Edge.
         </h1>
         <p style={{ fontFamily: MT, fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
           Two services. One focused engagement. A clearer picture of your business than you have ever had.
