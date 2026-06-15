@@ -168,7 +168,7 @@ export default function BundlesPage() {
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
         <div id="starter-intelligence" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
-          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('starter-intelligence')}
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
@@ -249,7 +249,7 @@ export default function BundlesPage() {
         {/* ── THE FIELD REPORT ──────────────────────────────────────────────── */}
         <div id="the-field-report" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
-          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('the-field-report')}
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
@@ -333,7 +333,7 @@ export default function BundlesPage() {
         {/* ── MARKET & MIND ────────────────────────────────────────────────── */}
         <div id="market-and-mind" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
-          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('market-and-mind')}
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
@@ -416,7 +416,7 @@ export default function BundlesPage() {
         {/* ── COMPLETE SHOPPER EXPERIENCE ───────────────────────────────────── */}
         <div id="complete-shopper-experience" style={{ scrollMarginTop: "120px" }}>
           {/* Collapsed header — always visible */}
-          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', overflow: 'hidden' }}>
           <button
             onClick={() => toggle('complete-shopper-experience')}
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
