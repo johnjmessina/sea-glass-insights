@@ -155,7 +155,7 @@ export default function BundlesPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 72px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 40px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -176,7 +176,7 @@ export default function BundlesPage() {
       </div>
 
       {/* BUNDLE NAV */}
-      <div style={{ backgroundColor: WHITE, padding: "12px 24px", borderBottom: "1px solid #F3F4F6", display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+      <div style={{ backgroundColor: SAND, padding: "12px 24px", borderBottom: "1px solid #F3F4F6", display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
         {[["#starter-intelligence","Starter Intelligence"],["#the-field-report","The Field Report"],["#market-and-mind","Market & Mind"],["#complete-shopper-experience","Complete Shopper Experience"]].map(([href,label])=>(
           <a key={href} href={href} style={{ fontFamily: MT, fontSize: "0.78rem", fontWeight: 500, color: NAVY, textDecoration: "none", padding: "6px 14px", borderRadius: "9999px", border: "1px solid #E5E7EB" }}>{label}</a>
         ))}
@@ -246,14 +246,14 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          </div>
-          )}
           <div style={{ textAlign: 'center', paddingTop: '12px' }}>
             <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
               ↑ Back to top
             </a>
           </div>
+          </div>
+          )}
         </div>
 
         {/* ── THE FIELD REPORT ──────────────────────────────────────────────── */}
@@ -321,14 +321,14 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          </div>
-          )}
           <div style={{ textAlign: 'center', paddingTop: '12px' }}>
             <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
               ↑ Back to top
             </a>
           </div>
+          </div>
+          )}
         </div>
 
         {/* ── MARKET & MIND ────────────────────────────────────────────────── */}
@@ -395,14 +395,14 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          </div>
-          )}
           <div style={{ textAlign: 'center', paddingTop: '12px' }}>
             <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
               ↑ Back to top
             </a>
           </div>
+          </div>
+          )}
         </div>
 
         {/* ── COMPLETE SHOPPER EXPERIENCE ───────────────────────────────────── */}
@@ -470,14 +470,14 @@ export default function BundlesPage() {
               </div>
             </form>
           </div>
-          </div>
-          )}
           <div style={{ textAlign: 'center', paddingTop: '12px' }}>
             <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
               ↑ Back to top
             </a>
           </div>
+          </div>
+          )}
         </div>
 
       </div>
