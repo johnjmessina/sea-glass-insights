@@ -141,10 +141,10 @@ export default function ServicesPage() {
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
-          What We Offer
+          Refine Your Edge.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
-          Professional market research powered by AI, refined by a local analyst, and built for small businesses on the Jersey Shore.
+          Seven research and intelligence services built for small businesses on the Jersey Shore.
         </p>
       </section>
 
