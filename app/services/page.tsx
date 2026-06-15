@@ -144,7 +144,7 @@ export default function ServicesPage() {
           Refine Your Edge.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
-          Seven research and intelligence services built for small businesses on the Jersey Shore.
+          Seven market research and intelligence services built for small businesses on the Jersey Shore.
         </p>
       </section>
 
