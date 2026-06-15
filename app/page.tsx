@@ -30,7 +30,7 @@ export default function Home() {
       <SiteNav />
 
       {/* ── HERO ── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 72px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 24px" }}>
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* ── SERVICES ── */}
-      <section style={{ backgroundColor: SAND, padding: "18px 24px 40px" }}>
+      <section style={{ backgroundColor: SAND, padding: "0 24px 40px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.8rem,4vw,2.4rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>
             What We Offer
