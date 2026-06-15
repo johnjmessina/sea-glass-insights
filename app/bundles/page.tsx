@@ -163,7 +163,7 @@ export default function BundlesPage() {
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
-          Bundle two services and save.
+          Intelligence from every angle.
         </h1>
         <p style={{ fontFamily: MT, fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
           Two services. One focused engagement. A clearer picture of your business than you have ever had.
@@ -176,13 +176,13 @@ export default function BundlesPage() {
       </div>
 
       {/* BUNDLE NAV */}
-      <div style={{ backgroundColor: SAND, padding: "12px 24px", borderBottom: "1px solid #F3F4F6", display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+      <div style={{ backgroundColor: SAND, padding: "12px 24px", display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
         {[["#starter-intelligence","Starter Intelligence"],["#the-field-report","The Field Report"],["#market-and-mind","Market & Mind"],["#complete-shopper-experience","Complete Shopper Experience"]].map(([href,label])=>(
           <a key={href} href={href} style={{ fontFamily: MT, fontSize: "0.78rem", fontWeight: 500, color: NAVY, textDecoration: "none", padding: "6px 14px", borderRadius: "9999px", border: "1px solid #E5E7EB" }}>{label}</a>
         ))}
       </div>
 
-      <div style={{ maxWidth: "860px", margin: "0 auto", padding: "56px 24px", display: "flex", flexDirection: "column", gap: "80px", width: "100%" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "56px 24px", display: "flex", flexDirection: "column", gap: "80px", width: "100%" }}>
 
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
         <div id="starter-intelligence" style={{ scrollMarginTop: "120px" }}>
@@ -192,7 +192,7 @@ export default function BundlesPage() {
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
             aria-expanded={expanded === 'starter-intelligence'}
           >
-            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Starter Intelligence</h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
@@ -264,7 +264,7 @@ export default function BundlesPage() {
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
             aria-expanded={expanded === 'the-field-report'}
           >
-            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>The Field Report</h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
@@ -339,7 +339,7 @@ export default function BundlesPage() {
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
             aria-expanded={expanded === 'market-and-mind'}
           >
-            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Market & Mind</h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
@@ -413,7 +413,7 @@ export default function BundlesPage() {
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
             aria-expanded={expanded === 'complete-shopper-experience'}
           >
-            <div style={{ borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: SAND, borderRadius: '16px', padding: '28px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Complete Shopper Experience</h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
