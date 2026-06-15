@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* ── SERVICES ── */}
-      <section style={{ backgroundColor: SAND, padding: "72px 24px 40px" }}>
+      <section style={{ backgroundColor: SAND, padding: "36px 24px 40px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.8rem,4vw,2.4rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>
             What We Offer
