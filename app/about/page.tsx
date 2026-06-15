@@ -34,7 +34,7 @@ export default function AboutPage() {
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
-          About Sea Glass Insights.
+          The Idea Behind Sea Glass Insights.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
           Market research built locally, for local small businesses. Analyst-reviewed and priced to be accessible.
@@ -43,7 +43,7 @@ export default function AboutPage() {
 
       {/* BODY CARD */}
       <section style={{ backgroundColor: SAND, padding: "32px 24px 64px" }}>
-        <div style={{ maxWidth: "1040px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "48px 52px" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "48px 56px" }}>
 
           {/* PHOTO + TEXT — two columns on desktop, stacked on mobile */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "52px", alignItems: "flex-start" }}>
