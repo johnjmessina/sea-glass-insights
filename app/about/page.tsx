@@ -37,7 +37,7 @@ export default function AboutPage() {
           The Idea Behind Sea Glass Insights.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
-          Market research built locally, for local small businesses. Analyst-reviewed and priced to be accessible.
+          Research rooted in the Jersey Shore.
         </p>
       </section>
 
@@ -46,7 +46,7 @@ export default function AboutPage() {
         <div style={{ maxWidth: "1280px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "48px 56px" }}>
 
           {/* PHOTO + TEXT — two columns on desktop, stacked on mobile */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "52px", alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "52px", alignItems: "center" }}>
 
             {/* Text — left column on desktop, appears first on mobile */}
             <div style={{ flex: 1, minWidth: "280px" }}>
@@ -73,7 +73,7 @@ export default function AboutPage() {
             </div>
 
             {/* Photo — right column on desktop, appears below text on mobile */}
-            <div style={{ flexShrink: 0, width: "360px", maxWidth: "100%", paddingTop: "24px" }}>
+            <div style={{ flexShrink: 0, width: "360px", maxWidth: "100%" }}>
               <div style={{
                 height: "440px",
                 overflow: "hidden",
