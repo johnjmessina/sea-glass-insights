@@ -34,10 +34,10 @@ export default function AboutPage() {
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
-          The Idea Behind Sea Glass Insights.
+          Research Rooted in the Jersey Shore.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
-          Research rooted in the Jersey Shore.
+          Professional research powered by AI, reviewed by a local analyst.
         </p>
       </section>
 
