@@ -43,7 +43,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ backgroundColor: WHITE, minHeight: "100vh", fontFamily: "'Montserrat', sans-serif" }}>
+    <div style={{ backgroundColor: SAND, minHeight: "100vh", fontFamily: "'Montserrat', sans-serif" }}>
       <SiteNav />
 
       {/* HERO */}
@@ -60,7 +60,8 @@ export default function ContactPage() {
       </section>
 
       {/* CONTENT */}
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "72px 24px 80px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "60px", alignItems: "start" }}>
+      <section style={{ backgroundColor: SAND, padding: "32px 24px 64px" }}>
+      <main style={{ maxWidth: "960px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "48px 52px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "60px", alignItems: "start" }}>
 
         {/* FORM */}
         <div>
@@ -164,6 +165,7 @@ export default function ContactPage() {
         </div>
 
       </main>
+      </section>
 
       <SiteFooter />
     </div>
