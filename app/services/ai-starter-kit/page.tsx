@@ -99,7 +99,7 @@ export default function AIStarterKitPage() {
           </div>
         </div>
       </section>
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "64px 24px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 64px" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>Get Your AI Starter Kit</h2>
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>Answer a few questions about your business and we&rsquo;ll write prompts that actually fit how you work. Delivered in 48 hours.</p>

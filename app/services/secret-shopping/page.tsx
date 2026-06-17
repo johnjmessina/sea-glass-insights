@@ -174,7 +174,7 @@ export default function SecretShoppingPage() {
           </div>
         </div>
       </section>
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "64px 24px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 64px" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>Request a Secret Shop</h2>
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "36px", lineHeight: 1.7 }}>Fill out the form below. After submitting you&rsquo;ll be directed to a secure payment page. Your report will be delivered within 5-7 days of the visit.</p>

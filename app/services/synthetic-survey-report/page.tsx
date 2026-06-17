@@ -119,7 +119,7 @@ export default function SyntheticSurveyReportPage() {
           </div>
         </div>
       </section>
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "64px 24px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 64px" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>Get Your Synthetic Survey Report</h2>
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>The more specific your answers, the more targeted the personas and the more useful the findings. After submitting you&rsquo;ll be directed to a secure payment page.</p>

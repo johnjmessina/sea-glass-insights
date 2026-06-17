@@ -171,7 +171,7 @@ export default function GetReportPage() {
       </section>
 
       {/* ── INTAKE FORM ── */}
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "64px 16px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 16px 64px" }}>
         <form onSubmit={handleSubmit} noValidate className="max-w-2xl mx-auto space-y-8">
 
           {/* Contact */}
