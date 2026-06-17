@@ -59,15 +59,15 @@ export default function AIStarterKitPage() {
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
       <SiteNav />
-      <section style={{ backgroundColor: NAVY, textAlign: "center", padding: "64px 24px 56px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 56px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>AI Starter Kit</p>
-        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: WHITE, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Custom AI prompts built for your specific business.</h1>
+        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Custom AI prompts built for your specific business.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
-          <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: WHITE }}>$99</span>
-          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: "#93C5FD" }}>48 hour delivery</span>
+          <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$99</span>
+          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48 hour delivery</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: TEAL, fontWeight: 600 }}>$79 as an add-on</span>
         </div>
-        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: "#CBD5E1", maxWidth: "540px", margin: "0 auto 28px" }}>Five to six prompts written specifically for your business type and voice — ready to use immediately with ChatGPT, Claude, or any major AI tool. No generic templates. Built for the tasks that actually save you time.</p>
+        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "540px", margin: "0 auto 28px" }}>Five to six prompts written specifically for your business type and voice — ready to use immediately with ChatGPT, Claude, or any major AI tool. No generic templates. Built for the tasks that actually save you time.</p>
         <a href="#intake-form" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
       </section>
       <div style={{ backgroundColor: WHITE, padding: "14px 24px", textAlign: "center", borderBottom: "1px solid #F3F4F6" }}>
