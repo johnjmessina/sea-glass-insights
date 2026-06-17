@@ -185,7 +185,7 @@ export default function ServicesPage() {
               </p>
               <Link
                 href="/get-report"
-                style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.95rem", padding: "13px 32px", borderRadius: "9999px", textDecoration: "none", letterSpacing: "0.02em" }}
+                style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "0.95rem", padding: "13px 32px", borderRadius: "9999px", textDecoration: "none", letterSpacing: "0.02em" }}
               >
                 Get My Report →
               </Link>
@@ -259,7 +259,7 @@ export default function ServicesPage() {
           <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.93rem", color: GRAY, lineHeight: 1.8, marginBottom: "32px" }}>
             Reach out anytime. We&rsquo;re happy to talk through your situation and recommend the best fit.
           </p>
-          <Link href="/contact" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>
+          <Link href="/contact" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: "var(--font-montserrat)", fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>
             Contact John →
           </Link>
         </div>

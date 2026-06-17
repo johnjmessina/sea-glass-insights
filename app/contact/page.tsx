@@ -118,15 +118,16 @@ export default function ContactPage() {
                 type="submit"
                 disabled={status === "sending"}
                 style={{
-                  backgroundColor: status === "sending" ? "#93C5FD" : TEAL,
+                  backgroundColor: "transparent",
                   color: NAVY,
                   fontFamily: "'Montserrat', sans-serif",
                   fontWeight: 600,
                   fontSize: "0.95rem",
                   padding: "13px 32px",
                   borderRadius: "9999px",
-                  border: "none",
+                  border: "1.5px solid #0A2F61",
                   cursor: status === "sending" ? "not-allowed" : "pointer",
+                  opacity: status === "sending" ? 0.45 : 1,
                   width: "100%",
                   letterSpacing: "0.02em",
                 }}
