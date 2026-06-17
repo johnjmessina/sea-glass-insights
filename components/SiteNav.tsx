@@ -6,7 +6,6 @@ import Link from "next/link";
 const SAND = "#F4EADA";
 const NAVY = "#0A2F61";
 const TEAL = "#00CED1";
-const GRAY = "#6B7280";
 
 const NAV_LINKS = [
   { label: "Services", href: "/services" },
@@ -22,12 +21,12 @@ export default function SiteNav() {
     <>
       <header
         style={{
-          backgroundColor: SAND,
+          backgroundColor: NAVY,
           padding: "18px 24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px solid rgba(10,47,97,0.06)",
+          borderBottom: "1px solid rgba(244,234,218,0.15)",
           position: "relative",
           zIndex: 40,
         }}
@@ -36,7 +35,7 @@ export default function SiteNav() {
         <Link href="/" style={{ flexShrink: 0, lineHeight: 0 }} onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logos/logo_transparent_FINAL.png"
+            src="/images/seaglass%20navy.png"
             alt="Sea Glass Insights"
             style={{ height: "40px", width: "auto", display: "block" }}
           />
@@ -48,14 +47,14 @@ export default function SiteNav() {
             <Link
               key={href}
               href={href}
-              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", fontWeight: 500, color: GRAY, textDecoration: "none", letterSpacing: "0.01em" }}
+              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", fontWeight: 500, color: SAND, textDecoration: "none", letterSpacing: "0.01em" }}
             >
               {label}
             </Link>
           ))}
           <Link
             href="/services"
-            style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.85rem", color: NAVY, textDecoration: "none", border: `1.5px solid ${NAVY}`, padding: "7px 20px", borderRadius: "9999px", letterSpacing: "0.02em", whiteSpace: "nowrap" }}
+            style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.85rem", backgroundColor: TEAL, color: NAVY, textDecoration: "none", padding: "7px 20px", borderRadius: "9999px", letterSpacing: "0.02em", whiteSpace: "nowrap" }}
           >
             Get Started
           </Link>
@@ -70,11 +69,11 @@ export default function SiteNav() {
         >
           {open ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 6L18 18M6 18L18 6" stroke={NAVY} strokeWidth="2" strokeLinecap="round"/>
+              <path d="M6 6L18 18M6 18L18 6" stroke={SAND} strokeWidth="2" strokeLinecap="round"/>
             </svg>
           ) : (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 6H20M4 12H20M4 18H20" stroke={NAVY} strokeWidth="2" strokeLinecap="round"/>
+              <path d="M4 6H20M4 12H20M4 18H20" stroke={SAND} strokeWidth="2" strokeLinecap="round"/>
             </svg>
           )}
         </button>
@@ -86,11 +85,11 @@ export default function SiteNav() {
           className="md:hidden"
           style={{
             position: "fixed",
-            top: "77px", // below header
+            top: "77px",
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: SAND,
+            backgroundColor: NAVY,
             zIndex: 39,
             display: "flex",
             flexDirection: "column",
@@ -104,7 +103,7 @@ export default function SiteNav() {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1.1rem", fontWeight: 500, color: NAVY, textDecoration: "none", padding: "14px 0", borderBottom: "1px solid rgba(10,47,97,0.08)", display: "block" }}
+              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1.1rem", fontWeight: 500, color: SAND, textDecoration: "none", padding: "14px 0", borderBottom: "1px solid rgba(244,234,218,0.15)", display: "block" }}
             >
               {label}
             </Link>
