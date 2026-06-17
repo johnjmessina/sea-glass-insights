@@ -96,9 +96,9 @@ export default function SocialMediaAuditPage() {
       </div>
 
       {/* TWO-COLUMN */}
-      <section style={{ backgroundColor: WHITE, padding: "56px 24px" }}>
+      <section style={{ backgroundColor: SAND, padding: "56px 24px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "48px", alignItems: "start" }}>
-          <div>
+          <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px", boxShadow: "0 4px 20px rgba(10,47,97,0.08)" }}>
             <h2 style={{ fontFamily: CG, fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>What&rsquo;s Included</h2>
             <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
               {CHECKLIST.map(item => (
@@ -109,7 +109,7 @@ export default function SocialMediaAuditPage() {
               ))}
             </ul>
           </div>
-          <div>
+          <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px", boxShadow: "0 4px 20px rgba(10,47,97,0.08)" }}>
             <h2 style={{ fontFamily: CG, fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>How It Works</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               {HIW.map(({ num, title, body }) => (
