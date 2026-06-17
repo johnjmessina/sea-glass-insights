@@ -20,7 +20,6 @@ const SERVICES = [
   { name: "Deep Dive Report",            href: "/services/deep-dive-report" },
   { name: "Synthetic Survey Report",     href: "/services/synthetic-survey-report" },
   { name: "Voice of Customer Survey",    href: "/services/voice-of-customer" },
-  { name: "AI Starter Kit",              href: "/services/ai-starter-kit" },
 ];
 
 
@@ -70,7 +69,7 @@ export default function Home() {
       {/* ── SERVICES ── */}
       <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px", marginBottom: "24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px", marginBottom: "10px" }}>
             {SERVICES.map(svc => (
               <Link key={svc.name} href={svc.href} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", border: "1px solid #E5E7EB", borderRadius: "10px", backgroundColor: WHITE, textDecoration: "none" }}>
                 <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.88rem", fontWeight: 600, color: NAVY }}>{svc.name}</span>
