@@ -35,9 +35,9 @@ export default function SiteNav() {
         <Link href="/" style={{ flexShrink: 0, lineHeight: 0 }} onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/seaglass_navy.png"
+            src="/images/seaglass_transparent.png"
             alt="Sea Glass Insights"
-            style={{ height: "40px", width: "auto", display: "block" }}
+            style={{ height: "60px", width: "auto", display: "block" }}
           />
         </Link>
 
