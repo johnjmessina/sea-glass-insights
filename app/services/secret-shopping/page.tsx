@@ -143,7 +143,7 @@ export default function SecretShoppingPage() {
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "520px", margin: "0 auto 16px" }}>A professional in-person visit to your business, scored across seven dimensions of the customer experience. Delivered as a complete formatted report with narrative notes and specific recommendations.</p>
         <p style={{ fontFamily: MT, fontSize: "0.78rem", color: GRAY, marginBottom: "24px" }}>Available for businesses in the Monmouth County and Jersey Shore area. Travel surcharge may apply for locations outside this area.</p>
-        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started &rarr;</a>
+        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started &rarr;</a>
       </section>
       <div style={{ backgroundColor: SAND, padding: "6px 24px", textAlign: "center" }}>
         <p style={{ fontFamily: MT, fontSize: "0.8rem", color: NAVY, opacity: 0.55, letterSpacing: "0.04em" }}>Analyst-reviewed. Flat fee. No surprises.</p>

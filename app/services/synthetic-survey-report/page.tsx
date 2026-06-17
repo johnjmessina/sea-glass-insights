@@ -85,7 +85,7 @@ export default function SyntheticSurveyReportPage() {
           <p style={{ fontFamily: MT, fontSize: "0.78rem", color: NAVY, margin: 0 }}>Results are presented as directional insight, not statistically validated data. Full methodology disclosure is included in every deliverable.</p>
         </div>
         <br />
-        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
+        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
       </section>
       <div style={{ backgroundColor: SAND, padding: "6px 24px", textAlign: "center" }}>
         <p style={{ fontFamily: MT, fontSize: "0.8rem", color: NAVY, opacity: 0.55, letterSpacing: "0.04em" }}>Analyst-reviewed. Flat fee. No surprises.</p>

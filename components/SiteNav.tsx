@@ -37,7 +37,7 @@ export default function SiteNav() {
           <img
             src="/images/seaglass_transparent.png"
             alt="Sea Glass Insights"
-            style={{ height: "60px", width: "auto", display: "block" }}
+            style={{ height: "90px", width: "auto", display: "block" }}
           />
         </Link>
 

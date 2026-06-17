@@ -113,7 +113,7 @@ export default function DeepDiveReportPage() {
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>5-7 day delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "560px", margin: "0 auto 28px" }}>Everything in the Market Intelligence Report, but deeper. The same competitor set examined with greater rigor, more sources, more context, and more analyst time spent on what each finding actually means for your business. Built for businesses facing a major decision or responding to a significant competitive threat.</p>
-        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
+        <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
       </section>
       <div style={{ backgroundColor: SAND, padding: "6px 24px", textAlign: "center" }}>
         <p style={{ fontFamily: MT, fontSize: "0.8rem", color: NAVY, opacity: 0.55, letterSpacing: "0.04em" }}>Analyst-reviewed. Flat fee. No surprises.</p>

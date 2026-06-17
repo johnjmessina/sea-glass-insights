@@ -116,7 +116,7 @@ export default function AboutPage() {
             <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
               <Link
                 href="/services"
-                style={{ display: "inline-block", backgroundColor: NAVY, color: WHITE, fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.9rem", padding: "12px 28px", borderRadius: "9999px", textDecoration: "none" }}
+                style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.9rem", padding: "12px 28px", borderRadius: "9999px", textDecoration: "none" }}
               >
                 Get Started
               </Link>
