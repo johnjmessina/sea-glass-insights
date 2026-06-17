@@ -35,7 +35,7 @@ export default function SiteNav() {
         <Link href="/" style={{ flexShrink: 0, lineHeight: 0 }} onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/seaglass%20navy.png"
+            src="/images/seaglass_navy.png"
             alt="Sea Glass Insights"
             style={{ height: "40px", width: "auto", display: "block" }}
           />
@@ -54,7 +54,7 @@ export default function SiteNav() {
           ))}
           <Link
             href="/services"
-            style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.85rem", backgroundColor: TEAL, color: NAVY, textDecoration: "none", padding: "7px 20px", borderRadius: "9999px", letterSpacing: "0.02em", whiteSpace: "nowrap" }}
+            style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.85rem", backgroundColor: "transparent", color: "#FFFFFF", textDecoration: "none", padding: "7px 20px", borderRadius: "9999px", letterSpacing: "0.02em", whiteSpace: "nowrap", border: "1.5px solid #FFFFFF" }}
           >
             Get Started
           </Link>
