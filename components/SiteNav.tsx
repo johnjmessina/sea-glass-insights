@@ -22,7 +22,7 @@ export default function SiteNav() {
       <header
         style={{
           backgroundColor: NAVY,
-          padding: "18px 24px",
+          padding: "8px 24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -37,7 +37,7 @@ export default function SiteNav() {
           <img
             src="/images/seaglass_transparent.png"
             alt="Sea Glass Insights"
-            style={{ height: "90px", width: "auto", display: "block" }}
+            style={{ height: "44px", width: "auto", display: "block" }}
           />
         </Link>
 
@@ -85,7 +85,7 @@ export default function SiteNav() {
           className="md:hidden"
           style={{
             position: "fixed",
-            top: "77px",
+            top: "61px",
             left: 0,
             right: 0,
             bottom: 0,
