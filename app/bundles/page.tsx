@@ -115,6 +115,21 @@ export default function BundlesPage() {
     router.push("/checkout");
   }
 
+  // ── The Deep Field state ────────────────────────────────────────────────────
+  const [df, setDf] = useState({ customerName:"",email:"",businessName:"",q1:"",q2:"",q3:"",q4:"",q5:"",q6:"",q7:"",q8:"",q9:"",q10:"",q11:"",q12:"",q13:"",q14:"",q15:"",q16:"" });
+  const [dfErr, setDfErr] = useState<Record<string,string>>({});
+  function setDfField(f: string, v: string) { setDf(p=>({...p,[f]:v})); setDfErr(p=>{const n={...p};delete n[f];return n;}); }
+  function dfSubmit(e: FormEvent) {
+    e.preventDefault();
+    const req=["customerName","email","businessName","q1","q2","q3","q4","q5","q6","q7","q8","q9","q11","q12","q13","q16"];
+    const errs:Record<string,string>={};
+    req.forEach(k=>{if(!df[k as keyof typeof df]?.trim()) errs[k]="Required.";});
+    if(df.email && !validateEmail(df.email)) errs.email="Please enter a valid email.";
+    setDfErr(errs); if(Object.keys(errs).length) { document.querySelector("[data-error]")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    sessionStorage.setItem("sgi_intake", JSON.stringify({service:"the-deep-field",...df}));
+    router.push("/checkout");
+  }
+
   // ── Shared field helpers (using ServiceFormField, no inner components) ──────
   function siField(id: keyof typeof si, label: string, placeholder: string, rows?: number, hint?: string, required=true) {
     return <ServiceFormField label={label} required={required} hint={hint} placeholder={placeholder} rows={rows} value={si[id]} error={siErr[id]} onChange={v=>setSiField(id,v)} />;
@@ -127,6 +142,10 @@ export default function BundlesPage() {
   }
   function csField(id: keyof typeof cs, label: string, placeholder: string, rows?: number, hint?: string, required=true) {
     return <ServiceFormField label={label} required={required} hint={hint} placeholder={placeholder} rows={rows} value={cs[id]} error={csErr[id]} onChange={v=>setCsField(id,v)} />;
+  }
+
+  function dfField(id: keyof typeof df, label: string, placeholder: string, rows?: number, hint?: string, required=true) {
+    return <ServiceFormField label={label} required={required} hint={hint} placeholder={placeholder} rows={rows} value={df[id]} error={dfErr[id]} onChange={v=>setDfField(id,v)} />;
   }
 
   const card = { backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px", display: "flex", flexDirection: "column" as const, gap: "20px" };
@@ -158,7 +177,7 @@ export default function BundlesPage() {
 
       {/* BUNDLE NAV */}
       <div style={{ backgroundColor: SAND, padding: "12px 24px", display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
-        {[["#starter-intelligence","Starter Intelligence"],["#the-field-report","The Field Report"],["#market-and-mind","Market & Mind"],["#complete-shopper-experience","Complete Shopper Experience"]].map(([href,label])=>(
+        {[["#starter-intelligence","Starter Intelligence"],["#the-field-report","The Field Report"],["#market-and-mind","Market & Mind"],["#the-deep-field","The Deep Field"],["#complete-shopper-experience","Complete Shopper Experience"]].map(([href,label])=>(
           <a key={href} href={href} style={{ fontFamily: MT, fontSize: "0.78rem", fontWeight: 500, color: NAVY, textDecoration: "none", padding: "6px 14px", borderRadius: "9999px", border: "1px solid #E5E7EB" }}>{label}</a>
         ))}
       </div>
@@ -343,8 +362,8 @@ export default function BundlesPage() {
               <div>
                 <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>Market & Mind</h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
-                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$549</span>
-                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $49</span>
+                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$499</span>
+                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $99</span>
                 </div>
                 <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Market Intelligence Report + Synthetic Survey Report</p>
                 <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>Understand your market and your customer without needing an existing contact list. Two research streams working together to give you the full picture.</p>
@@ -396,9 +415,91 @@ export default function BundlesPage() {
               </div>
               <div style={{ textAlign: "center" }}>
                 <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
-                  Proceed to Payment — $549
+                  Proceed to Payment — $499
                 </button>
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Synthetic Survey results presented as directional insight, not statistically validated data. Please only share what you are comfortable sharing.</p>
+              </div>
+            </form>
+          </div>
+          <div style={{ textAlign: 'center', paddingTop: '12px' }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+               style={{ fontFamily: MT, fontSize: '0.78rem', color: LGRAY, textDecoration: 'none', cursor: 'pointer' }}>
+              ↑ Back to top
+            </a>
+          </div>
+          </div>
+          )}
+          </div>
+        </div>
+
+        {/* ── THE DEEP FIELD ───────────────────────────────────────────────── */}
+        <div id="the-deep-field" style={{ scrollMarginTop: "120px" }}>
+          <div style={{ border: "1px solid #E5E7EB", borderTop: `3px solid ${TEAL}`, backgroundColor: WHITE, borderRadius: '16px', overflow: 'hidden' }}>
+          <button
+            onClick={() => toggle('the-deep-field')}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '28px 32px' }}
+            aria-expanded={expanded === 'the-deep-field'}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+              <div>
+                <h2 style={{ fontFamily: CG, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>The Deep Field</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
+                  <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$599</span>
+                  <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $99</span>
+                </div>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Deep Dive Report + Secret Shopping</p>
+                <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>Know your competitive landscape in depth and your customer experience from the inside. The most complete picture of your market position available.</p>
+              </div>
+              <Chevron open={expanded === 'the-deep-field'} />
+            </div>
+          </button>
+          {expanded === 'the-deep-field' && (
+          <div style={{ padding: '0 32px 32px', borderTop: '1px solid #E5E7EB' }}>
+          <div style={{ display: "flex", gap: "12px", margin: "24px 0", flexWrap: "wrap" }}>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Deep Dive Report</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$399</span>
+            </div>
+            <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Secret Shopping</span>
+              <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$299</span>
+            </div>
+          </div>
+          <div id="df-form" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <form onSubmit={dfSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <div style={card}>
+                <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Your Contact Information</h3>
+                {dfField("customerName","Your Name","Jane Smith")}
+                {dfField("email","Email Address","jane@yourbusiness.com")}
+                {dfField("businessName","Business Name","Acme Coffee Co.")}
+              </div>
+              <div style={card}>
+                <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Deep Dive Report Questions</h3>
+                {dfField("q1","1. What is your business name and what do you sell or offer?","e.g. Anchor Coffee Co. — specialty coffee shop and roastery.",3)}
+                {dfField("q2","2. How long have you been in business, and where are you located?","e.g. 4 years, Bradley Beach NJ.")}
+                {dfField("q3","3. Who is your ideal customer?","e.g. 28-45, dual income households, value quality over price.",3,"Age, income, lifestyle, and the problem they have.")}
+                {dfField("q4","4. Who are your top 2–3 competitors?","e.g. Starbucks on Main St, The Grind.",3,"Names, or describe them if you don't know exact names.")}
+                {dfField("q5","5. What makes you different from those competitors?","e.g. We roast in-house, our staff knows the product deeply.",3)}
+                {dfField("q6","6. What is the biggest challenge you are facing right now?","e.g. A new shop nearby is pulling our afternoon regulars.",3)}
+                {dfField("q7","7. What does success look like for you in the next 12 months?","e.g. Stabilize our customer base, grow revenue by 20%.",3)}
+                {dfField("q8","8. What marketing are you currently doing, if any?","e.g. Instagram 3x per week, no paid ads.",3)}
+                {dfField("q9","9. What do you wish you knew about your market or customers?","e.g. Why our lunch traffic is weaker than morning traffic.",3)}
+                {dfField("q10","10. Is there anything else you want the report to focus on?","e.g. We're considering a second location or new product line.",3,undefined,false)}
+              </div>
+              <div style={card}>
+                <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700 }}>Secret Shopping Questions</h3>
+                {dfField("q11","11. What is your business address?","e.g. 123 Main St, Bradley Beach, NJ 07720")}
+                {dfField("q12","12. What are your hours of operation?","e.g. Mon-Fri 7am-6pm, Sat-Sun 8am-4pm")}
+                {dfField("q13","13. What does a typical customer interaction look like?","e.g. Customer walks in, browses, orders at the counter, waits for their drink.",4,"Walk us through what happens from arrival to departure.")}
+                {dfField("q14","14. Are there specific experience dimensions you want evaluated?","e.g. Greeting, wait time, product knowledge, cleanliness.",3,"e.g. greeting, wait time, product knowledge, cleanliness",false)}
+                {dfField("q15","15. Would you like a competitor location shopped as well?","e.g. Yes — The Grind, 456 Ocean Ave, Belmar NJ",undefined,"An additional fee applies. We'll follow up to confirm details and pricing.",false)}
+                {dfField("q16","16. Anything specific you're concerned about or want us to focus on?","e.g. We've had Google reviews mentioning slow service during lunch.",4)}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                  Proceed to Payment — $599
+                </button>
+                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
               </div>
             </form>
           </div>
