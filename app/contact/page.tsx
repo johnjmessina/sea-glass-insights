@@ -47,7 +47,7 @@ export default function ContactPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 54px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 54px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"

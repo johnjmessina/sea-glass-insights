@@ -136,7 +136,7 @@ export default function BundlesPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "27px 24px 18px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 18px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"

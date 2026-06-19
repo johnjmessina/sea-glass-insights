@@ -30,7 +30,7 @@ export default function Home() {
       <SiteNav />
 
       {/* ── HERO ── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 18px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 18px" }}>
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"

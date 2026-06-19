@@ -26,7 +26,7 @@ export default function AboutPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 30px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 30px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
