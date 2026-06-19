@@ -59,7 +59,7 @@ export default function Home() {
             lineHeight: 1.8,
           }}
         >
-          Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore and beyond. AI generates the foundation. A market research professional refines it into something you can actually use.
+          Sea Glass Insights delivers professional market research for small businesses on the Jersey Shore. AI generates the foundation — a market research professional refines it.
         </p>
         <p style={{ fontFamily: "var(--font-montserrat)", color: LGRAY, fontSize: "0.83rem" }}>
           Flat fee. No subscriptions. No retainers.

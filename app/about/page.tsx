@@ -102,7 +102,7 @@ export default function AboutPage() {
                 textAlign: "right",
                 letterSpacing: "0.01em",
               }}>
-                Bloggin&rsquo; about Bradley. Coming soon →
+                <em>Bloggin&rsquo; about Bradley. Coming soon →</em>
               </p>
             </div>
 

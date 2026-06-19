@@ -140,9 +140,10 @@ export default function ContactPage() {
 
         {/* CONTACT INFO */}
         <div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "28px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.5rem", fontWeight: 700, color: NAVY, marginBottom: "10px" }}>
             Direct Contact
           </h2>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.88rem", color: GRAY, marginBottom: "24px" }}>Prefer to reach out directly?</p>
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             {[
               { icon: "✉", label: "Email", val: "john@seaglassinsights.com", href: "mailto:john@seaglassinsights.com" },
