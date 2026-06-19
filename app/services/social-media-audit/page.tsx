@@ -75,7 +75,7 @@ export default function SocialMediaAuditPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 16px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 16px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>Social Media Audit</p>
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>
           See your social presence the way your customers do.
@@ -127,7 +127,7 @@ export default function SocialMediaAuditPage() {
       </section>
 
       {/* INTAKE FORM */}
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 64px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 48px" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>Get Your Social Media Audit</h2>
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>

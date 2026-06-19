@@ -136,7 +136,7 @@ export default function BundlesPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "36px 24px 24px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "27px 24px 18px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -163,7 +163,7 @@ export default function BundlesPage() {
         ))}
       </div>
 
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px", display: "flex", flexDirection: "column", gap: "40px", width: "100%" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "30px 24px", display: "flex", flexDirection: "column", gap: "40px", width: "100%" }}>
 
         {/* ── STARTER INTELLIGENCE ─────────────────────────────────────────── */}
         <div id="starter-intelligence" style={{ scrollMarginTop: "120px" }}>

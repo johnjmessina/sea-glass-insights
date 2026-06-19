@@ -78,7 +78,7 @@ export default function VoiceOfCustomerPage() {
   return (
     <div className="flex flex-col min-h-full" style={{ backgroundColor: SAND }}>
       <SiteNav />
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 16px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 16px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>Voice of Customer Survey</p>
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Real feedback from your real customers.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
@@ -124,7 +124,7 @@ export default function VoiceOfCustomerPage() {
           </div>
         </div>
       </section>
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 64px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 24px 48px" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>Get Your Voice of Customer Report</h2>
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>Tell us about your goals below. After payment you&rsquo;ll receive a secure link to upload your customer contact list.</p>
@@ -202,7 +202,7 @@ export default function VoiceOfCustomerPage() {
           </form>
         </div>
       </section>
-      <section style={{ backgroundColor: WHITE, padding: "32px 24px", textAlign: "center" }}>
+      <section style={{ backgroundColor: WHITE, padding: "24px 24px", textAlign: "center" }}>
         <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY, marginBottom: "8px" }}>Don&rsquo;t have a contact list yet?</p>
         <Link href="/services/synthetic-survey-report" style={{ fontFamily: MT, fontWeight: 600, fontSize: "0.9rem", color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>See the Synthetic Survey Report instead →</Link>
       </section>

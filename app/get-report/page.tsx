@@ -113,7 +113,7 @@ export default function GetReportPage() {
       <SiteNav />
 
       {/* ── HERO ── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "64px 24px 16px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 16px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>
           Most Popular Service
         </p>
@@ -171,7 +171,7 @@ export default function GetReportPage() {
       </section>
 
       {/* ── INTAKE FORM ── */}
-      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 16px 64px" }}>
+      <section id="intake-form" style={{ backgroundColor: SAND, padding: "16px 16px 48px" }}>
         <form onSubmit={handleSubmit} noValidate className="max-w-2xl mx-auto space-y-8">
 
           {/* Contact */}

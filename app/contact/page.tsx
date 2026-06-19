@@ -47,7 +47,7 @@ export default function ContactPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 72px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 54px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -60,8 +60,8 @@ export default function ContactPage() {
       </section>
 
       {/* CONTENT */}
-      <section style={{ backgroundColor: SAND, padding: "32px 24px 64px" }}>
-      <main style={{ maxWidth: "960px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "48px 52px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "60px", alignItems: "start" }}>
+      <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
+      <main style={{ maxWidth: "960px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "36px 52px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "60px", alignItems: "start" }}>
 
         {/* FORM */}
         <div>

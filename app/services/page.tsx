@@ -133,7 +133,7 @@ export default function ServicesPage() {
       <SiteNav />
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 40px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 30px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -215,7 +215,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── 6-SERVICE GRID ────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
+      <section style={{ backgroundColor: SAND, padding: "18px 24px 36px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
             {GRID_SERVICES.map(svc => (
@@ -251,7 +251,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── BOTTOM CTA ────────────────────────────────────────── */}
-      <section style={{ backgroundColor: SAND, padding: "40px 24px", textAlign: "center" }}>
+      <section style={{ backgroundColor: SAND, padding: "30px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, color: NAVY, marginBottom: "16px", lineHeight: 1.3 }}>
             Not sure which service is right for you?

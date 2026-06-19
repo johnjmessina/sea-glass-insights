@@ -26,7 +26,7 @@ export default function AboutPage() {
       <SiteNav />
 
       {/* HERO */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 40px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 30px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logos/logo_transparent_FINAL.png"
@@ -42,8 +42,8 @@ export default function AboutPage() {
       </section>
 
       {/* BODY CARD */}
-      <section style={{ backgroundColor: SAND, padding: "32px 24px 64px" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "48px 56px" }}>
+      <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "36px 56px" }}>
 
           {/* PHOTO + TEXT — two columns on desktop, stacked on mobile */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "52px", alignItems: "center" }}>
@@ -109,7 +109,7 @@ export default function AboutPage() {
           </div>
 
           {/* CTA */}
-          <div style={{ borderTop: "1px solid #E5E7EB", marginTop: "40px", paddingTop: "40px", textAlign: "center" }}>
+          <div style={{ borderTop: "1px solid #E5E7EB", marginTop: "30px", paddingTop: "30px", textAlign: "center" }}>
             <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.6rem", fontWeight: 700, color: NAVY, marginBottom: "24px" }}>
               Ready to find your edge?
             </h3>

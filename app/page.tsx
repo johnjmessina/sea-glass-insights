@@ -30,7 +30,7 @@ export default function Home() {
       <SiteNav />
 
       {/* ── HERO ── */}
-      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "56px 24px 24px" }}>
+      <section style={{ backgroundColor: SAND, textAlign: "center", padding: "42px 24px 18px" }}>
         <img
           src="/logos/logo_transparent_FINAL.png"
           alt="Sea Glass Insights"
@@ -67,7 +67,7 @@ export default function Home() {
       </section>
 
       {/* ── SERVICES ── */}
-      <section style={{ backgroundColor: SAND, padding: "24px 24px 48px" }}>
+      <section style={{ backgroundColor: SAND, padding: "18px 24px 36px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px", marginBottom: "10px" }}>
             {SERVICES.map(svc => (
