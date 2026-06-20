@@ -55,9 +55,14 @@ const SERVICE_CONFIG: Record<string, { unitAmount: string; productName: string; 
     cancelPath:  "/bundles#the-field-report",
   },
   "market-and-mind": {
-    unitAmount:  "54900",
+    unitAmount:  "49900",
     productName: "Sea Glass Insights — Market & Mind Bundle",
     cancelPath:  "/bundles#market-and-mind",
+  },
+  "the-deep-field": {
+    unitAmount:  "59900",
+    productName: "Sea Glass Insights — The Deep Field Bundle",
+    cancelPath:  "/bundles#the-deep-field",
   },
   "complete-shopper-experience": {
     unitAmount:  "69900",
@@ -102,6 +107,10 @@ function buildQSlots(service: string, b: Record<string, any>) {
   // ── Bundles: extra questions beyond q10 combined into q10 slot ────────────
   if (service === "starter-intelligence") {
     const extra = [b.q10, b.q11 ? `Social platforms: ${b.q11}` : nil, b.q12 ? `Competitor socials: ${b.q12}` : nil, b.q13 ? `Social challenge: ${b.q13}` : nil].filter(Boolean).join("\n\n");
+    return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5, q6: b.q6, q7: b.q7, q8: b.q8, q9: b.q9, q10: extra || nil };
+  }
+  if (service === "the-deep-field") {
+    const extra = [b.q10, b.q11 ? `Address: ${b.q11}` : nil, b.q12 ? `Hours: ${b.q12}` : nil, b.q13 ? `Interaction: ${b.q13}` : nil, b.q14 ? `Dimensions: ${b.q14}` : nil, b.q15 ? `Competitor shop: ${b.q15}` : nil, b.q16 ? `Focus: ${b.q16}` : nil].filter(Boolean).join("\n\n");
     return { q1: b.q1, q2: b.q2, q3: b.q3, q4: b.q4, q5: b.q5, q6: b.q6, q7: b.q7, q8: b.q8, q9: b.q9, q10: extra || nil };
   }
   if (service === "the-field-report") {
