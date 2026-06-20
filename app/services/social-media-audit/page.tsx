@@ -7,7 +7,9 @@ import SiteNav    from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
 import {
   PlatformCheckboxesWithHandles,
-  CheckboxGroupWithOther,
+  PillGroupWithOther,
+  SelectWithOther,
+  BUSINESS_TYPES,
   SMA_CHALLENGES,
 } from "@/components/StructuredFormInputs";
 
@@ -32,7 +34,7 @@ const CHECKLIST = [
 
 const HIW = [
   { num: "1", title: "Tell Us About Your Business", body: "Fill out the short form below with your business info and social handles. It takes about 5 minutes. The more context you share, the sharper the audit will be." },
-  { num: "2", title: "A Real Analyst Reviews Your Presence", body: "I personally visit your profiles, evaluate them across all seven dimensions, and compare them against up to two competitors you name." },
+  { num: "2", title: "A Real Analyst Gets to Work", body: "We personally review your profiles, evaluate them across all seven dimensions, and deliver specific findings and actionable recommendations tailored to your business." },
   { num: "3", title: "Your Audit Arrives", body: "A professionally written scored report lands in your inbox within 48-72 hours. Specific findings and actionable recommendations you can implement immediately." },
 ];
 
@@ -78,14 +80,14 @@ export default function SocialMediaAuditPage() {
       <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 16px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>Social Media Audit</p>
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>
-          See your social presence the way your customers do.
+          Your social media, professionally scored and analyzed.
         </h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$199</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48-72 hour delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "520px", margin: "0 auto 28px" }}>
-          A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and how you stack up against competitors.
+          A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and overall platform utilization.
         </p>
         <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
       </section>
@@ -164,21 +166,25 @@ export default function SocialMediaAuditPage() {
                   {errors.location && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.location}</p>}
                 </div>
                 <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "6px" }}>Industry / Business Type <span style={{ color: "#EF4444" }}>*</span></label>
-                  <input type="text" placeholder="e.g. Coffee Shop, Retail Clothing, Fitness Studio, Restaurant" value={form.industry} onChange={e => set("industry", e.target.value)} className={cls("industry")} style={{ fontFamily: MT }} />
-                  {errors.industry && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.industry}</p>}
+                  <SelectWithOther
+                    label="Industry / Business Type"
+                    options={BUSINESS_TYPES}
+                    required
+                    onChange={v => set("industry", v)}
+                    error={errors.industry}
+                  />
                 </div>
                 <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: "20px" }} data-error={errors.facebook ? true : undefined}>
                   <PlatformCheckboxesWithHandles
                     label="Your Social Media Platforms"
-                    hint="Check each platform you are active on. Add a handle or URL for each one — it helps us find your profiles faster."
+                    hint="Select each platform you are active on. Add a handle or URL for each one — it helps us find your profiles faster."
                     required
                     onChange={v => set("facebook", v)}
                     error={errors.facebook}
                   />
                 </div>
                 <div>
-                  <CheckboxGroupWithOther
+                  <PillGroupWithOther
                     label="Biggest Social Media Challenge Right Now"
                     hint="Select all that apply."
                     options={SMA_CHALLENGES}
@@ -194,8 +200,7 @@ export default function SocialMediaAuditPage() {
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                 Proceed to Payment — $199
               </button>
-              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. No subscriptions. Your audit will be delivered within 48-72 hours.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "6px" }}>Please only share what you are comfortable sharing. Your responses are used solely to produce your audit.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "12px" }}>Please only share what you are comfortable sharing publicly. Your responses are used solely to produce your audit.</p>
             </div>
           </form>
         </div>

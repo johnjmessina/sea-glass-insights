@@ -225,6 +225,80 @@ export function CheckboxGroupWithOther({
   );
 }
 
+// ── PillGroupWithOther ─────────────────────────────────────────────────────────
+// Select-all-that-apply pill toggles where "Other" reveals a specify field.
+
+export function PillGroupWithOther({
+  label, hint: hintText, options, onChange, error, required,
+  otherPlaceholder = "Please specify…",
+}: CheckboxGroupProps) {
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [specify,  setSpecify]  = useState("");
+
+  function serialize(s: Set<string>, spec: string): string {
+    const parts = [...s].filter(x => x !== "Other");
+    const otherPart = s.has("Other") && spec.trim() ? `Other: ${spec.trim()}` : null;
+    if (otherPart) parts.push(otherPart);
+    return parts.join(", ");
+  }
+
+  function toggle(opt: string) {
+    const next = new Set(selected);
+    next.has(opt) ? next.delete(opt) : next.add(opt);
+    setSelected(next);
+    onChange(serialize(next, specify));
+  }
+
+  function updateSpecify(val: string) {
+    setSpecify(val);
+    onChange(serialize(selected, val));
+  }
+
+  return (
+    <div>
+      <label className={lbl}>{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
+      {hintText && <p className={hint}>{hintText}</p>}
+      <div className="flex flex-wrap gap-2">
+        {options.map(opt => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => toggle(opt)}
+            style={{
+              fontFamily: "'Montserrat', system-ui, sans-serif",
+              fontSize: "0.78rem",
+              fontWeight: 600,
+              padding: "5px 14px",
+              borderRadius: "9999px",
+              border: "1.5px solid #0A2F61",
+              backgroundColor: selected.has(opt) ? "#0A2F61" : "transparent",
+              color: selected.has(opt) ? "#F4EADA" : "#0A2F61",
+              cursor: "pointer",
+              transition: "background-color 0.15s, color 0.15s",
+              letterSpacing: "0.01em",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+      {selected.has("Other") && (
+        <input
+          type="text"
+          value={specify}
+          onChange={e => updateSpecify(e.target.value)}
+          placeholder={otherPlaceholder}
+          className={`${inp} ${inpOk} mt-2`}
+          style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}
+        />
+      )}
+      <Err msg={error} />
+    </div>
+  );
+}
+
 // ── AgeIncomeCheckboxes ────────────────────────────────────────────────────────
 // Age-range + income-range checkboxes + open lifestyle/problem textarea.
 
@@ -502,35 +576,59 @@ export function PlatformCheckboxesWithHandles({ label, hint: hintText, onChange,
     <div>
       <label className={lbl}>{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
       {hintText && <p className={hint}>{hintText}</p>}
-      <div className="space-y-3">
+      <div className="flex flex-wrap gap-2 mb-3">
         {SMA_PLATFORMS.map(plat => (
+          <button
+            key={plat}
+            type="button"
+            onClick={() => togglePlatform(plat)}
+            style={{
+              fontFamily: "'Montserrat', system-ui, sans-serif",
+              fontSize: "0.78rem",
+              fontWeight: 600,
+              padding: "5px 14px",
+              borderRadius: "9999px",
+              border: "1.5px solid #0A2F61",
+              backgroundColor: checked.has(plat) ? "#0A2F61" : "transparent",
+              color: checked.has(plat) ? "#F4EADA" : "#0A2F61",
+              cursor: "pointer",
+              transition: "background-color 0.15s, color 0.15s",
+              letterSpacing: "0.01em",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {plat}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-2">
+        {SMA_PLATFORMS.filter(p => checked.has(p) && p !== "Other").map(plat => (
           <div key={plat}>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={checked.has(plat)} onChange={() => togglePlatform(plat)} className="w-4 h-4 rounded accent-seafoam cursor-pointer" />
-              <span className="text-sm text-gray-700 font-medium">{plat}</span>
-            </label>
-            {checked.has(plat) && plat !== "Other" && (
-              <input
-                type="text"
-                value={handles[plat] ?? ""}
-                onChange={e => updateHandle(plat, e.target.value)}
-                placeholder={`@handle or URL for ${plat} (optional)`}
-                className={`${inp} ${inpOk} mt-1.5 ml-6`}
-                style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}
-              />
-            )}
-            {checked.has(plat) && plat === "Other" && (
-              <input
-                type="text"
-                value={otherPlat}
-                onChange={e => updateOther(e.target.value)}
-                placeholder="Platform name and handle or URL"
-                className={`${inp} ${inpOk} mt-1.5 ml-6`}
-                style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}
-              />
-            )}
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{plat}</p>
+            <input
+              type="text"
+              value={handles[plat] ?? ""}
+              onChange={e => updateHandle(plat, e.target.value)}
+              placeholder={`@handle or URL for ${plat} (optional)`}
+              className={`${inp} ${inpOk}`}
+              style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}
+            />
           </div>
         ))}
+        {checked.has("Other") && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Other platform</p>
+            <input
+              type="text"
+              value={otherPlat}
+              onChange={e => updateOther(e.target.value)}
+              placeholder="Platform name and handle or URL"
+              className={`${inp} ${inpOk}`}
+              style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}
+            />
+          </div>
+        )}
       </div>
       <Err msg={error} />
     </div>
