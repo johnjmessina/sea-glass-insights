@@ -353,7 +353,7 @@ export default function GetReportPage() {
 
           <div className="text-center pb-4">
             <p className="text-gray-500 text-sm mb-4" style={{ fontFamily: MT }}>You will be taken to a secure checkout page to complete your $199 payment.</p>
-            <button type="submit" style={{ display: "inline-block", backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "14px 40px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+            <button type="submit" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "14px 40px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
               Proceed to Payment →
             </button>
           </div>

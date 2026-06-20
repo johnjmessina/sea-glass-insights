@@ -247,7 +247,7 @@ export default function BundlesPage() {
                 {siField("q13","13. What is your biggest social media challenge right now?","e.g. We post regularly but get almost no engagement. We don't know what content resonates.",4)}
               </div>
               <div style={{ textAlign: "center" }}>
-                <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $349
                 </button>
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Both deliverables included. Please only share what you are comfortable sharing.</p>
@@ -331,7 +331,7 @@ export default function BundlesPage() {
                 {frField("q16","16. Anything specific you're concerned about or want us to focus on?","e.g. We've had Google reviews mentioning slow service during lunch.",4)}
               </div>
               <div style={{ textAlign: "center" }}>
-                <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $449
                 </button>
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Available in the Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
@@ -414,7 +414,7 @@ export default function BundlesPage() {
                 {mmField("q14","14. Is there a specific product, service, or decision you want customer reactions to?","e.g. We're considering a monthly coffee subscription at $35/month.",3,undefined,false)}
               </div>
               <div style={{ textAlign: "center" }}>
-                <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $499
                 </button>
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Synthetic Survey results presented as directional insight, not statistically validated data. Please only share what you are comfortable sharing.</p>
@@ -496,7 +496,7 @@ export default function BundlesPage() {
                 {dfField("q16","16. Anything specific you're concerned about or want us to focus on?","e.g. We've had Google reviews mentioning slow service during lunch.",4)}
               </div>
               <div style={{ textAlign: "center" }}>
-                <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $599
                 </button>
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
@@ -580,7 +580,7 @@ export default function BundlesPage() {
                 {csField("q13","13. What decision will this research inform?","e.g. Whether to expand our hours, add a subscription, or open a second location.",3)}
               </div>
               <div style={{ textAlign: "center" }}>
-                <button type="submit" style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $699
                 </button>
                 <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
