@@ -98,17 +98,17 @@ export default function MIRPage() {
               {
                 num: "1",
                 title: "Tell Us About Your Business",
-                body: "Answer 10 focused questions about your market, customers, and competitors. It takes about 15 minutes. The more detail you share, the sharper your report will be. Please only share what you are comfortable sharing — your responses will be used to generate your report with the assistance of AI.",
+                body: "Answer a short intake form about your market, customers, and goals. Takes about 15 minutes. Please only share what you are comfortable sharing publicly. Your responses will be used to generate your report with the assistance of AI.",
               },
               {
                 num: "2",
                 title: "A Real Analyst Gets to Work",
-                body: "I personally review every submission. I dig into your market, your competitors, and your positioning, combining professional research methodology with AI intelligence to build something genuinely useful.",
+                body: "We personally review every submission, combining professional research experience and methodology with AI intelligence to provide something tailored to your business.",
               },
               {
                 num: "3",
                 title: "Your Report Arrives",
-                body: "A professionally written report lands in your inbox within 48-72 hours. Six sections, four recommendations, and insights you can act on immediately.",
+                body: "A professionally written report lands in your inbox within the promised timeframe. Insights you can act on immediately.",
               },
             ].map(({ num, title, body }) => (
               <div key={num} style={{ textAlign: "center" }}>
