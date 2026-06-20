@@ -28,7 +28,7 @@ const CHECKLIST = [
 ];
 const HIW = [
   { num: "1", title: "Tell Us About Your Business", body: "Fill out the short form below with your business details, hours, and anything specific you want evaluated. The more context you give, the sharper the visit will be." },
-  { num: "2", title: "A Trained Researcher Visits", body: "A real researcher visits your location as a genuine first-time customer, experiencing your business exactly as your customers do. No announcements, no pre-visit contact." },
+  { num: "2", title: "A Trained Researcher Visits", body: "We visit your location as a genuine first-time customer, experiencing your business exactly as your customers do. No announcements, no pre-visit contact." },
   { num: "3", title: "Your Report Arrives", body: "A complete scored report with narrative notes across all seven dimensions lands in your inbox within 5-7 days. Specific observations and actionable recommendations included." },
 ];
 
@@ -136,7 +136,7 @@ export default function SecretShoppingPage() {
       <SiteNav />
       <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 16px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>Secret Shopping</p>
-        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>See your business the way a first-time customer does.</h1>
+        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>See your business through a customer&rsquo;s eyes.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$299</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>5-7 day delivery</span>
@@ -272,7 +272,7 @@ export default function SecretShoppingPage() {
             {/* ── Navigation buttons ── */}
             {formStep === 1 && (
               <div style={{ textAlign: "right" }}>
-                <button type="button" onClick={handleContinue} style={{ backgroundColor: TEAL, color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", border: "none", cursor: "pointer", letterSpacing: "0.02em" }}>
+                <button type="button" onClick={handleContinue} style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Continue &rarr;
                 </button>
               </div>
