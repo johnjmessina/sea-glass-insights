@@ -166,7 +166,7 @@ export default function BundlesPage() {
           See Every Edge.
         </h1>
         <p style={{ fontFamily: MT, fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
-          Two services. One focused engagement. A clearer picture of your business than you have ever had.
+          Bundled research for a sharper edge.
         </p>
       </section>
 
