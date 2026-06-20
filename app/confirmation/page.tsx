@@ -8,6 +8,16 @@ const NAVY = "#0A2F61";
 const TEAL = "#00CED1";
 const MT   = "'Montserrat', system-ui, sans-serif";
 
+const UPSELLS: Record<string, { label: string; msg: string; href: string }> = {
+  "market-intelligence-report": { label: "Starter Intelligence",        msg: "Add a Social Media Audit and get both for $349, saving $49",                             href: "/bundles#starter-intelligence" },
+  "social-media-audit":         { label: "Starter Intelligence",        msg: "Add a Market Intelligence Report and get both for $349, saving $49",                     href: "/bundles#starter-intelligence" },
+  "secret-shopping":            { label: "The Field Report",            msg: "Add a Market Intelligence Report and get both for $449, saving $49",                     href: "/bundles#the-field-report" },
+  "deep-dive-report":           { label: "The Deep Field",              msg: "Add Secret Shopping and get both for $599, saving $99",                                  href: "/bundles#the-deep-field" },
+  "synthetic-survey-report":    { label: "Market & Mind",               msg: "Add a Market Intelligence Report and get both for $499, saving $99",                     href: "/bundles#market-and-mind" },
+  "voice-of-customer":          { label: "Complete Shopper Experience", msg: "Add Secret Shopping and get both for $699, saving $99",                                  href: "/bundles#complete-shopper-experience" },
+  "ai-starter-kit":             { label: "Market Intelligence Report",  msg: "Add a Market Intelligence Report for $199, or get both for $278 with the $79 add-on rate", href: "/get-report" },
+};
+
 // ── File Upload component — shown only for voice-of-customer orders ───────────
 
 function ContactListUpload({ orderId }: { orderId: string }) {
@@ -200,6 +210,20 @@ function ConfirmationContent() {
             </div>
           </div>
 
+          {(() => {
+            const upsell = service ? UPSELLS[service] : null;
+            if (!upsell) return null;
+            return (
+              <div className="rounded-xl border px-6 py-5 mb-6 text-center" style={{ borderColor: TEAL, backgroundColor: "#F0FFFE" }}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: TEAL }}>Bundle &amp; Save</p>
+                <p className="font-bold text-base mb-1" style={{ fontFamily: "Georgia, serif", color: NAVY }}>{upsell.label}</p>
+                <p className="text-sm mb-3" style={{ color: "#6B7280" }}>{upsell.msg}</p>
+                <Link href={upsell.href} className="text-sm font-semibold underline underline-offset-2" style={{ color: NAVY }}>
+                  See bundle →
+                </Link>
+              </div>
+            );
+          })()}
           <Link href="/" className="block text-center text-navy text-sm font-semibold underline underline-offset-2 hover:text-navy-dark">
             ← Back to Sea Glass Insights
           </Link>

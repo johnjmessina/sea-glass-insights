@@ -154,13 +154,6 @@ export default function AIStarterKitPage() {
           </form>
         </div>
       </section>
-      <section style={{ backgroundColor: WHITE, padding: "24px 24px", textAlign: "center" }}>
-        <p style={{ fontFamily: MT, fontSize: "0.88rem", color: GRAY, maxWidth: "520px", margin: "0 auto", lineHeight: 1.7 }}>
-          Already purchasing another service?{" "}
-          <Link href="/contact" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline", textUnderlineOffset: "3px" }}>Contact us</Link>
-          {" "}to add the AI Starter Kit for just $79.
-        </p>
-      </section>
       <SiteFooter />
     </div>
   );

@@ -6,7 +6,7 @@ import SiteNav    from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
 import {
   SelectWithOther, AgeIncomeCheckboxes, CompetitorFields, CheckboxGroupWithOther,
-  BUSINESS_TYPES, DURATION_OPTIONS, MARKETING_CHANNELS,
+  DURATION_OPTIONS, MARKETING_CHANNELS,
 } from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
@@ -38,13 +38,13 @@ const HIW = [
 type FormData = {
   customerName: string; businessName: string; email: string;
   q1: string; q2: string; q3: string; q4: string; q5: string;
-  q6: string; q7: string; q8: string; q9: string; q10: string;
+  q6: string; q7: string; q8: string; q9: string;
 };
 
 const EMPTY: FormData = {
   customerName: "", businessName: "", email: "",
   q1: "", q2: "", q3: "", q4: "", q5: "",
-  q6: "", q7: "", q8: "", q9: "", q10: "",
+  q6: "", q7: "", q8: "", q9: "",
 };
 
 const inputBase = "w-full rounded-lg border px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-seafoam transition";
@@ -59,7 +59,6 @@ export default function GetReportPage() {
 
   // ── Structured-input state ─────────────────────────────────────────────────
   // These are separate from form.q_n and get merged at submit time.
-  const [bizType,  setBizType]  = useState(""); // supplemental to q1
   const [duration, setDuration] = useState(""); // supplemental to q2 (location stays in form.q2)
 
   function set(field: keyof FormData, value: string) {
@@ -75,7 +74,6 @@ export default function GetReportPage() {
     if (!form.email.trim()) newErrors.email = "This field is required.";
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       newErrors.email = "Please enter a valid email address.";
-    // Q1 — text description required; bizType optional
     if (!form.q1.trim()) newErrors.q1 = "This field is required.";
     // Q2 — location text required
     if (!form.q2.trim() && !duration) newErrors.q2 = "This field is required.";
@@ -83,13 +81,12 @@ export default function GetReportPage() {
     if (!form.q3.trim()) newErrors.q3 = "Please describe your ideal customer.";
     // Q4 — structured (CompetitorFields writes into form.q4)
     if (!form.q4.trim()) newErrors.q4 = "Please enter at least one competitor.";
-    // Q5-Q7, Q9-Q10 — plain text, all required
+    // Q5-Q7, Q9 — plain text, all required
     if (!form.q5.trim()) newErrors.q5 = "This field is required.";
     if (!form.q6.trim()) newErrors.q6 = "This field is required.";
     if (!form.q7.trim()) newErrors.q7 = "This field is required.";
     if (!form.q8.trim()) newErrors.q8 = "Please select at least one option.";
     if (!form.q9.trim()) newErrors.q9 = "This field is required.";
-    if (!form.q10.trim()) newErrors.q10 = "This field is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -102,9 +99,8 @@ export default function GetReportPage() {
       return;
     }
     // Merge supplemental structured values
-    const q1val = [form.q1.trim(), bizType ? `Business type: ${bizType}` : ""].filter(Boolean).join("\n\n");
     const q2val = [duration, form.q2.trim()].filter(Boolean).join(". ");
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ ...form, q1: q1val, q2: q2val }));
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ ...form, q2: q2val }));
     router.push("/checkout");
   }
 
@@ -205,20 +201,12 @@ export default function GetReportPage() {
             {/* Q1 — text + business type dropdown */}
             <div data-error={errors.q1 ? true : undefined}>
               <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
-                1. What is your business name and what do you sell or offer? <span className="text-red-500">*</span>
+                1. What do you sell or offer? <span className="text-red-500">*</span>
               </label>
-              <textarea rows={3} placeholder="e.g. Anchor Coffee Co. — specialty coffee shop and retail roastery in Bradley Beach, NJ."
+              <textarea rows={3} placeholder="e.g. Specialty coffee shop and retail roastery. We serve single-origin pour-overs and sell retail bags roasted in-house."
                 value={form.q1} onChange={e => set("q1", e.target.value)}
                 className={`${inputBase} resize-y ${errors.q1 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
               {errors.q1 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q1}</p>}
-              <div className="mt-3">
-                <SelectWithOther
-                  label="Business type"
-                  options={BUSINESS_TYPES}
-                  placeholder="Select your business type…"
-                  onChange={setBizType}
-                />
-              </div>
             </div>
 
             {/* Q2 — duration + location */}
@@ -308,21 +296,11 @@ export default function GetReportPage() {
             {/* Q9 — plain text */}
             <div data-error={errors.q9 ? true : undefined}>
               <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
-                9. What do you wish you knew about your market or customers that you don&rsquo;t know today? <span className="text-red-500">*</span>
+                9. Is there anything specific you want the report to focus on or address? What do you wish you knew about your market, your customers, or your competition that you don&rsquo;t know today? Use this space to share anything else that feels relevant. <span className="text-red-500">*</span>
               </label>
-              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q9} onChange={e => set("q9", e.target.value)}
+              <textarea rows={5} placeholder="Write as much detail as you like…" value={form.q9} onChange={e => set("q9", e.target.value)}
                 className={`${inputBase} resize-y ${errors.q9 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
               {errors.q9 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q9}</p>}
-            </div>
-
-            {/* Q10 — plain text */}
-            <div data-error={errors.q10 ? true : undefined}>
-              <label className="block text-sm text-gray-700 mb-1" style={{ fontFamily: MT, fontWeight: 600 }}>
-                10. Is there anything else you want the report to focus on or address? <span className="text-red-500">*</span>
-              </label>
-              <textarea rows={4} placeholder="Write as much detail as you like…" value={form.q10} onChange={e => set("q10", e.target.value)}
-                className={`${inputBase} resize-y ${errors.q10 ? inputErr : inputOk}`} style={{ fontFamily: MT }} />
-              {errors.q10 && <p className="text-red-500 text-xs mt-1" style={{ fontFamily: MT }}>{errors.q10}</p>}
             </div>
           </div>
 
@@ -331,25 +309,6 @@ export default function GetReportPage() {
               Please fill in all required fields before proceeding.
             </div>
           )}
-
-          {/* BUNDLE CALLOUTS */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Starter Intelligence — Bundle and save</p>
-              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Social Media Audit and save $49.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$349</strong>. <a href="/bundles#starter-intelligence" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
-            </div>
-            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>The Field Report — Bundle and save</p>
-              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Secret Shopping visit and save $49.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$449</strong>. <a href="/bundles#the-field-report" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
-            </div>
-            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Market &amp; Mind — Bundle and save</p>
-              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Synthetic Survey Report and save $49.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: "#6B7280" }}>Get both for <strong style={{ color: NAVY }}>$549</strong>. <a href="/bundles#market-and-mind" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</a></p>
-            </div>
-          </div>
 
           <div className="text-center pb-4">
             <p className="text-gray-500 text-sm mb-4" style={{ fontFamily: MT }}>You will be taken to a secure checkout page to complete your $199 payment.</p>

@@ -267,17 +267,6 @@ export default function SecretShoppingPage() {
                   <ServiceFormField label="Anything specific you're concerned about or want us to focus on?" required placeholder="e.g. We've had a few Google reviews mentioning slow service during lunch. We want to know if it's a staffing issue or a process issue." rows={4} value={form.focus} error={errors.focus} onChange={v => set("focus", v)} />
                 </div>
               </div>
-              {/* BUNDLE CALLOUTS */}
-              <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-                <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>The Field Report &mdash; Bundle and save</p>
-                <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Market Intelligence Report and save $49.</p>
-                <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$449</strong>. <Link href="/bundles#the-field-report" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle &rarr;</Link></p>
-              </div>
-              <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-                <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Complete Shopper Experience &mdash; Bundle and save</p>
-                <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Voice of Customer Survey and save $99.</p>
-                <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$699</strong>. <Link href="/bundles#complete-shopper-experience" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle &rarr;</Link></p>
-              </div>
             </div>
 
             {/* ── Navigation buttons ── */}

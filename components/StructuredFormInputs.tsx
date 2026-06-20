@@ -41,8 +41,8 @@ export const DURATION_OPTIONS = [
   "Less than 1 year", "1–2 years", "3–5 years", "6–10 years", "10+ years",
 ];
 
-export const AGE_RANGES = ["Under 25", "25–34", "35–44", "45–54", "55+"];
-export const INCOME_RANGES = ["Under $50k", "$50–75k", "$75–100k", "$100k+"];
+export const AGE_RANGES = ["Under 25", "25–34", "35–44", "45–54", "55–64", "65–74", "75+"];
+export const INCOME_RANGES = ["Under $25k", "$25k–$50k", "$50k–$75k", "$75k–$100k", "$100k–$150k", "$150k–$250k", "$250k+"];
 
 export const MARKETING_CHANNELS = [
   "Social Media", "Google / SEO", "Word of Mouth", "Email Marketing",

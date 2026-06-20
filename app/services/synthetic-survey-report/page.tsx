@@ -221,12 +221,6 @@ export default function SyntheticSurveyReportPage() {
                 <ServiceFormField label="10. Is there anything else you want the personas to focus on or address?" placeholder="e.g. We'd like the personas to react to our brand name and logo description if possible." rows={3}  value={form.q10} error={errors.q10} onChange={v => set("q10", v)} />
               </div>
             </div>
-            {/* BUNDLE CALLOUT */}
-            <div style={{ border: `1.5px solid ${TEAL}`, borderRadius: "12px", padding: "16px 20px", textAlign: "center", backgroundColor: WHITE }}>
-              <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px" }}>Market & Mind — Bundle and save</p>
-              <p style={{ fontFamily: CG, fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: "4px" }}>Add a Market Intelligence Report and save $49.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY }}>Get both for <strong style={{ color: NAVY }}>$549</strong>. <Link href="/bundles#market-and-mind" style={{ color: NAVY, fontWeight: 600, textDecoration: "underline" }}>See bundle →</Link></p>
-            </div>
             <div style={{ textAlign: "center" }}>
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $399</button>
               <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Report delivered within 48-72 hours.</p>
