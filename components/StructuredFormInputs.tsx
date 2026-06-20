@@ -275,23 +275,55 @@ export function AgeIncomeCheckboxes({ label, hint: hintText, onChange, error, re
       <div className="space-y-3">
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Age range (select all that apply)</p>
-          <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+          <div className="flex flex-wrap gap-2">
             {AGE_RANGES.map(a => (
-              <label key={a} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={ages.has(a)} onChange={() => toggleAge(a)} className="w-4 h-4 rounded accent-seafoam cursor-pointer" />
-                <span className="text-sm text-gray-700">{a}</span>
-              </label>
+              <button
+                key={a}
+                type="button"
+                onClick={() => toggleAge(a)}
+                style={{
+                  fontFamily: "'Montserrat', system-ui, sans-serif",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  padding: "5px 14px",
+                  borderRadius: "9999px",
+                  border: "1.5px solid #0A2F61",
+                  backgroundColor: ages.has(a) ? "#0A2F61" : "transparent",
+                  color: ages.has(a) ? "#F4EADA" : "#0A2F61",
+                  cursor: "pointer",
+                  transition: "background-color 0.15s, color 0.15s",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {a}
+              </button>
             ))}
           </div>
         </div>
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Income range (select all that apply)</p>
-          <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+          <div className="flex flex-wrap gap-2">
             {INCOME_RANGES.map(i => (
-              <label key={i} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={incomes.has(i)} onChange={() => toggleIncome(i)} className="w-4 h-4 rounded accent-seafoam cursor-pointer" />
-                <span className="text-sm text-gray-700">{i}</span>
-              </label>
+              <button
+                key={i}
+                type="button"
+                onClick={() => toggleIncome(i)}
+                style={{
+                  fontFamily: "'Montserrat', system-ui, sans-serif",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  padding: "5px 14px",
+                  borderRadius: "9999px",
+                  border: "1.5px solid #0A2F61",
+                  backgroundColor: incomes.has(i) ? "#0A2F61" : "transparent",
+                  color: incomes.has(i) ? "#F4EADA" : "#0A2F61",
+                  cursor: "pointer",
+                  transition: "background-color 0.15s, color 0.15s",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {i}
+              </button>
             ))}
           </div>
         </div>
