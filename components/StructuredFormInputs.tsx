@@ -275,7 +275,7 @@ export function AgeIncomeCheckboxes({ label, hint: hintText, onChange, error, re
       <div className="space-y-3">
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Age range (select all that apply)</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {AGE_RANGES.map(a => (
               <button
                 key={a}
@@ -293,6 +293,8 @@ export function AgeIncomeCheckboxes({ label, hint: hintText, onChange, error, re
                   cursor: "pointer",
                   transition: "background-color 0.15s, color 0.15s",
                   letterSpacing: "0.01em",
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
                 }}
               >
                 {a}
@@ -302,7 +304,7 @@ export function AgeIncomeCheckboxes({ label, hint: hintText, onChange, error, re
         </div>
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Income range (select all that apply)</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {INCOME_RANGES.map(i => (
               <button
                 key={i}
@@ -320,6 +322,10 @@ export function AgeIncomeCheckboxes({ label, hint: hintText, onChange, error, re
                   cursor: "pointer",
                   transition: "background-color 0.15s, color 0.15s",
                   letterSpacing: "0.01em",
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                  minWidth: "120px",
+                  textAlign: "center",
                 }}
               >
                 {i}
