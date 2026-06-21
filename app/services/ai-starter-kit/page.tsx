@@ -6,7 +6,7 @@ import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
 import ServiceFormField from "@/components/ServiceFormField";
-import { CheckboxGroupWithOther, AI_TOOLS, AI_TASKS, AI_TONES } from "@/components/StructuredFormInputs";
+import { CheckboxGroupWithOther, PillGroupWithOther, AI_TOOLS, AI_TASKS, AI_TONES } from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -61,7 +61,7 @@ export default function AIStarterKitPage() {
       <SiteNav />
       <section style={{ backgroundColor: SAND, textAlign: "center", padding: "48px 24px 16px" }}>
         <p style={{ fontFamily: MT, fontSize: "0.72rem", fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "12px" }}>AI Starter Kit</p>
-        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Custom AI prompts built for your specific business.</h1>
+        <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Custom AI prompts built for your business.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$99</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48 hour delivery</span>
@@ -115,9 +115,9 @@ export default function AIStarterKitPage() {
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <ServiceFormField label="1. What is your business name and what do you do?" required placeholder="e.g. Anchor Coffee Co. — we run a specialty coffee shop and roastery in Bradley Beach, NJ." rows={2}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
+                <ServiceFormField label="1. What do you sell or offer?" required placeholder="e.g. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={2}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
                 <ServiceFormField label="2. Where are you located and who are your customers?" required placeholder="e.g. Bradley Beach, NJ. Our customers are mostly locals, 25-50, who value quality and community. Tourists in summer." rows={2}  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
-                <CheckboxGroupWithOther
+                <PillGroupWithOther
                   label="3. What AI tool are you planning to use?"
                   hint="Select all that apply. If you're not sure yet, that's fine too."
                   options={AI_TOOLS}
@@ -126,7 +126,7 @@ export default function AIStarterKitPage() {
                   error={errors.q3}
                   otherPlaceholder="Which other AI tool?"
                 />
-                <CheckboxGroupWithOther
+                <PillGroupWithOther
                   label="4. What are the top tasks you want AI to help you with?"
                   hint="Select all that apply."
                   options={AI_TASKS}
