@@ -8,7 +8,7 @@ import SiteFooter       from "@/components/SiteFooter";
 import ServiceFormField from "@/components/ServiceFormField";
 import {
   SelectWithOther,
-  CheckboxGroupWithOther,
+  PillGroupWithOther,
   YesNoReveal,
   BUSINESS_TYPES,
   VOC_COLLECTION_METHODS,
@@ -32,7 +32,7 @@ const HIW = [
   { num: "1", title: "Tell Us Your Goals", body: "Fill out the short intake form below with your business context and what you most want to learn from your customers." },
   { num: "2", title: "Pay and Upload Your List", body: "After payment, you'll receive a secure upload link. Send us your customer contact list as a CSV, XLS, or XLSX file." },
   { num: "3", title: "We Design and Send the Survey", body: "We design a custom survey based on your goals and distribute it to your customers on your behalf." },
-  { num: "4", title: "Your Report Arrives", body: "A visual findings report with themes, highlights, and analyst interpretation lands in your inbox within 1-2 weeks." },
+  { num: "4", title: "Your Report Arrives", body: "A complete findings report with themes, key highlights, and analyst interpretation delivered within 1-2 weeks." },
 ];
 
 const CONTACT_SIZES = ["Under 50", "50–100", "100–250", "250–500", "500–1,000", "1,000+"];
@@ -85,7 +85,7 @@ export default function VoiceOfCustomerPage() {
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$499</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>1-2 week delivery</span>
         </div>
-        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "580px", margin: "0 auto 20px" }}>We design a custom survey around your business goals, send it to your existing customers, and deliver a visual report with findings, themes, and actionable recommendations. You&rsquo;ll need an existing customer contact list to participate.</p>
+        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "580px", margin: "0 auto 20px" }}>A custom survey sent to your real customers, analyzed and delivered as a professional report. Requires an existing customer contact list.</p>
         <div style={{ display: "inline-block", border: "1px solid rgba(10,47,97,0.2)", borderRadius: "8px", padding: "10px 18px", backgroundColor: "rgba(10,47,97,0.05)", marginBottom: "24px" }}>
           <p style={{ fontFamily: MT, fontSize: "0.78rem", color: NAVY, margin: 0 }}>After payment, you&rsquo;ll receive a secure link to upload your contact data. Sea Glass Insights does not provide contact lists.</p>
         </div>
@@ -140,7 +140,7 @@ export default function VoiceOfCustomerPage() {
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
               <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business and Customers</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <ServiceFormField label="1. Business name and location" required placeholder="e.g. Anchor Coffee Co., Bradley Beach NJ — specialty coffee shop and roastery."  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
+                <ServiceFormField label="1. What do you sell or offer?" required placeholder="e.g. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ."  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
                 <SelectWithOther
                   label="2. Industry / business type"
                   options={BUSINESS_TYPES}
@@ -156,7 +156,7 @@ export default function VoiceOfCustomerPage() {
                   error={errors.q3}
                   required
                 />
-                <CheckboxGroupWithOther
+                <PillGroupWithOther
                   label="4. How were these contacts collected?"
                   options={VOC_COLLECTION_METHODS}
                   onChange={v => set("q4", v)}
