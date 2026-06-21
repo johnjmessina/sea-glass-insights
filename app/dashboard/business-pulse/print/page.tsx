@@ -58,7 +58,7 @@ const BACK_SERVICES = [
     checklist: ["Everything in the MIR, but deeper", "Greater competitive rigor per competitor", "Expanded customer segments", "Priority action framework"],
   },
   {
-    name: "Synthetic Survey Report", price: "$399",
+    name: "Synthetic Customer Profile Report", price: "$399",
     checklist: ["AI-generated customer personas", "3-5 customer type responses", "Thematic analysis and recommendations", "Full methodology disclosure"],
   },
   {

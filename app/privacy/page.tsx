@@ -52,7 +52,7 @@ export default function PrivacyPage() {
 
         <H2>4. How AI Is Used in Our Process</H2>
         <H3>What AI Does</H3>
-        <P>When you submit an intake form, that information is used to generate an initial research foundation using large language model technology, specifically Anthropic&rsquo;s Claude. AI synthesizes publicly available market and competitive information, drafts initial report sections, identifies patterns and directional insights from your responses, and generates synthetic customer personas for the Synthetic Survey Report.</P>
+        <P>When you submit an intake form, that information is used to generate an initial research foundation using large language model technology, specifically Anthropic&rsquo;s Claude. AI synthesizes publicly available market and competitive information, drafts initial report sections, identifies patterns and directional insights from your responses, and generates synthetic customer personas for the Synthetic Customer Profile Report.</P>
         <H3>What AI Does Not Do</H3>
         <P>AI does not make final editorial or strategic judgments without human review, replace the analyst&rsquo;s interpretation of findings, generate fabricated competitor data presented as factual, or make financial or investment recommendations.</P>
         <H3>The Analyst Review Process</H3>
@@ -64,8 +64,8 @@ export default function PrivacyPage() {
         ]} />
         <H3>Your Data and AI</H3>
         <P>Your intake information is submitted to Anthropic&rsquo;s Claude API as part of the report generation process. By default, Anthropic does not use API-submitted data to train their models. See <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>anthropic.com/privacy</a> for details. Your business information is used solely to produce your report. It is not used to train AI models, shared with third parties for marketing purposes, or sold.</P>
-        <H3 id="synthetic-surveys">Synthetic Survey Reports</H3>
-        <P>The Synthetic Survey Report uses AI-generated customer personas to simulate how different customer types might respond to your research questions. This is a directional research tool, not a replacement for actual customer feedback. Results are clearly presented as directional insight, not statistically validated customer data, and the methodology is fully disclosed in every deliverable.</P>
+        <H3 id="synthetic-surveys">Synthetic Customer Profile Reports</H3>
+        <P>The Synthetic Customer Profile Report uses AI-generated customer personas to simulate how different customer types might respond to your research questions. This is a directional research tool, not a replacement for actual customer feedback. Results are clearly presented as directional insight, not statistically validated customer data, and the methodology is fully disclosed in every deliverable.</P>
 
         <H2>5. Payment Processing</H2>
         <P>All payment transactions are processed by Stripe, Inc. Your payment information is transmitted directly to Stripe and is subject to Stripe&rsquo;s Privacy Policy at <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>stripe.com/privacy</a>. Sea Glass Insights does not store your full credit card number, CVV, or bank account details.</P>

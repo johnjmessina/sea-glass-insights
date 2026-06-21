@@ -180,7 +180,7 @@ const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
   { value: "social_media_audit",                label: "Social Media Audit" },
   { value: "secret_shopping",                   label: "Secret Shopping" },
   { value: "deep_dive_report",                  label: "Deep Dive Report" },
-  { value: "synthetic_survey_report",           label: "Synthetic Survey Report" },
+  { value: "synthetic_survey_report",           label: "Synthetic Customer Profile Report" },
   { value: "voice_of_customer_survey",          label: "Voice of Customer Survey" },
   { value: "ai_starter_kit",                    label: "AI Starter Kit" },
   { value: "starter_intelligence_bundle",       label: "Starter Intelligence — Bundle" },
@@ -198,12 +198,12 @@ const SERVICE_PICKER_ITEMS: {
   { value: "social_media_audit",                label: "Social Media Audit",            desc: "Presence, content, and engagement across platforms" },
   { value: "secret_shopping",                   label: "Secret Shopping",               desc: "In-person visit scored across 7 experience dimensions" },
   { value: "deep_dive_report",                  label: "Deep Dive Report",              desc: "Deeper intelligence for a specific major decision" },
-  { value: "synthetic_survey_report",           label: "Synthetic Survey Report",       desc: "AI personas pressure-test your customer assumptions" },
+  { value: "synthetic_survey_report",           label: "Synthetic Customer Profile Report", desc: "AI personas pressure-test your customer assumptions" },
   { value: "voice_of_customer_survey",          label: "Voice of Customer Survey",      desc: "Custom survey designed and sent to your customers" },
   { value: "ai_starter_kit",                    label: "AI Starter Kit",                desc: "Custom AI prompts built for your specific business" },
   { value: "starter_intelligence_bundle",       label: "Starter Intelligence",          desc: "Market Intelligence Report + Social Media Audit", bundle: true },
   { value: "field_report_bundle",               label: "The Field Report",              desc: "Market Intelligence Report + Secret Shopping", bundle: true },
-  { value: "market_mind_bundle",                label: "Market & Mind",                 desc: "Market Intelligence Report + Synthetic Survey", bundle: true },
+  { value: "market_mind_bundle",                label: "Market & Mind",                 desc: "Market Intelligence Report + Synthetic Customer Profile", bundle: true },
   { value: "complete_shopper_experience_bundle",label: "Complete Shopper Experience",   desc: "Secret Shopping + Voice of Customer Survey", bundle: true },
 ];
 
@@ -1662,7 +1662,7 @@ const BACK_SERVICES = [
     checklist: ["Everything in the MIR, but deeper", "Greater competitive rigor per competitor", "Expanded customer segments", "Priority action framework"],
   },
   {
-    name: "Synthetic Survey Report", price: "$399",
+    name: "Synthetic Customer Profile Report", price: "$399",
     checklist: ["AI-generated customer personas", "3-5 customer type responses", "Thematic analysis and recommendations", "Full methodology disclosure"],
   },
   {

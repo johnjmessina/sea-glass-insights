@@ -18,7 +18,7 @@ const SERVICES = [
   { name: "Social Media Audit",          href: "/services/social-media-audit" },
   { name: "Secret Shopping",             href: "/services/secret-shopping" },
   { name: "Deep Dive Report",            href: "/services/deep-dive-report" },
-  { name: "Synthetic Survey Report",     href: "/services/synthetic-survey-report" },
+  { name: "Synthetic Customer Profile Report", href: "/services/synthetic-survey-report" },
   { name: "Voice of Customer Survey",    href: "/services/voice-of-customer" },
 ];
 

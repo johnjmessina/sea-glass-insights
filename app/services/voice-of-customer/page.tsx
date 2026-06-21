@@ -198,7 +198,7 @@ export default function VoiceOfCustomerPage() {
       </section>
       <section style={{ backgroundColor: WHITE, padding: "24px 24px", textAlign: "center" }}>
         <p style={{ fontFamily: MT, fontSize: "0.85rem", color: GRAY, marginBottom: "8px" }}>Don&rsquo;t have a contact list yet?</p>
-        <Link href="/services/synthetic-survey-report" style={{ fontFamily: MT, fontWeight: 600, fontSize: "0.9rem", color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>See the Synthetic Survey Report instead →</Link>
+        <Link href="/services/synthetic-survey-report" style={{ fontFamily: MT, fontWeight: 600, fontSize: "0.9rem", color: NAVY, textDecoration: "underline", textUnderlineOffset: "3px" }}>See the Synthetic Customer Profile Report instead →</Link>
       </section>
       <SiteFooter />
     </div>
