@@ -365,7 +365,7 @@ export default function BundlesPage() {
                   <span style={{ fontFamily: MT, fontSize: '1.3rem', fontWeight: 700, color: NAVY }}>$499</span>
                   <span style={{ fontFamily: MT, fontSize: '0.8rem', fontWeight: 600, color: TEAL }}>save $99</span>
                 </div>
-                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Market Intelligence Report + Synthetic Customer Profile Report</p>
+                <p style={{ fontFamily: MT, fontSize: '0.78rem', color: GRAY, marginBottom: '10px' }}>Market Intelligence Report + Synthetic Customer Profiles</p>
                 <p style={{ fontFamily: MT, fontSize: '0.9rem', color: GRAY, lineHeight: 1.75 }}>Understand your market and your customer without needing an existing contact list. Two research streams working together to give you the full picture.</p>
               </div>
               <Chevron open={expanded === 'market-and-mind'} />
@@ -380,7 +380,7 @@ export default function BundlesPage() {
               <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$199</span>
             </div>
             <div style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: WHITE }}>
-              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Synthetic Customer Profile Report</span>
+              <span style={{ fontFamily: MT, fontSize: "0.82rem", color: NAVY, fontWeight: 500 }}>Synthetic Customer Profiles</span>
               <span style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY }}>$399</span>
             </div>
           </div>

@@ -105,7 +105,7 @@ const GRID_SERVICES: GridSvc[] = [
     href: "/services/deep-dive-report",
   },
   {
-    name: "Synthetic Customer Profile Report",
+    name: "Synthetic Customer Profiles",
     price: "$399", turnaround: "48-72 hrs",
     desc: "We work with you to build the exact customer profiles you want to understand, then use AI to simulate how they would respond to your business, whether they are customers you already have or ones you are trying to attract.",
     bundles: ["Market & Mind"],
