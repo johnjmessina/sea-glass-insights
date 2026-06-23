@@ -44,7 +44,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 type SectionKey =
-  | "snapshot"
+  | "executive_summary"
+  | "business_snapshot"
+  | "snapshot"               // legacy — not shown in SECTIONS, handled inside business_snapshot render
   | "customer_profile"
   | "competitive_landscape"
   | "positioning"
@@ -55,12 +57,13 @@ type SectionMeta = { notes: string; locked: boolean };
 type MetaMap     = Record<SectionKey, SectionMeta>;
 
 const SECTIONS: { key: SectionKey; label: string }[] = [
-  { key: "snapshot",              label: "Business Snapshot"    },
-  { key: "customer_profile",      label: "Customer Profile"      },
+  { key: "executive_summary",    label: "Executive Summary"     },
+  { key: "business_snapshot",    label: "Business Snapshot"     },
+  { key: "customer_profile",     label: "Customer Profile"      },
   { key: "competitive_landscape", label: "Competitive Landscape" },
-  { key: "positioning",           label: "Market Positioning"    },
-  { key: "insights",              label: "Key Insights"          },
-  { key: "recommendations",       label: "Recommendations"       },
+  { key: "positioning",          label: "Market Positioning"    },
+  { key: "insights",             label: "Key Insights"          },
+  { key: "recommendations",      label: "Recommendations"       },
 ];
 
 const QUESTIONS = [
@@ -78,6 +81,8 @@ const QUESTIONS = [
 
 function defaultMeta(): MetaMap {
   return {
+    executive_summary:     { notes: "", locked: false },
+    business_snapshot:     { notes: "", locked: false },
     snapshot:              { notes: "", locked: false },
     customer_profile:      { notes: "", locked: false },
     competitive_landscape: { notes: "", locked: false },
@@ -1047,8 +1052,9 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
 
   function startEdit(key: SectionKey) {
     if (!draft) return;
-    const content = draft[key];
-    setEditBuf(key === "snapshot"
+    const content = draft[key as keyof AIDraft];
+    const isPlainText = key === "snapshot" || key === "executive_summary";
+    setEditBuf(isPlainText
       ? (typeof content === "string" ? content : "")
       : JSON.stringify(content, null, 2)
     );
@@ -1058,7 +1064,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   function applyEdit() {
     if (!draft || !editingSection) return;
     let newContent: unknown;
-    if (editingSection === "snapshot") {
+    if (editingSection === "snapshot" || editingSection === "executive_summary") {
       newContent = editBuf;
     } else {
       try {
@@ -1195,6 +1201,53 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   // ── Content display renderer ───────────────────────────────────────────────
 
   function renderContent(key: SectionKey, d: AIDraft): React.ReactNode {
+    if (key === "executive_summary") {
+      if (d.executive_summary) {
+        return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{d.executive_summary}</p>;
+      }
+      return <p className="text-sm text-gray-400 italic">Generate the draft to populate this section.</p>;
+    }
+
+    if (key === "business_snapshot") {
+      if (d.business_snapshot && typeof d.business_snapshot === "object") {
+        const bs = d.business_snapshot;
+        const fields: { label: string; value: string | undefined }[] = [
+          { label: "Business Name",    value: bs.business_name },
+          { label: "Location",         value: bs.location },
+          { label: "Time in Business", value: bs.time_in_business },
+          { label: "Business Type",    value: bs.business_type },
+          { label: "Primary Offering", value: bs.primary_offering },
+          { label: "Target Customer",  value: bs.target_customer },
+          { label: "Top Competitors",  value: Array.isArray(bs.top_competitors) ? bs.top_competitors.join(", ") : bs.top_competitors },
+          { label: "Marketing",        value: Array.isArray(bs.marketing_channels) ? bs.marketing_channels.join(", ") : bs.marketing_channels },
+          { label: "Key Challenge",    value: bs.key_challenge },
+          { label: "Success Goal",     value: bs.success_goal },
+        ];
+        return (
+          <div className="grid grid-cols-2 gap-2">
+            {fields.map(({ label, value }) => (
+              <div key={label} className="rounded-lg px-3 py-2.5" style={{ backgroundColor: "#EEF2F8" }}>
+                <p className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: "#00CED1" }}>{label}</p>
+                <p className="text-sm leading-snug" style={{ color: "#0A2F61" }}>{value || "—"}</p>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      // Legacy: order has old snapshot string instead of structured object
+      if (d.snapshot) {
+        return (
+          <div>
+            <p className="text-xs bg-amber-50 text-amber-700 rounded px-2 py-1 mb-3">
+              This order uses the legacy snapshot format. Regenerate the draft to get the structured view.
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{d.snapshot}</p>
+          </div>
+        );
+      }
+      return <p className="text-sm text-gray-400 italic">Generate the draft to populate this section.</p>;
+    }
+
     if (key === "snapshot") {
       return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{d.snapshot}</p>;
     }
@@ -1345,13 +1398,13 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
         {isEditing ? (
           <div>
             <textarea
-              rows={key === "snapshot" ? 10 : 16}
+              rows={key === "snapshot" || key === "executive_summary" ? 10 : 16}
               value={editBuf}
               onChange={e => setEditBuf(e.target.value)}
               className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed"
               autoFocus
             />
-            {key !== "snapshot" && (
+            {key !== "snapshot" && key !== "executive_summary" && (
               <p className="text-xs text-gray-400 mt-1">
                 Editing as JSON. For structural changes, add Analyst Notes and use Regenerate instead.
               </p>
