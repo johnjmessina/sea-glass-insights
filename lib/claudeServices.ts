@@ -26,7 +26,7 @@ function buildIntake(order: Order): string {
 
 async function callClaude(system: string, user: string, maxTokens = 4096): Promise<string> {
   const msg = await client.messages.create({
-    model: "claude-sonnet-4-5",
+    model: "claude-sonnet-4-6",
     max_tokens: maxTokens,
     system,
     messages: [{ role: "user", content: user }],
@@ -96,7 +96,7 @@ Return ONLY a raw JSON object with exactly these 7 keys:
 Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
 
   const response = await client.messages.create({
-    model:      "claude-sonnet-4-5",
+    model:      "claude-sonnet-4-6",
     max_tokens: 6000,
     tools:      [{ type: "web_search_20250305", name: "web_search" }],
     system,
@@ -183,7 +183,7 @@ async function generateDeepDiveDraft(order: Order): Promise<Record<string, strin
   let response1: Awaited<ReturnType<typeof client.messages.create>>;
   try {
     response1 = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 4000,
       tools:      [{ type: "web_search_20250305", name: "web_search" }],
       system: `${mandate}
@@ -224,7 +224,7 @@ Return ONLY this JSON object with exactly these 5 keys:
   let response2: Awaited<ReturnType<typeof client.messages.create>>;
   try {
     response2 = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 4000,
       tools:      [{ type: "web_search_20250305", name: "web_search" }],
       system: `${mandate}
@@ -314,7 +314,7 @@ export async function generateSSRSection(
 
   try {
     const msg = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 1200,
       system,
       messages:   [{ role: "user", content: user }],
@@ -379,7 +379,7 @@ Return a JSON array where each element has:
 
   try {
     const msg = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 2000,
       system,
       messages:   [{ role: "user", content: `Business intake:\n\n${intake}` }],
@@ -450,7 +450,7 @@ export async function generateVOCSection(
 
   try {
     const msg = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 1400,
       system,
       messages:   [{ role: "user", content: user }],
@@ -573,7 +573,7 @@ export async function generateAISKSection(
 
   try {
     const msg = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: config.maxTokens,
       system,
       messages:   [{ role: "user", content: user }],
@@ -797,7 +797,7 @@ export async function generateDDRSectionWithSearch(
       try {
         const msg = await Promise.race([
           client.messages.create({
-            model:      "claude-sonnet-4-5",
+            model:      "claude-sonnet-4-6",
             max_tokens: 1200,
             tools:      [{ type: "web_search_20250305", name: "web_search" }],
             system:     searchSystem,
@@ -820,7 +820,7 @@ export async function generateDDRSectionWithSearch(
 
     // No-search path: used directly for no-search sections, or as fallback when search timed out
     const msg = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 1200,
       system:     noSearchSystem,
       messages:   [{ role: "user", content: userPrompt }],
@@ -861,7 +861,7 @@ export async function generateDDRResearch(order: Order): Promise<string> {
   let resp: Awaited<ReturnType<typeof client.messages.create>>;
   try {
     resp = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 4096,
       tools:      [{ type: "web_search_20250305", name: "web_search" }],
       system: `You are a senior market research analyst preparing a research briefing for a Deep Dive Report. Search the web to gather everything a section writer will need.
@@ -910,7 +910,7 @@ export async function generateDDRSection(
   let msg: Awaited<ReturnType<typeof client.messages.create>>;
   try {
     msg = await client.messages.create({
-      model:      "claude-sonnet-4-5",
+      model:      "claude-sonnet-4-6",
       max_tokens: 1500,
       system:     `You are a senior market research analyst at Sea Glass Insights. Your task is to write ONLY the "${sectionLabel}" section of a Deep Dive Report. Return plain prose text only — no JSON, no section headers, no bullet points, no markdown. Just 2-4 flowing prose paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`,
       messages:   [{

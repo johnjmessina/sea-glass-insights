@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       const userPrompt = `BUSINESS INTAKE ANSWERS:\n${intake}\n\nCURRENT SECTION (${sectionKey}):\n${JSON.stringify(currentContent, null, 2)}\n\nANALYST NOTES:\n${analystNotes?.trim() || "(no notes — improve and sharpen the existing content)"}`;
 
       const message = await client.messages.create({
-        model: "claude-sonnet-4-5",
+        model: "claude-sonnet-4-6",
         max_tokens: 2048,
         system,
         messages: [{ role: "user", content: userPrompt }],

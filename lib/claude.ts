@@ -117,8 +117,8 @@ Requirements:
 Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a smart person, not a consulting firm.`;
 
   const message = await client.messages.create({
-    model: "claude-sonnet-4-5",
-    max_tokens: 8192,
+    model: "claude-sonnet-4-6",
+    max_tokens: 4096,
     system: systemPrompt,
     messages: [
       {
