@@ -67,7 +67,7 @@ export default function AIStarterKitPage() {
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48 hour delivery</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: TEAL, fontWeight: 600 }}>$79 as an add-on</span>
         </div>
-        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "540px", margin: "0 auto 28px" }}>Five to six prompts written specifically for your business type and voice — ready to use immediately with ChatGPT, Claude, or any major AI tool. No generic templates. Built for the tasks that actually save you time.</p>
+        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "540px", margin: "0 auto 28px" }}>We learn your business first, then write six custom prompts ready to use immediately with ChatGPT, Claude, or any major AI tool. No generic templates. Built for the tasks that actually save you time.</p>
         <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
       </section>
       <div style={{ backgroundColor: SAND, padding: "6px 24px", textAlign: "center" }}>
