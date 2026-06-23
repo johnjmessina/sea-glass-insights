@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
       order,
       order.ai_draft,
       analystNote,
-      order.executive_summary || "",
     );
 
     const businessName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");

@@ -8,6 +8,9 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // Per-section format instructions for MIR sections (unchanged)
 const MIR_FORMAT: Record<string, string> = {
+  executive_summary: `Return 3-4 sentences as plain text only. No JSON, no headers, no bullet points. Warm, direct, specific to this business. No generic statements.`,
+  business_snapshot: `Return a JSON object only — no other text. Format exactly:
+{"business_name":"...","location":"...","time_in_business":"...","business_type":"...","primary_offering":"...","target_customer":"...","top_competitors":["...","..."],"marketing_channels":["...","..."],"key_challenge":"...","success_goal":"..."}`,
   snapshot: `Return 2-3 cohesive paragraphs as plain text only. No JSON, no headers, no bullet points.`,
   customer_profile: `Return a JSON array only — no other text. Each element must be exactly:
 {"name":"3-5 word segment label","desc":"one sentence description","motivation":"primary purchase motivation","key_need":"single most important need"}`,
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
       const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "";
 
       let newContent: unknown;
-      if (sectionKey === "snapshot") {
+      if (sectionKey === "snapshot" || sectionKey === "executive_summary") {
         newContent = raw;
       } else {
         const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();

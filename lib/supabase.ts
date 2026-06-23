@@ -102,10 +102,30 @@ export interface Recommendation {
   body:  string;  // 2-3 sentence explanation
 }
 
+// ── BusinessSnapshot — structured MIR section (post-restructure) ──────────────
+
+export interface BusinessSnapshot {
+  business_name:      string;
+  location:           string;
+  time_in_business:   string;
+  business_type:      string;
+  primary_offering:   string;
+  target_customer:    string;
+  top_competitors:    string[];
+  marketing_channels: string[];
+  key_challenge:      string;
+  success_goal:       string;
+}
+
 // ── AIDraft ───────────────────────────────────────────────────────────────────
 
 export interface AIDraft {
-  snapshot:              string;
+  // Current MIR structure
+  executive_summary?:    string;
+  business_snapshot?:    BusinessSnapshot;
+  // Legacy MIR structure (pre-restructure orders keep this)
+  snapshot?:             string;
+  // Shared across all MIR orders
   customer_profile:      CustomerSegment[];
   competitive_landscape: Competitor[];
   positioning:           Positioning;
@@ -123,7 +143,9 @@ export interface SectionMeta {
 // ── AnalystCommentary — stored in analyst_commentary jsonb column ─────────────
 
 export interface AnalystCommentary {
-  snapshot?:              SectionMeta;
+  executive_summary?:     SectionMeta;
+  business_snapshot?:     SectionMeta;
+  snapshot?:              SectionMeta;  // legacy
   customer_profile?:      SectionMeta;
   competitive_landscape?: SectionMeta;
   positioning?:           SectionMeta;
