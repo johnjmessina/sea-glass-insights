@@ -1,13 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Order, AIDraft } from "@/lib/supabase";
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error("Missing ANTHROPIC_API_KEY environment variable");
-}
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 export async function generateReportDraft(order: Order): Promise<AIDraft> {
+  // Check inside the function so a missing key returns a clean JSON error
+  // rather than crashing the module at load time and dropping the TCP connection.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("Missing ANTHROPIC_API_KEY environment variable");
+  }
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const intake = `
 1. What is your business name and what do you sell or offer?
 ${order.q1 ?? "Not provided"}
