@@ -45,7 +45,20 @@ ${order.q10 ?? "Not provided"}
 Return ONLY a valid JSON object with EXACTLY this structure. No markdown. No code fences. No explanation. Raw JSON only.
 
 {
-  "snapshot": "2-3 paragraphs summarizing who the business is, what they offer, and their market context.",
+  "executive_summary": "3-4 sentences written by the analyst that preview the most important finding, the key opportunity, and the top recommendation for this business. Warm, direct, specific to this business. No generic statements.",
+
+  "business_snapshot": {
+    "business_name": "The business name exactly as provided.",
+    "location": "City, state or region.",
+    "time_in_business": "How long they have been operating.",
+    "business_type": "Single clear phrase describing the type of business.",
+    "primary_offering": "What they sell or provide in one sentence.",
+    "target_customer": "Who their ideal customer is in one sentence.",
+    "top_competitors": ["Competitor 1", "Competitor 2"],
+    "marketing_channels": ["Channel 1", "Channel 2"],
+    "key_challenge": "Their stated biggest challenge in one sentence.",
+    "success_goal": "What success looks like for them in one sentence."
+  },
 
   "customer_profile": [
     {
@@ -131,8 +144,11 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a sm
   }
 
   // ── Validate structure ────────────────────────────────────────────────────
-  if (typeof parsed.snapshot !== "string" || !parsed.snapshot)
-    throw new Error("Missing or invalid: snapshot");
+  if (typeof parsed.executive_summary !== "string" || !parsed.executive_summary)
+    throw new Error("Missing or invalid: executive_summary");
+
+  if (!parsed.business_snapshot || typeof parsed.business_snapshot !== "object")
+    throw new Error("Missing or invalid: business_snapshot");
 
   if (!Array.isArray(parsed.customer_profile) || parsed.customer_profile.length < 2)
     throw new Error("Missing or invalid: customer_profile");
