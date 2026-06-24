@@ -4,8 +4,8 @@ import { generateReportDraft } from "@/lib/claude";
 import { generateServiceDraft } from "@/lib/claudeServices";
 import { getEffectiveServiceType } from "@/lib/serviceConfig";
 
-// Allow up to 60 seconds for AI generation (web-search DDR needs the full window)
-export const maxDuration = 60;
+// Allow up to 120 seconds for AI generation (Vercel Pro supports up to 300s)
+export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
   // Guard: fail fast with JSON if the API key is missing
@@ -44,12 +44,12 @@ export async function POST(req: NextRequest) {
 
   let draft: Record<string, unknown>;
 
-  // 55-second JS timeout — fires before Vercel's 60s limit so we can return
-  // a clean JSON error instead of letting Vercel return an unhandled HTML response.
+  // 115-second JS timeout — fires before Vercel's 120s limit so we can return
+  // a clean JSON error instead of letting Vercel drop the TCP connection.
   const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(
-      () => reject(new Error("Generation timed out (55 s). The AI is taking longer than expected — please try again.")),
-      55_000
+      () => reject(new Error("Generation timed out (115 s). The AI is taking longer than expected — please try again.")),
+      115_000
     )
   );
 
