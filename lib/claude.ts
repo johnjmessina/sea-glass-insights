@@ -116,7 +116,10 @@ Requirements:
 
 Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a smart person, not a consulting firm.`;
 
-  const message = await client.messages.create({
+  // Use streaming so the outbound TCP connection stays active during generation.
+  // Non-streaming holds an idle connection for 80+ seconds, which Vercel's network
+  // layer kills before the response arrives (TypeError: fetch failed).
+  const message = await client.messages.stream({
     model: "claude-sonnet-4-6",
     max_tokens: 4096,
     system: systemPrompt,
@@ -126,7 +129,7 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a sm
         content: `Business intake data:\n\n${intake}`,
       },
     ],
-  });
+  }).finalMessage();
 
   const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
