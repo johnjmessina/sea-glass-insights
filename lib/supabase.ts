@@ -117,11 +117,20 @@ export interface BusinessSnapshot {
   success_goal:       string;
 }
 
+// ── ExecutiveSummaryBlock — structured MIR executive summary ─────────────────
+
+export interface ExecutiveSummaryBlock {
+  intro:           string;    // one context-setting sentence
+  bullets:         string[];  // 3-4 bullets: finding, opportunity, vulnerability, action
+  your_edge:       string;    // 1-2 sentences on the key differentiator
+  priority_action: string;    // 1-2 sentences on the most urgent action
+}
+
 // ── AIDraft ───────────────────────────────────────────────────────────────────
 
 export interface AIDraft {
   // Current MIR structure
-  executive_summary?:    string;
+  executive_summary?:    ExecutiveSummaryBlock | string;  // string = legacy orders
   business_snapshot?:    BusinessSnapshot;
   // Legacy MIR structure (pre-restructure orders keep this)
   snapshot?:             string;

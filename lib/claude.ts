@@ -45,7 +45,17 @@ ${order.q10 ?? "Not provided"}
 Return ONLY a valid JSON object with EXACTLY this structure. No markdown. No code fences. No explanation. Raw JSON only.
 
 {
-  "executive_summary": "3-4 sentences written by the analyst that preview the most important finding, the key opportunity, and the top recommendation for this business. Warm, direct, specific to this business. No generic statements.",
+  "executive_summary": {
+    "intro": "One sentence that places this business in its market — who they are and what makes this moment meaningful for them. Warm, specific, no generic openers.",
+    "bullets": [
+      "Key finding: the single most important thing the research revealed about their market position.",
+      "Main opportunity: the clearest growth opportunity available to them right now.",
+      "Biggest vulnerability: the most pressing risk or gap that could hold them back.",
+      "Top priority action: the one thing they should do first to move the needle."
+    ],
+    "your_edge": "1-2 sentences on the specific differentiator that sets this business apart and that competitors cannot easily replicate.",
+    "priority_action": "1-2 sentences on the single most urgent action this business should take right now and why it matters."
+  },
 
   "business_snapshot": {
     "business_name": "The business name exactly as provided.",
@@ -147,7 +157,12 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a sm
   }
 
   // ── Validate structure ────────────────────────────────────────────────────
-  if (typeof parsed.executive_summary !== "string" || !parsed.executive_summary)
+  const es = parsed.executive_summary as Record<string, unknown> | undefined;
+  if (!es || typeof es !== "object" ||
+      typeof es.intro !== "string" || !es.intro ||
+      !Array.isArray(es.bullets) || es.bullets.length < 3 ||
+      typeof es.your_edge !== "string" || !es.your_edge ||
+      typeof es.priority_action !== "string" || !es.priority_action)
     throw new Error("Missing or invalid: executive_summary");
 
   if (!parsed.business_snapshot || typeof parsed.business_snapshot !== "object")
