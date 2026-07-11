@@ -40,78 +40,69 @@ ${order.q9 ?? "Not provided"}
 ${order.q10 ?? "Not provided"}
 `.trim();
 
-  const systemPrompt = `You are a senior market research analyst at Sea Glass Insights, a boutique market research firm serving small businesses. Your job is to produce a professional, insightful market intelligence report based on the intake information provided.
+  const systemPrompt = `You are a senior market research analyst at Sea Glass Insights. Produce a professional market intelligence report from the intake data provided.
 
 Return ONLY a valid JSON object with EXACTLY this structure. No markdown. No code fences. No explanation. Raw JSON only.
 
 {
   "executive_summary": {
-    "intro": "One sentence that places this business in its market — who they are and what makes this moment meaningful for them. Warm, specific, no generic openers.",
+    "intro": "One warm, specific sentence placing this business in its market. No generic openers.",
     "bullets": [
-      "Key finding: the single most important thing the research revealed about their market position.",
-      "Main opportunity: the clearest growth opportunity available to them right now.",
-      "Biggest vulnerability: the most pressing risk or gap that could hold them back.",
-      "Top priority action: the one thing they should do first to move the needle."
+      "Key finding: their most important market position insight.",
+      "Main opportunity: the clearest growth opportunity available now.",
+      "Biggest vulnerability: the most pressing risk or gap.",
+      "Top priority action: the one thing to do first."
     ],
-    "your_edge": "1-2 sentences on the specific differentiator that sets this business apart and that competitors cannot easily replicate.",
-    "priority_action": "1-2 sentences on the single most urgent action this business should take right now and why it matters."
+    "your_edge": "1-2 sentences on their key differentiator that competitors cannot easily replicate.",
+    "priority_action": "1-2 sentences on the single most urgent action and why it matters."
   },
 
   "business_snapshot": {
-    "business_name": "The business name exactly as provided.",
+    "business_name": "Business name as provided.",
     "location": "City, state or region.",
-    "time_in_business": "How long they have been operating.",
-    "business_type": "Single clear phrase describing the type of business.",
-    "primary_offering": "What they sell or provide in one sentence.",
+    "time_in_business": "How long operating.",
+    "business_type": "Single phrase describing the type of business.",
+    "primary_offering": "What they sell in one sentence.",
     "target_customer": "Who their ideal customer is in one sentence.",
     "top_competitors": ["Competitor 1", "Competitor 2"],
     "marketing_channels": ["Channel 1", "Channel 2"],
-    "key_challenge": "Their stated biggest challenge in one sentence.",
-    "success_goal": "What success looks like for them in one sentence."
+    "key_challenge": "Their biggest challenge in one sentence.",
+    "success_goal": "What success looks like in one sentence."
   },
 
   "customer_profile": [
     {
       "name": "Segment name (3-5 words)",
-      "desc": "One sentence describing this customer type and why they buy.",
-      "motivation": "The primary thing that motivates them to choose this business.",
-      "key_need": "The single most important thing they need from this business."
+      "desc": "One sentence: who they are and why they buy.",
+      "motivation": "Their primary reason for choosing this business.",
+      "key_need": "The one thing they most need from this business."
     }
   ],
 
   "competitive_landscape": [
     {
       "name": "Competitor name or descriptor",
-      "strength": "Their main competitive advantage in one clear sentence.",
-      "edge": "How this business has a genuine, specific edge over them."
+      "strength": "Their main competitive advantage in one sentence.",
+      "edge": "This business's genuine, specific advantage over them."
     }
   ],
 
   "positioning": {
-    "strengths": [
-      "Specific strength statement.",
-      "Specific strength statement.",
-      "Specific strength statement.",
-      "Specific strength statement."
-    ],
-    "vulnerabilities": [
-      "Specific vulnerability statement.",
-      "Specific vulnerability statement.",
-      "Specific vulnerability statement."
-    ]
+    "strengths": ["Strength statement.", "Strength statement.", "Strength statement.", "Strength statement."],
+    "vulnerabilities": ["Vulnerability statement.", "Vulnerability statement.", "Vulnerability statement."]
   },
 
   "insights": [
     {
-      "title": "Short insight title (5-8 words)",
-      "body": "2-3 sentences unpacking this insight and what it means for the business."
+      "title": "Insight title (5-8 words)",
+      "body": "2-3 sentences on what this means and why it matters."
     }
   ],
 
   "recommendations": [
     {
-      "title": "Short action-oriented title (5-8 words)",
-      "body": "2-3 sentences explaining this recommendation and why it matters now."
+      "title": "Action title (5-8 words)",
+      "body": "2-3 sentences on the action and why it matters now."
     }
   ]
 }
@@ -119,10 +110,10 @@ Return ONLY a valid JSON object with EXACTLY this structure. No markdown. No cod
 Requirements:
 - customer_profile: 3-4 segments
 - competitive_landscape: cover every competitor mentioned (min 2, max 5)
-- positioning.strengths: exactly 4-5 items
-- positioning.vulnerabilities: exactly 3-4 items
-- insights: exactly 4-5 items
-- recommendations: exactly 4 items
+- positioning.strengths: 4-5 items
+- positioning.vulnerabilities: 3-4 items
+- insights: 4-5 items
+- recommendations: 4 items
 
 Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a smart person, not a consulting firm.`;
 
@@ -131,7 +122,7 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a sm
   // layer kills before the response arrives (TypeError: fetch failed).
   const message = await client.messages.stream({
     model: "claude-sonnet-4-6",
-    max_tokens: 4096,
+    max_tokens: 16000,
     system: systemPrompt,
     messages: [
       {
@@ -140,6 +131,13 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a sm
       },
     ],
   }).finalMessage();
+
+  if (message.stop_reason === "max_tokens") {
+    throw new Error(
+      "Report generation hit the token limit before completing. " +
+      "The response was truncated — please try generating again."
+    );
+  }
 
   const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
@@ -153,7 +151,11 @@ Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a sm
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    throw new Error(`Claude returned invalid JSON: ${cleaned.slice(0, 300)}`);
+    const looksLikeTruncation = cleaned.length > 200 && !cleaned.trimEnd().endsWith("}");
+    const hint = looksLikeTruncation
+      ? " (response appears truncated — try generating again)"
+      : "";
+    throw new Error(`Claude returned invalid JSON${hint}: ${cleaned.slice(0, 400)}`);
   }
 
   // ── Validate structure ────────────────────────────────────────────────────
