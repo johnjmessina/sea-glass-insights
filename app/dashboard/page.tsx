@@ -1038,7 +1038,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   function startEdit(key: SectionKey) {
     if (!draft) return;
     const content = draft[key as keyof AIDraft];
-    const isPlainText = key === "snapshot" || key === "executive_summary";
+    const isPlainText = key === "snapshot";
     setEditBuf(isPlainText
       ? (typeof content === "string" ? content : "")
       : JSON.stringify(content, null, 2)
@@ -1049,7 +1049,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   function applyEdit() {
     if (!draft || !editingSection) return;
     let newContent: unknown;
-    if (editingSection === "snapshot" || editingSection === "executive_summary") {
+    if (editingSection === "snapshot") {
       newContent = editBuf;
     } else {
       try {
@@ -1186,10 +1186,36 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
 
   function renderContent(key: SectionKey, d: AIDraft): React.ReactNode {
     if (key === "executive_summary") {
-      if (d.executive_summary) {
-        return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{d.executive_summary}</p>;
+      const es = d.executive_summary;
+      if (!es) return <p className="text-sm text-gray-400 italic">Generate the draft to populate this section.</p>;
+      if (typeof es === "string") {
+        return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{es}</p>;
       }
-      return <p className="text-sm text-gray-400 italic">Generate the draft to populate this section.</p>;
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-700 leading-relaxed">{es.intro}</p>
+          <ul className="space-y-1 pl-1">
+            {es.bullets.map((b, i) => (
+              <li key={i} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: "#00CED1" }} />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="rounded-lg p-3" style={{ backgroundColor: "#0A2F61" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#00CED1" }}>Your Edge</p>
+              <div className="border-t mb-2" style={{ borderColor: "#00CED1" }} />
+              <p className="text-sm leading-relaxed" style={{ color: "#FFFFFF" }}>{es.your_edge}</p>
+            </div>
+            <div className="rounded-lg p-3" style={{ backgroundColor: "#00CED1" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#0A2F61" }}>Priority Action</p>
+              <div className="border-t mb-2" style={{ borderColor: "#0A2F61" }} />
+              <p className="text-sm leading-relaxed" style={{ color: "#0A2F61" }}>{es.priority_action}</p>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     if (key === "business_snapshot") {
@@ -1382,13 +1408,13 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
         {isEditing ? (
           <div>
             <textarea
-              rows={key === "snapshot" || key === "executive_summary" ? 10 : 16}
+              rows={key === "snapshot" ? 10 : 16}
               value={editBuf}
               onChange={e => setEditBuf(e.target.value)}
               className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed"
               autoFocus
             />
-            {key !== "snapshot" && key !== "executive_summary" && (
+            {key !== "snapshot" && (
               <p className="text-xs text-gray-400 mt-1">
                 Editing as JSON. For structural changes, add Analyst Notes and use Regenerate instead.
               </p>
