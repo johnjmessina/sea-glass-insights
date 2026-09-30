@@ -1265,17 +1265,22 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
     if (key === "customer_profile") {
       if (!Array.isArray(d.customer_profile)) return <OldFormatFallback text={String(d.customer_profile)} />;
       return (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2">
           {d.customer_profile.map((seg, i) => (
-            <div key={i} className="border-l-2 border-seafoam/40 pl-3 py-0.5">
-              <p className="font-semibold text-navy text-sm">{["A","B","C","D","E"][i]}. {seg.name}</p>
-              <p className="text-sm text-gray-600 mt-0.5 leading-relaxed">{seg.desc}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                <span className="font-medium text-gray-600">Motivation:</span> {seg.motivation}
-              </p>
-              <p className="text-xs text-gray-500">
-                <span className="font-medium text-gray-600">Key Need:</span> {seg.key_need}
-              </p>
+            <div key={i} className="rounded-lg overflow-hidden bg-white" style={{ border: "1.5px solid #F4EADA" }}>
+              <div className="px-3 py-2.5" style={{ backgroundColor: "#0A2F61" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "#00CED1" }}>
+                  Segment {"ABCDEFGH"[i] ?? i + 1}
+                </p>
+                <p className="text-sm font-semibold leading-snug text-white">{seg.name}</p>
+              </div>
+              <div className="px-3 py-2.5">
+                <p className="text-sm text-gray-700 leading-relaxed">{seg.desc}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide mt-2.5 mb-0.5" style={{ color: "#00CED1" }}>Motivation</p>
+                <p className="text-sm leading-snug" style={{ color: "#0A2F61" }}>{seg.motivation || "—"}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide mt-2.5 mb-0.5" style={{ color: "#00CED1" }}>Key Need</p>
+                <p className="text-sm leading-snug" style={{ color: "#0A2F61" }}>{seg.key_need || "—"}</p>
+              </div>
             </div>
           ))}
         </div>
