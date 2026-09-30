@@ -126,18 +126,35 @@ function yearsTile(v: unknown): { value: string; label: string } {
   return m ? { value: m[1], label: "Years in Business" } : { value: t || "—", label: "Time in Business" };
 }
 
-// Short business type for the stat tile: the first clause of the AI's
-// description ("Surf shop and beach lifestyle retail…" → "Surf shop").
-function shortType(v: unknown): string {
-  const t = String(v ?? "").trim();
-  const first = t.split(/,|;|\s+(?:and|with|offering|that|which|specializing)\s+|\s+[-–—]\s+/i)[0].trim();
-  const out = first.length >= 3 ? first : t;
-  return out.charAt(0).toUpperCase() + out.slice(1);
+// Keep hyphenated words ("Full-Service") on one line in the stat tiles
+function noBreakHyphens(html: string): string {
+  return html.replace(/\S+-\S+/g, w => `<span class="nowrap">${w}</span>`);
 }
 
-// Stat values are 26px, stepping down so long values stay inside a tile
-function statSize(v: string): string {
-  return v.length <= 12 ? "" : v.length <= 20 ? " mid" : " small";
+// Title case for short labels: small words stay lowercase mid-label,
+// acronyms (HIIT) are kept, and each part of a hyphenated word is capitalized.
+const SMALL_WORDS = new Set(["a", "an", "and", "as", "at", "by", "for", "in", "of", "on", "or", "the", "to", "with"]);
+function titleCase(s: string): string {
+  return s.split(/\s+/).filter(Boolean).map((w, i) => {
+    if (i > 0 && SMALL_WORDS.has(w.toLowerCase())) return w.toLowerCase();
+    if (w.length > 1 && w === w.toUpperCase() && /[A-Z]/.test(w)) return w;
+    return w.split("-").map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join("-");
+  }).join(" ");
+}
+
+// Short business type for the stat tile. Trailing detail ("… offering X",
+// "… — family and cosmetic") is dropped; a list joined by "and" becomes its
+// first & last items: "Surf shop and beach lifestyle retail and experiences"
+// → "Surf Shop & Experiences".
+function shortType(v: unknown): string {
+  const t = String(v ?? "").trim();
+  if (!t) return "";
+  const head = t.split(/\s+(?:with|offering|that|which|specializing|focused on)\s+|\s+[-–—]\s+|;/i)[0].trim() || t;
+  const parts = head.split(/\s*,\s*|\s+(?:and|&)\s+/i).map(x => x.trim()).filter(Boolean);
+  const first = parts[0] ?? head;
+  const last  = parts[parts.length - 1];
+  const label = parts.length > 1 && `${first} & ${last}`.length <= 28 ? `${first} & ${last}` : first;
+  return titleCase(label);
 }
 
 function businessSnapshot(bs: unknown, legacy: unknown): string {
@@ -166,7 +183,7 @@ function businessSnapshot(bs: unknown, legacy: unknown): string {
     </div>
     <div class="snap-stats">${stats.map(st => `
       <div class="snap-stat">
-        <div class="snap-stat-value${statSize(st.value)}">${text(st.value)}</div>
+        <div class="snap-stat-value">${noBreakHyphens(text(st.value))}</div>
         <div class="snap-stat-label">${esc(st.label)}</div>
       </div>`).join("")}
     </div>
@@ -362,11 +379,11 @@ table { border-collapse: collapse; width: 100%; }
 .snap-name { color: ${WHITE}; font-size: 32px; font-weight: 700; line-height: 1.15; }
 .snap-location { color: ${TEAL}; font-size: 15px; margin-top: 4px; }
 .snap-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
-.snap-stat { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-top: 3px solid ${TEAL}; border-radius: 4pt; padding: 12px 14px; }
-.snap-stat-value { color: ${NAVY}; font-size: 26px; font-weight: 700; line-height: 1.15; }
-.snap-stat-value.mid { font-size: 20px; }
-.snap-stat-value.small { font-size: 16px; }
-.snap-stat-label { color: ${GRAY}; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
+.snap-stat { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-top: 3px solid ${TEAL}; border-radius: 4pt; padding: 12px 14px; display: flex; flex-direction: column; }
+/* One fixed size for all three values; long ones wrap rather than shrink */
+.snap-stat-value { color: ${NAVY}; font-size: 28px; font-weight: 700; line-height: 1.15; }
+.snap-stat-label { color: ${GRAY}; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-top: auto; padding-top: 6px; }  /* pinned to the bottom so labels line up */
+.nowrap { white-space: nowrap; }
 .snap-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .snap-card { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-radius: 4pt; padding: 12px 14px; box-shadow: 0 2px 0 rgba(10, 47, 97, 0.07); break-inside: avoid; }
 .snap-card-label { color: ${NAVY}; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
