@@ -23,7 +23,6 @@ export type MirOrderInfo = {
   business_name: string;
   customer_name?: string | null;
   created_at: string;
-  q2?: string | null;   // intake: "How long have you been in business…" (founding year, if given)
 };
 
 export type SectionId =
@@ -128,28 +127,14 @@ function yearsValue(v: unknown): string {
   return t ? t.charAt(0).toUpperCase() + t.slice(1) : "";
 }
 
-// A founding year only when one is actually stated (never derived from
-// "4 years"): looked for in time_in_business, then the intake answer.
-function foundedYear(...sources: unknown[]): string {
-  const now = new Date().getUTCFullYear();
-  for (const src of sources) {
-    for (const m of String(src ?? "").matchAll(/\b(1[89]\d\d|20\d\d)\b/g)) {
-      if (Number(m[1]) <= now) return m[1];
-    }
-  }
-  return "";
-}
-
-// "Google / SEO, Social media, Print / Flyers" → "Google/Social/Print"
-const CHANNEL_FILLER = /\s+(?:media|marketing|advertising|ads|campaigns?)$/i;
-function shortChannels(v: unknown): string {
-  const items = (Array.isArray(v) ? v : String(v ?? "").split(",")).map(x => String(x ?? "").trim()).filter(Boolean);
-  const heads = items
-    .map(c => c.split(/\/|\s+(?:and|&)\s+|\s*\(/i)[0].trim().replace(CHANNEL_FILLER, ""))
-    .filter(Boolean)
-    .map(titleCase);
-  const label = heads.slice(0, 3).join("/");
-  return heads.length > 3 ? `${label} +${heads.length - 3}` : label;
+// Business stage from the AI: normalized to one of the four expected labels;
+// anything else longer than 3 words is dropped rather than overflowing the bar.
+const STAGES = ["Early Stage", "Growth Stage", "Established", "Scaling"];
+function stageValue(v: unknown): string {
+  const t = String(v ?? "").trim();
+  const known = STAGES.find(st => st.toLowerCase() === t.toLowerCase());
+  if (known) return known;
+  return t && t.split(/\s+/).length <= 3 ? titleCase(t) : "";
 }
 
 // Keep hyphenated words ("Full-Service") on one line in the stat tiles
@@ -183,16 +168,14 @@ function shortType(v: unknown): string {
   return titleCase(label);
 }
 
-function businessSnapshot(bs: unknown, legacy: unknown, order: MirOrderInfo): string {
+function businessSnapshot(bs: unknown, legacy: unknown): string {
   const b = obj(bs);
   if (!Object.keys(b).length) return paragraphs(legacy);           // legacy drafts
 
-  const founded = foundedYear(b.time_in_business, order.q2);
   const stats: { label: string; value: string }[] = [
-    { label: "In Business",   value: yearsValue(b.time_in_business) },
-    { label: "Business Type", value: shortType(b.business_type) },
-    { label: "Marketing",     value: shortChannels(b.marketing_channels) },
-    { label: "Founded",       value: founded ? `Est. ${founded}` : "" },
+    { label: "Years in Business", value: yearsValue(b.time_in_business) },
+    { label: "Business Type",     value: shortType(b.business_type) },
+    { label: "Business Stage",    value: stageValue(b.business_stage) },
   ].filter(st => st.value);                                         // omit what we don't know
 
   const details: [string, unknown][] = [
@@ -487,7 +470,7 @@ export function buildMirReportHtml(
 ): string {
   const body: Record<SectionId, () => string> = {
     executive_summary:     () => executiveSummary(draft.executive_summary),
-    business_snapshot:     () => businessSnapshot(draft.business_snapshot, draft.snapshot, order),
+    business_snapshot:     () => businessSnapshot(draft.business_snapshot, draft.snapshot),
     customer_profile:      () => customerProfile(draft.customer_profile),
     competitive_landscape: () => competitiveLandscape(draft.competitive_landscape),
     positioning:           () => positioning(draft.positioning),

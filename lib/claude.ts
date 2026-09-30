@@ -63,6 +63,7 @@ The executive summary must agree with the report sections provided: draw the fin
   "marketing_channels": ["Channel 1", "Channel 2"],
   "key_challenge": "Their biggest challenge in one sentence.",
   "success_goal": "What success looks like in one sentence.",
+  "business_stage": "Exactly one of: Early Stage, Growth Stage, Established, Scaling. Judge from years in operation, stated goals and overall context (e.g. a 4-year business planning a second location is Growth Stage).",
   "business_descriptor": "One punchy sentence, under 20 words, saying what the business is, what it offers and where. Specific, not generic. Example: Full-service surf shop offering lessons, rentals, and retail on the Asbury Park beachblock."
 }`,
     validate: v =>

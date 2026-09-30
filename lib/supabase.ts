@@ -116,6 +116,7 @@ export interface BusinessSnapshot {
   marketing_channels: string[];
   key_challenge:      string;
   success_goal:       string;
+  business_stage?:      string;  // Early Stage | Growth Stage | Established | Scaling; absent on older drafts
   business_descriptor?: string;  // one-line summary for the PDF banner; absent on older drafts
 }
 
