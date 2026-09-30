@@ -23,6 +23,7 @@ export type MirOrderInfo = {
   business_name: string;
   customer_name?: string | null;
   created_at: string;
+  q2?: string | null;   // intake: "How long have you been in business…" (founding year, if given)
 };
 
 export type SectionId =
@@ -118,12 +119,37 @@ function executiveSummary(es: unknown): string {
     </div>`;
 }
 
-// "4 years" → "4" for the years tile; anything not in years ("8 months",
-// "Just opened") is shown as-is under a TIME IN BUSINESS label instead.
-function yearsTile(v: unknown): { value: string; label: string } {
+// "4 years" → "4 Years"; anything else ("8 months", "Just opened") is
+// shown as written, capitalized.
+function yearsValue(v: unknown): string {
   const t = String(v ?? "").trim();
   const m = /^(?:about |around |over |nearly |almost )?(\d+(?:\.\d+)?)\+?\s*(?:years?|yrs?)\b/i.exec(t);
-  return m ? { value: m[1], label: "Years in Business" } : { value: t || "—", label: "Time in Business" };
+  if (m) return `${m[1]} ${m[1] === "1" ? "Year" : "Years"}`;
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : "";
+}
+
+// A founding year only when one is actually stated (never derived from
+// "4 years"): looked for in time_in_business, then the intake answer.
+function foundedYear(...sources: unknown[]): string {
+  const now = new Date().getUTCFullYear();
+  for (const src of sources) {
+    for (const m of String(src ?? "").matchAll(/\b(1[89]\d\d|20\d\d)\b/g)) {
+      if (Number(m[1]) <= now) return m[1];
+    }
+  }
+  return "";
+}
+
+// "Google / SEO, Social media, Print / Flyers" → "Google/Social/Print"
+const CHANNEL_FILLER = /\s+(?:media|marketing|advertising|ads|campaigns?)$/i;
+function shortChannels(v: unknown): string {
+  const items = (Array.isArray(v) ? v : String(v ?? "").split(",")).map(x => String(x ?? "").trim()).filter(Boolean);
+  const heads = items
+    .map(c => c.split(/\/|\s+(?:and|&)\s+|\s*\(/i)[0].trim().replace(CHANNEL_FILLER, ""))
+    .filter(Boolean)
+    .map(titleCase);
+  const label = heads.slice(0, 3).join("/");
+  return heads.length > 3 ? `${label} +${heads.length - 3}` : label;
 }
 
 // Keep hyphenated words ("Full-Service") on one line in the stat tiles
@@ -157,16 +183,18 @@ function shortType(v: unknown): string {
   return titleCase(label);
 }
 
-function businessSnapshot(bs: unknown, legacy: unknown): string {
+function businessSnapshot(bs: unknown, legacy: unknown, order: MirOrderInfo): string {
   const b = obj(bs);
   if (!Object.keys(b).length) return paragraphs(legacy);           // legacy drafts
 
-  const years = yearsTile(b.time_in_business);
-  const stats: { value: string; label: string }[] = [
-    years,
-    { value: shortType(b.business_type) || "—", label: "Business Type" },
-    { value: String(b.location ?? "").trim() || "—", label: "Location" },
-  ];
+  const founded = foundedYear(b.time_in_business, order.q2);
+  const stats: { label: string; value: string }[] = [
+    { label: "In Business",   value: yearsValue(b.time_in_business) },
+    { label: "Business Type", value: shortType(b.business_type) },
+    { label: "Marketing",     value: shortChannels(b.marketing_channels) },
+    { label: "Founded",       value: founded ? `Est. ${founded}` : "" },
+  ].filter(st => st.value);                                         // omit what we don't know
+
   const details: [string, unknown][] = [
     ["Primary Offering",   b.primary_offering],
     ["Target Customer",    b.target_customer],
@@ -180,17 +208,18 @@ function businessSnapshot(bs: unknown, legacy: unknown): string {
     <div class="snap-banner">
       <div class="snap-name">${text(b.business_name)}</div>
       ${b.location ? `<div class="snap-location">${text(b.location)}</div>` : ""}
+      ${b.business_descriptor ? `<div class="snap-descriptor">${text(b.business_descriptor)}</div>` : ""}
     </div>
-    <div class="snap-stats">${stats.map(st => `
-      <div class="snap-stat">
-        <div class="snap-stat-value">${noBreakHyphens(text(st.value))}</div>
-        <div class="snap-stat-label">${esc(st.label)}</div>
+    ${stats.length ? `<div class="snap-bar">${stats.map(st => `
+      <div class="snap-bar-item">
+        <div class="snap-bar-label">${esc(st.label)}</div>
+        <div class="snap-bar-value">${noBreakHyphens(text(st.value).replace(/\//g, "/<wbr>"))}</div>
       </div>`).join("")}
-    </div>
-    <div class="snap-details">${details.map(([l, v]) => `
-      <div class="snap-card">
-        <div class="snap-card-label">${esc(l)}</div>
-        <p>${text(v) || "&mdash;"}</p>
+    </div>` : ""}
+    <div class="snap-list">${details.map(([l, v]) => `
+      <div class="snap-row">
+        <div class="snap-row-label">${esc(l)}</div>
+        <div class="snap-row-value">${text(v) || "&mdash;"}</div>
       </div>`).join("")}
     </div>`;
 }
@@ -373,21 +402,22 @@ section.contents { page: contents; }
 
 table { border-collapse: collapse; width: 100%; }
 
-/* Business Snapshot — profile card: banner, stat tiles, detail cards.
-   Card shadows use no blur: blurred shadows print as flat gray bands. */
+/* Business Snapshot — banner, compact stat bar, editorial label/value list */
 .snap-banner { background: ${NAVY}; min-height: 80px; padding: 16px 22px; border-radius: 4pt; display: flex; flex-direction: column; justify-content: center; }
 .snap-name { color: ${WHITE}; font-size: 32px; font-weight: 700; line-height: 1.15; }
 .snap-location { color: ${TEAL}; font-size: 15px; margin-top: 4px; }
-.snap-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
-.snap-stat { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-top: 3px solid ${TEAL}; border-radius: 4pt; padding: 12px 14px; display: flex; flex-direction: column; }
-/* One fixed size for all three values; long ones wrap rather than shrink */
-.snap-stat-value { color: ${NAVY}; font-size: 28px; font-weight: 700; line-height: 1.15; }
-.snap-stat-label { color: ${GRAY}; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-top: auto; padding-top: 6px; }  /* pinned to the bottom so labels line up */
+.snap-descriptor { color: ${WHITE}; font-size: 12px; font-style: italic; margin-top: 6px; opacity: 0.92; }
+.snap-bar { display: flex; background: ${WHITE}; border: 1px solid ${ROW_TINT}; padding: 12px 0; margin: 14px 0 6px; }
+.snap-bar-item { flex: 1 1 auto; padding: 0 14px; }  /* width follows content; never narrower than its label */
+.snap-bar-item + .snap-bar-item { border-left: 1px solid ${ROW_TINT}; }
+.snap-bar-label { color: ${NAVY}; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; white-space: nowrap; }
+.snap-bar-value { color: ${NAVY}; font-size: 14px; font-weight: 700; line-height: 1.3; }
+.snap-list { margin-top: 4px; }
+.snap-row { display: flex; gap: 16px; padding: 11px 0; border-bottom: 1px solid ${ROW_TINT}; break-inside: avoid; }
+.snap-row:last-child { border-bottom: none; }
+.snap-row-label { flex: 0 0 30%; color: ${NAVY}; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding-top: 2px; }
+.snap-row-value { flex: 1; color: #333333; font-size: 13px; line-height: 1.5; }
 .nowrap { white-space: nowrap; }
-.snap-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.snap-card { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-radius: 4pt; padding: 12px 14px; box-shadow: 0 2px 0 rgba(10, 47, 97, 0.07); break-inside: avoid; }
-.snap-card-label { color: ${NAVY}; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-.snap-card p { margin: 0; color: #374151; font-size: 13px; line-height: 1.45; }
 
 /* Customer Profile */
 .segments { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
@@ -457,7 +487,7 @@ export function buildMirReportHtml(
 ): string {
   const body: Record<SectionId, () => string> = {
     executive_summary:     () => executiveSummary(draft.executive_summary),
-    business_snapshot:     () => businessSnapshot(draft.business_snapshot, draft.snapshot),
+    business_snapshot:     () => businessSnapshot(draft.business_snapshot, draft.snapshot, order),
     customer_profile:      () => customerProfile(draft.customer_profile),
     competitive_landscape: () => competitiveLandscape(draft.competitive_landscape),
     positioning:           () => positioning(draft.positioning),

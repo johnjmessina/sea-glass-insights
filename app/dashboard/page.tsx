@@ -1352,6 +1352,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
           { label: "Marketing",        value: Array.isArray(bs.marketing_channels) ? bs.marketing_channels.join(", ") : bs.marketing_channels },
           { label: "Key Challenge",    value: bs.key_challenge },
           { label: "Success Goal",     value: bs.success_goal },
+          { label: "Descriptor",       value: bs.business_descriptor },
         ];
         return (
           <div className="grid grid-cols-2 gap-2">

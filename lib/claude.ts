@@ -62,7 +62,8 @@ The executive summary must agree with the report sections provided: draw the fin
   "top_competitors": ["Competitor 1", "Competitor 2"],
   "marketing_channels": ["Channel 1", "Channel 2"],
   "key_challenge": "Their biggest challenge in one sentence.",
-  "success_goal": "What success looks like in one sentence."
+  "success_goal": "What success looks like in one sentence.",
+  "business_descriptor": "One punchy sentence, under 20 words, saying what the business is, what it offers and where. Specific, not generic. Example: Full-service surf shop offering lessons, rentals, and retail on the Asbury Park beachblock."
 }`,
     validate: v =>
       isObj(v) && isStr(v.business_name) && Array.isArray(v.top_competitors) && Array.isArray(v.marketing_channels)
