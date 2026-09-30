@@ -12,6 +12,8 @@ const WHITE = "#FFFFFF";
 const INK   = "#1C1C1C";
 const GRAY  = "#6B7280";
 const LIGHT_GRAY = "#E5E7EB";
+const ROW_TINT = "#E8EDF4";   // very light navy, for table striping
+const RULE     = "#E0E0E0";   // table row dividers
 
 // ── Types (loose on purpose: drafts come from AI output and older formats) ──
 
@@ -325,29 +327,23 @@ table { border-collapse: collapse; width: 100%; }
 .field { margin-bottom: 5pt; }
 .field-label { color: ${TEAL}; font-weight: 700; }
 
-/* Competitive Landscape */
+/* Competitive Landscape — white rows with light navy striping, navy headers */
 .compare thead { display: table-header-group; }
-.compare thead th.edge { border-bottom: 3pt solid ${TEAL}; }
 .compare thead th { background: ${NAVY}; color: ${WHITE}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; text-align: left; padding: 8pt 10pt; }
-.compare tbody th { background: ${NAVY}; color: ${WHITE}; text-align: left; width: 24%; }
+.compare thead th.edge { border-bottom: 3pt solid ${TEAL}; }
+.compare tbody th { background: ${NAVY}; color: ${WHITE}; text-align: left; width: 24%; border-top: 1pt solid rgba(255,255,255,0.25); }
 .compare tbody td, .compare tbody th { padding: 10pt; vertical-align: top; font-size: 11pt; }
-.compare tbody tr:nth-child(odd) td { background: ${CREAM}; }
-.compare tbody tr:nth-child(even) td { background: ${WHITE}; }
-.compare tbody th { border-top: 1pt solid rgba(255,255,255,0.25); }
+.compare tbody td { background: ${WHITE}; border-bottom: 1px solid ${RULE}; }
+.compare tbody td:last-child { border-right: 1px solid ${RULE}; }
+.compare tbody tr:nth-child(even) td { background: ${ROW_TINT}; }
 
-/* Market Positioning */
+/* Market Positioning — white cards like the rest of the report */
 .positioning { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; align-items: stretch; }
-.pos-card { border-radius: 4pt; overflow: hidden; background: ${CREAM}; }
-.pos-head { padding: 9pt 14pt; font-size: 9pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; }
-.pos-card.navy .pos-head { background: ${NAVY}; color: ${WHITE}; }
-/* Equal 3pt top borders keep both headers level; only the teal one shows */
-.pos-card.navy { border-top: 3pt solid ${NAVY}; }
-.pos-card.teal { border-top: 3pt solid ${TEAL}; }
-.pos-card.teal .pos-head { background: ${NAVY}; color: ${WHITE}; }
+.pos-card { border-radius: 4pt; overflow: hidden; background: ${WHITE}; border: 1pt solid ${CREAM}; border-top: 3pt solid ${TEAL}; }
+.pos-head { padding: 9pt 14pt; font-size: 9pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; background: ${NAVY}; color: ${WHITE}; }
 .pos-card ul { margin: 0; padding: 12pt 14pt 12pt 28pt; }
 .pos-card li { font-size: 13px; margin-bottom: 6px; }
-.pos-card.navy li::marker { color: ${NAVY}; }
-.pos-card.teal li::marker { color: ${TEAL}; }
+.pos-card li::marker { color: ${TEAL}; }
 
 /* Key Insights */
 .insights { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
