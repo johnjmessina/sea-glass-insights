@@ -1423,7 +1423,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
             </thead>
             <tbody>
               {d.competitive_landscape.map((c, i) => (
-                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#F4EADA" : "#FFFFFF" }}>
+                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#E8EDF4" }}>
                   <td className="px-3 py-2.5 font-bold text-sm align-middle" style={{ color: "#0A2F61" }}>{c.name}</td>
                   <td className="px-3 py-2.5 text-gray-700 text-xs leading-relaxed align-top">{c.strength || "—"}</td>
                   <td className="px-3 py-2.5 text-gray-700 text-xs leading-relaxed align-top">{c.edge || "—"}</td>
@@ -1447,7 +1447,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
               <div className="px-3 py-2" style={{ backgroundColor: card.bg }}>
                 <p className="text-xs font-bold uppercase tracking-wide" style={{ color: card.fg }}>{card.label}</p>
               </div>
-              <ul className="flex-1 px-3 py-2.5 space-y-1.5" style={{ backgroundColor: "#F4EADA" }}>
+              <ul className="flex-1 px-3 py-2.5 space-y-1.5" style={{ backgroundColor: "#FFFFFF" }}>
                 {card.items.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug">
                     <span className="shrink-0 font-bold" style={{ color: card.dot }}>•</span>{item}
@@ -1492,7 +1492,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
       const TIERS = [
         { tier: 1, sub: "Do first",   bg: "#0A2F61", fg: "#FFFFFF", subFg: "#00CED1", edge: "#0A2F61" },
         { tier: 2, sub: "Do next",    bg: "#00CED1", fg: "#0A2F61", subFg: "#0A2F61", edge: "#00CED1" },
-        { tier: 3, sub: "When ready", bg: "#F4EADA", fg: "#0A2F61", subFg: "#6B7280", edge: "#F4EADA" },
+        { tier: 3, sub: "When ready", bg: "#E5E7EB", fg: "#0A2F61", subFg: "#6B7280", edge: "#E5E7EB" },
       ];
       let num = 0;
       return (
@@ -1967,7 +1967,7 @@ function BusinessPulse() {
     import("qrcode").then(QRCode =>
       QRCode.default.toDataURL("https://www.seaglassinsights.com", {
         width: 80, margin: 1,
-        color: { dark: "#0A2F61", light: "#F4EADA" },
+        color: { dark: "#0A2F61", light: "#FFFFFF" },
       }).then(setQrDataUrl)
     );
   }, []);
@@ -2111,7 +2111,7 @@ function BusinessPulse() {
 
       <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
       {/* ── Back panel — cream, services page layout ── */}
-      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: SAND_HEX, borderRadius: "3px", overflow: "hidden", padding: "26px 36px", display: "flex", flexDirection: "column", gap: "14px" }}>
+      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: "#FFFFFF", border: "1px solid #E8EDF4", borderRadius: "3px", overflow: "hidden", padding: "26px 36px", display: "flex", flexDirection: "column", gap: "14px" }}>
 
         {/* TOP — logo + headline + subtext, centered */}
         <div style={{ textAlign: "center" }}>

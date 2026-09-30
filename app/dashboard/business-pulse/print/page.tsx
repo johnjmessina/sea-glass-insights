@@ -102,7 +102,7 @@ export default async function BusinessPulsePrintPage(
 
   const qrDataUrl = await QRCode.toDataURL("https://www.seaglassinsights.com", {
     width: 64, margin: 1,
-    color: { dark: "#0A2F61", light: "#F4EADA" },
+    color: { dark: "#0A2F61", light: "#FFFFFF" },
   });
 
   return (
@@ -139,7 +139,7 @@ export default async function BusinessPulsePrintPage(
           .card-back {
             width: 4in;
             height: 6in;
-            background: ${SAND};
+            background: ${WHITE};
             overflow: hidden;
           }
 
