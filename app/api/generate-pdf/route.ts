@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { generateReport } from "@/lib/reportGenerator";
+import { missingMirSections, MIR_SECTION_LABELS } from "@/lib/mirSections";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,6 +28,14 @@ export async function POST(req: NextRequest) {
     if (typeof order.ai_draft.customer_profile === "string") {
       return NextResponse.json(
         { error: "This order uses the old draft format. Please click Regenerate Draft to update it, then save before downloading." },
+        { status: 400 },
+      );
+    }
+
+    const missing = missingMirSections(order.ai_draft);
+    if (missing.length) {
+      return NextResponse.json(
+        { error: `Draft is incomplete. Generate these sections first: ${missing.map(k => MIR_SECTION_LABELS[k]).join(", ")}.` },
         { status: 400 },
       );
     }

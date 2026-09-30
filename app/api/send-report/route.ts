@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { supabase } from "@/lib/supabase";
 import { generateReport } from "@/lib/reportGenerator";
 import type { Order } from "@/lib/supabase";
+import { missingMirSections, MIR_SECTION_LABELS } from "@/lib/mirSections";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,6 +31,13 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(order.ai_draft.customer_profile))
       return NextResponse.json(
         { error: "Draft is in the old format. Regenerate it in the dashboard before sending." },
+        { status: 400 },
+      );
+
+    const missing = missingMirSections(order.ai_draft);
+    if (missing.length)
+      return NextResponse.json(
+        { error: `Draft is incomplete. Generate these sections in the dashboard first: ${missing.map(k => MIR_SECTION_LABELS[k]).join(", ")}.` },
         { status: 400 },
       );
 

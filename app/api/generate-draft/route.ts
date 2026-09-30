@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateReportDraft } from "@/lib/claude";
 import { generateServiceDraft } from "@/lib/claudeServices";
 import { getEffectiveServiceType } from "@/lib/serviceConfig";
 
@@ -59,6 +58,15 @@ export async function POST(req: NextRequest) {
   const serviceType = getEffectiveServiceType(order.service_type);
   console.log("[generate-draft] STEP 4 OK: effectiveServiceType =", serviceType);
 
+  // MIR drafts are generated one section per request so no single response
+  // can be truncated. The dashboard drives that via /api/generate-mir-section.
+  if (serviceType === "market_intelligence_report") {
+    return NextResponse.json(
+      { error: "Market Intelligence Reports are generated section by section. Use /api/generate-mir-section." },
+      { status: 400 }
+    );
+  }
+
   let draft: Record<string, unknown>;
 
   // 115-second JS timeout — fires before Vercel's 120s limit so we can return
@@ -71,30 +79,20 @@ export async function POST(req: NextRequest) {
   );
 
   try {
-    if (serviceType === "market_intelligence_report") {
-      // MIR generation
-      console.log("[generate-draft] STEP 5: starting MIR generateReportDraft");
-      draft = await Promise.race([
-        generateReportDraft(order) as unknown as Record<string, unknown>,
-        timeoutPromise,
-      ]);
-      console.log("[generate-draft] STEP 5 OK: MIR draft generated");
-    } else {
-      // Non-MIR services
-      const ss = order.service_data as Record<string, unknown> | null;
-      draft = await Promise.race([
-        generateServiceDraft(order, serviceType, {
-          vocPhase:    (vocPhase ?? (ss?.voc_phase as 1 | 2 | undefined)) ?? 1,
-          vocResponses: vocResponses ?? (ss?.voc_responses as string | undefined),
-          ssScorecard:  bodyScorecard ?? ss?.ss_scorecard as Record<string, boolean | number> | undefined,
-          ssAnalystObs: bodyAnalystObs ?? ss?.ss_analyst_obs as {
-            best_moment: string; biggest_miss: string;
-            immediate_fix: string; additional_observations: string;
-          } | undefined,
-        }),
-        timeoutPromise,
-      ]);
-    }
+    // Non-MIR services
+    const ss = order.service_data as Record<string, unknown> | null;
+    draft = await Promise.race([
+      generateServiceDraft(order, serviceType, {
+        vocPhase:    (vocPhase ?? (ss?.voc_phase as 1 | 2 | undefined)) ?? 1,
+        vocResponses: vocResponses ?? (ss?.voc_responses as string | undefined),
+        ssScorecard:  bodyScorecard ?? ss?.ss_scorecard as Record<string, boolean | number> | undefined,
+        ssAnalystObs: bodyAnalystObs ?? ss?.ss_analyst_obs as {
+          best_moment: string; biggest_miss: string;
+          immediate_fix: string; additional_observations: string;
+        } | undefined,
+      }),
+      timeoutPromise,
+    ]);
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     const errStack = err instanceof Error ? err.stack : undefined;

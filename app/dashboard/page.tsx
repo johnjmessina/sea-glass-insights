@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Order, AIDraft, Insight, Recommendation } from "@/lib/supabase";
+import { MIR_GENERATION_ORDER, MIR_SECTION_LABELS, type MirSectionKey } from "@/lib/mirSections";
 import {
   SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
   getEffectiveServiceType, isBundle, type ServiceType,
@@ -926,12 +927,19 @@ function ServiceOrderRouter({ order, onBack }: { order: Order; onBack: () => voi
 
 // ── Order Detail ──────────────────────────────────────────────────────────────
 
-function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: () => void }) {
-  const svcType = getEffectiveServiceType(initialOrder.service_type as ServiceType | null);
-  // Non-MIR orders: delegate to the service-specific component
+function OrderDetail({ order, onBack }: { order: Order; onBack: () => void }) {
+  const svcType = getEffectiveServiceType(order.service_type as ServiceType | null);
+  // Non-MIR orders: delegate to the service-specific component. MIR lives in
+  // its own component so its hooks never sit behind this early return.
   if (svcType !== "market_intelligence_report") {
-    return <ServiceOrderRouter order={initialOrder} onBack={onBack} />;
+    return <ServiceOrderRouter order={order} onBack={onBack} />;
   }
+  return <MIROrderDetail order={order} onBack={onBack} />;
+}
+
+// ── MIR Order Detail ──────────────────────────────────────────────────────────
+
+function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: () => void }) {
   const [order, setOrder]           = useState<Order>(initialOrder);
   const [draft, setDraft]           = useState<AIDraft | null>(initialOrder.ai_draft as AIDraft | null);
   const [analystNote, setAnalystNote] = useState(initialOrder.analyst_note === "Manual Order" ? "" : (initialOrder.analyst_note ?? ""));
@@ -950,6 +958,11 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
   const [genError, setGenError]     = useState<string | null>(null);
   const [regenError, setRegenError] = useState<Partial<Record<SectionKey, string>>>({});
   const [saveMsg, setSaveMsg]       = useState<string | null>(null);
+  // Section-by-section generation progress (see generateDraft)
+  const [genCurrent, setGenCurrent] = useState<MirSectionKey | null>(null);
+  const [genDone, setGenDone]       = useState<Partial<Record<MirSectionKey, boolean>>>({});
+  const [genFailed, setGenFailed]   = useState<Partial<Record<MirSectionKey, string>>>({});
+  const [retrying, setRetrying]     = useState<Partial<Record<MirSectionKey, boolean>>>({});
   const [autoSaved, setAutoSaved]   = useState(false);
 
   // Debounce refs
@@ -1095,27 +1108,76 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
 
   // ── Full draft generation ──────────────────────────────────────────────────
 
+  // Generates one section per request, in MIR_GENERATION_ORDER, so no single
+  // AI response can be truncated. Each call saves its section to the order;
+  // a failed section keeps going and gets its own Retry button.
+  async function generateSectionRequest(key: MirSectionKey): Promise<unknown> {
+    const res  = await fetch("/api/generate-mir-section", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: order.id, sectionKey: key }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Section generation failed");
+    return data.content;
+  }
+
   async function generateDraft() {
     setGenerating(true);
     setGenError(null);
     setEditingSection(null);
+    setGenDone({});
+    setGenFailed({});
+
+    const failures: Partial<Record<MirSectionKey, string>> = {};
+    let succeeded = 0;
     try {
-      const res  = await fetch("/api/generate-draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Generation failed");
-      setDraft(data.draft);
-      // Reset section locks when a full draft is regenerated
-      const resetMeta = defaultMeta();
-      setSectionMeta(resetMeta);
-      persistMeta(resetMeta);
-    } catch (e) {
-      setGenError(e instanceof Error ? e.message : "Unknown error");
+      for (const key of MIR_GENERATION_ORDER) {
+        setGenCurrent(key);
+        try {
+          const content = await generateSectionRequest(key);
+          setDraft(prev => ({ ...(prev ?? {}), [key]: content }) as AIDraft);
+          setGenDone(prev => ({ ...prev, [key]: true }));
+          succeeded++;
+        } catch (e) {
+          failures[key] = e instanceof Error ? e.message : "Failed";
+          setGenFailed(prev => ({ ...prev, [key]: failures[key] }));
+        }
+      }
+
+      if (succeeded > 0) {
+        // Reset section locks when a full draft is regenerated
+        const resetMeta = defaultMeta();
+        setSectionMeta(resetMeta);
+        persistMeta(resetMeta);
+      }
+      const failedKeys = Object.keys(failures) as MirSectionKey[];
+      if (failedKeys.length === MIR_GENERATION_ORDER.length) {
+        setGenError(`Generation failed: ${failures[failedKeys[0]]}`);
+      } else if (failedKeys.length > 0) {
+        setGenError(
+          `${failedKeys.length} section${failedKeys.length > 1 ? "s" : ""} failed: ` +
+          `${failedKeys.map(k => MIR_SECTION_LABELS[k]).join(", ")}. Use Retry on ${failedKeys.length > 1 ? "each" : "it"} below.`
+        );
+      }
     } finally {
       setGenerating(false);
+      setGenCurrent(null);
+    }
+  }
+
+  // Generate (or retry) a single section — used for failed and missing sections
+  async function retrySection(key: MirSectionKey) {
+    setGenFailed(prev => { const n = { ...prev }; delete n[key]; return n; });
+    setRetrying(prev => ({ ...prev, [key]: true }));
+    try {
+      const content = await generateSectionRequest(key);
+      setDraft(prev => ({ ...(prev ?? {}), [key]: content }) as AIDraft);
+      flashAutoSaved(); // API already saved to DB
+    } catch (e) {
+      setGenFailed(prev => ({ ...prev, [key]: e instanceof Error ? e.message : "Retry failed" }));
+    } finally {
+      setRetrying(prev => ({ ...prev, [key]: false }));
     }
   }
 
@@ -1414,6 +1476,12 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
     const isEditing     = editingSection === key;
     const isRegenerating = !!regenerating[key];
     const err           = regenError[key];
+    const mirKey        = key as MirSectionKey;
+    const failedMsg     = genFailed[mirKey];
+    const isRetrying    = !!retrying[mirKey];
+    const raw           = (draft as unknown as Record<string, unknown>)[key];
+    const hasContent    = (raw !== undefined && raw !== null && raw !== "") ||
+                          (key === "business_snapshot" && !!draft.snapshot);
 
     return (
       <div key={key} className="border-t border-gray-100 py-5 first:border-0 first:pt-0">
@@ -1430,7 +1498,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {!meta.locked && !isEditing && (
+            {hasContent && !failedMsg && !isRetrying && !meta.locked && !isEditing && (
               <button onClick={() => startEdit(key)}
                 className="text-xs text-seafoam hover:text-navy border border-seafoam/40 hover:border-navy/40 rounded-full px-3 py-1 transition-colors font-medium">
                 Edit
@@ -1441,7 +1509,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
                 className="text-xs text-gray-400 hover:text-orange-500 transition-colors">
                 Unlock
               </button>
-            ) : (
+            ) : hasContent && !failedMsg && !isRetrying && (
               <button onClick={() => lockSection(key)}
                 className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
                 Lock Section
@@ -1450,8 +1518,29 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
           </div>
         </div>
 
-        {/* AI content or edit textarea */}
-        {isEditing ? (
+        {/* AI content, edit textarea, or generation retry / failure state */}
+        {isRetrying ? (
+          <div className="flex items-center gap-2 text-sm text-gray-400 py-2">
+            <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
+            <span>Generating this section…</span>
+          </div>
+        ) : failedMsg ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-600 mb-3">{failedMsg}</p>
+            <button onClick={() => retrySection(mirKey)}
+              className="inline-flex items-center gap-1.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 font-semibold px-4 py-2 rounded-full transition-colors">
+              ↺ Retry this section
+            </button>
+          </div>
+        ) : !hasContent ? (
+          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+            <p className="text-sm text-gray-500 mb-3">This section hasn&rsquo;t been generated yet.</p>
+            <button onClick={() => retrySection(mirKey)}
+              className="inline-flex items-center gap-1.5 text-xs bg-seafoam text-navy hover:bg-seafoam-dark font-semibold px-4 py-2 rounded-full transition-colors">
+              Generate this section
+            </button>
+          </div>
+        ) : isEditing ? (
           <div>
             <textarea
               rows={key === "snapshot" ? 10 : 16}
@@ -1480,8 +1569,8 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
           renderContent(key, draft)
         )}
 
-        {/* Analyst Notes + Regenerate — hidden when locked */}
-        {!meta.locked && (
+        {/* Analyst Notes + Regenerate — hidden when locked or not yet generated */}
+        {!meta.locked && hasContent && !failedMsg && !isRetrying && (
           <div className="mt-4 pt-3 border-t border-gray-50 space-y-2">
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block">
               Analyst Notes — your thoughts, corrections, or direction for this section
@@ -1584,9 +1673,28 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
         {genError && <p className="text-red-500 text-sm mb-4">{genError}</p>}
 
         {generating && (
-          <div className="flex items-center gap-3 py-8 justify-center text-gray-400">
-            <div className="w-5 h-5 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm">Claude is drafting your report…</span>
+          <div className="py-4 space-y-1.5">
+            {MIR_GENERATION_ORDER.map((key, i) => {
+              const isDone   = !!genDone[key];
+              const isFailed = !!genFailed[key];
+              const isActive = genCurrent === key;
+              return (
+                <div key={key} className="flex items-center gap-2.5">
+                  {isDone   && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                  {isFailed && <span className="text-red-500 text-xs shrink-0">✕</span>}
+                  {isActive && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
+                  {!isDone && !isFailed && !isActive && <span className="text-gray-200 text-xs shrink-0">○</span>}
+                  <span className={`text-sm ${isDone ? "text-gray-500" : isFailed ? "text-red-500" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>
+                    {MIR_SECTION_LABELS[key]}
+                    {isActive && (
+                      <span className="text-xs text-gray-400 ml-2 font-normal">
+                        {i + 1} of {MIR_GENERATION_ORDER.length}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -1599,7 +1707,7 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
         {draft && !generating && (
           <div>
             {/* Old-format warning */}
-            {!Array.isArray(draft.customer_profile) && (
+            {draft.customer_profile != null && !Array.isArray(draft.customer_profile) && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex items-start gap-3">
                 <span className="text-amber-500 text-lg shrink-0">⚠</span>
                 <div>
