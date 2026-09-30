@@ -1290,21 +1290,21 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
     if (key === "competitive_landscape") {
       if (!Array.isArray(d.competitive_landscape)) return <OldFormatFallback text={String(d.competitive_landscape)} />;
       return (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-lg" style={{ border: "1.5px solid #F4EADA" }}>
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-navy text-white">
-                <th className="text-left px-3 py-2 font-semibold text-xs">Competitor</th>
-                <th className="text-left px-3 py-2 font-semibold text-xs">Their Strength</th>
-                <th className="text-left px-3 py-2 font-semibold text-xs text-seafoam">Your Edge</th>
+              <tr style={{ backgroundColor: "#00CED1" }}>
+                {["Competitor", "Their Strength", "Your Edge"].map(h => (
+                  <th key={h} className="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-wide" style={{ color: "#0A2F61" }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {d.competitive_landscape.map((c, i) => (
-                <tr key={i} className={i % 2 === 0 ? "bg-sand" : "bg-white"}>
-                  <td className="px-3 py-2 font-semibold text-navy text-xs border border-gray-100">{c.name}</td>
-                  <td className="px-3 py-2 text-gray-600 text-xs border border-gray-100">{c.strength}</td>
-                  <td className="px-3 py-2 text-teal-700 text-xs border border-gray-100">{c.edge}</td>
+                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#F4EADA" : "#FFFFFF" }}>
+                  <td className="px-3 py-2.5 font-bold text-sm align-middle" style={{ color: "#0A2F61" }}>{c.name}</td>
+                  <td className="px-3 py-2.5 text-gray-700 text-xs leading-relaxed align-top">{c.strength || "—"}</td>
+                  <td className="px-3 py-2.5 text-gray-700 text-xs leading-relaxed align-top">{c.edge || "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -1316,27 +1316,24 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
     if (key === "positioning") {
       if (!d.positioning || !Array.isArray(d.positioning.strengths)) return <OldFormatFallback text={String(d.positioning)} />;
       return (
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Strengths</p>
-            <ul className="space-y-1.5">
-              {d.positioning.strengths.map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <span className="text-seafoam mt-0.5 shrink-0 font-bold">▸</span>{s}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Vulnerabilities</p>
-            <ul className="space-y-1.5">
-              {d.positioning.vulnerabilities.map((v, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <span className="text-orange-400 mt-0.5 shrink-0 font-bold">▸</span>{v}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            { label: "Strengths",       items: d.positioning.strengths,             bg: "#0A2F61", fg: "#FFFFFF", dot: "#0A2F61" },
+            { label: "Vulnerabilities", items: d.positioning.vulnerabilities ?? [], bg: "#00CED1", fg: "#0A2F61", dot: "#00CED1" },
+          ].map(card => (
+            <div key={card.label} className="rounded-lg overflow-hidden flex flex-col" style={{ border: "1.5px solid #F4EADA" }}>
+              <div className="px-3 py-2" style={{ backgroundColor: card.bg }}>
+                <p className="text-xs font-bold uppercase tracking-wide" style={{ color: card.fg }}>{card.label}</p>
+              </div>
+              <ul className="flex-1 px-3 py-2.5 space-y-1.5" style={{ backgroundColor: "#F4EADA" }}>
+                {card.items.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug">
+                    <span className="shrink-0 font-bold" style={{ color: card.dot }}>•</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       );
     }
