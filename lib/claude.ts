@@ -184,17 +184,16 @@ function priorSectionsContext(key: MirSectionKey, draft: Record<string, unknown>
   return `\n\nREPORT SECTIONS ALREADY WRITTEN (stay consistent with these; do not repeat them verbatim):\n\n${body}`;
 }
 
-// One streamed call that must return a JSON value for `key`. Streaming keeps
-// the outbound connection active, which Vercel's network layer otherwise
-// kills on long idle requests (TypeError: fetch failed).
-async function callForSection(key: MirSectionKey, system: string, user: string): Promise<unknown> {
+// One streamed call returning the response text. Streaming keeps the outbound
+// connection active, which Vercel's network layer otherwise kills on long idle
+// requests (TypeError: fetch failed). `label` names the section in errors.
+async function callModel(label: string, system: string, user: string): Promise<string> {
   // Checked here so a missing key returns a clean JSON error instead of
   // crashing the module at load time.
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error("Missing ANTHROPIC_API_KEY environment variable");
   }
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const label  = MIR_SECTION_LABELS[key];
 
   const message = await client.messages.stream({
     model: MODEL,
@@ -210,10 +209,16 @@ async function callForSection(key: MirSectionKey, system: string, user: string):
     throw new Error(`${label}: the model declined to write this section. Retry, or adjust the analyst notes.`);
   }
 
-  const raw = message.content
+  return message.content
     .map(b => (b.type === "text" ? b.text : ""))
     .join("")
     .trim();
+}
+
+// One call that must return a valid JSON value for `key`
+async function callForSection(key: MirSectionKey, system: string, user: string): Promise<unknown> {
+  const label = MIR_SECTION_LABELS[key];
+  const raw   = await callModel(label, system, user);
 
   // Strip any accidental markdown fences
   const cleaned = raw
@@ -286,4 +291,52 @@ ANALYST NOTES:
 ${analystNotes?.trim() || "(no notes — improve and sharpen the existing content)"}`;
 
   return callForSection(key, system, user);
+}
+
+// ── Analyst Note ──────────────────────────────────────────────────────────────
+// A personal note from the analyst that opens the conversation with the
+// client, like a cover letter inside the report. Drafted from the intake and
+// the finished report; the analyst edits it in the dashboard before sending.
+// The PDF adds the signature, so the note has no sign-off.
+
+const ANALYST_NOTE_SYSTEM = `You are John Messina, founder and lead analyst at Sea Glass Insights, a small market research firm. You have just finished a market intelligence report for a client, and you are writing the personal note that closes it. Think of it as the cover letter inside the report.
+
+Write 2 to 3 short paragraphs, in the first person, as John:
+- Refer to the business by name, and you may open by addressing the client by first name.
+- Say what stands out to you about their situation: something specific to this business, not a general observation about small businesses.
+- Share what you found most interesting or surprising while working through their answers and the research. Draw only on the intake answers and the report sections provided; do not invent facts, numbers or conversations.
+- End with a brief, genuine personal closing, such as what you are rooting for or an invitation to reach out with questions.
+
+It should read like something a thoughtful person actually wrote: warm, specific, plain-spoken. Not templated, not salesy, no consulting jargon, no flattery for its own sake. Vary sentence length. No em-dashes. No bullet points, headings or markdown.
+
+Do not sign off with a name, title or "Best regards"; the signature is added below the note automatically. Return only the note text, with paragraphs separated by a blank line.`;
+
+export async function generateAnalystNote(
+  order: Order,
+  draft: Record<string, unknown>,
+): Promise<string> {
+  const sections = MIR_GENERATION_ORDER
+    .filter(k => draft[k] !== undefined && draft[k] !== null)
+    .map(k => `### ${MIR_SECTION_LABELS[k]}\n${JSON.stringify(draft[k], null, 2)}`)
+    .join("\n\n");
+
+  const user = `Client name: ${order.customer_name ?? "(not provided)"}
+Business: ${order.business_name}
+
+Business intake data:
+
+${mirIntake(order)}
+
+THE FINISHED REPORT:
+
+${sections || "(no report sections yet)"}`;
+
+  const note = (await callModel("Analyst Note", ANALYST_NOTE_SYSTEM, user))
+    .replace(/^```\w*\s*|\s*```$/g, "")
+    .trim();
+
+  if (note.length < 200 || note.startsWith("{") || note.startsWith("[")) {
+    throw new Error("Analyst Note: the response was not a usable note. Try again.");
+  }
+  return note;
 }

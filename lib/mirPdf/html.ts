@@ -354,17 +354,17 @@ table { border-collapse: collapse; width: 100%; }
 .insight p { margin: 0; font-size: 13px; line-height: 1.45; }
 
 /* Recommendations */
-.tier { margin-bottom: 16pt; border-radius: 4pt; border: 1pt solid ${CREAM}; }
-.tier-head { display: flex; align-items: baseline; gap: 10pt; padding: 8pt 14pt; font-size: 10pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; border-radius: 4pt 4pt 0 0; }
+.tier { margin-bottom: 10pt; border-radius: 4pt; border: 1pt solid ${CREAM}; }
+.tier-head { display: flex; align-items: baseline; gap: 10pt; padding: 5pt 12pt; font-size: 10pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; border-radius: 4pt 4pt 0 0; }
 .tier-sub { font-size: 8pt; letter-spacing: 1pt; }
 .tier.p1 { border-color: ${NAVY}; } .tier.p1 .tier-head { background: ${NAVY}; color: ${WHITE}; } .tier.p1 .tier-sub { color: ${TEAL}; }
 .tier.p2 { border-color: ${TEAL}; } .tier.p2 .tier-head { background: ${TEAL}; color: ${NAVY}; }
 .tier.p3 { border-color: ${LIGHT_GRAY}; } .tier.p3 .tier-head { background: ${LIGHT_GRAY}; color: ${NAVY}; } .tier.p3 .tier-sub { color: ${GRAY}; }
-.rec { padding: 11pt 14pt; background: ${WHITE}; }
+.rec { padding: 7pt 12pt; background: ${WHITE}; }
 .rec + .rec, .keep + .rec { border-top: 1pt solid ${CREAM}; }
-.rec h3 { font-size: 12pt; color: ${NAVY}; margin: 0 0 4pt; }
+.rec h3 { font-size: 12pt; line-height: 1.3; color: ${NAVY}; margin: 0 0 3pt; }
 .rec-num { color: ${TEAL}; }
-.rec p { margin: 0; }
+.rec p { margin: 0; font-size: 13px; line-height: 1.45; }
 
 /* Analyst Note */
 .note p { font-style: italic; font-size: 12pt; line-height: 1.6; color: ${INK}; margin-bottom: 12pt; }

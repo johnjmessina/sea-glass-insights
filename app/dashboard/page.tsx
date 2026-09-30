@@ -963,6 +963,11 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
   const [genDone, setGenDone]       = useState<Partial<Record<MirSectionKey, boolean>>>({});
   const [genFailed, setGenFailed]   = useState<Partial<Record<MirSectionKey, string>>>({});
   const [retrying, setRetrying]     = useState<Partial<Record<MirSectionKey, boolean>>>({});
+  // AI-drafted Analyst Note: last step of generateDraft, or the "Draft with AI" button
+  type NoteStep = "idle" | "active" | "done" | "kept" | "failed";
+  const [noteStep, setNoteStep]     = useState<NoteStep>("idle");
+  const [draftingNote, setDraftingNote] = useState(false);
+  const [noteError, setNoteError]   = useState<string | null>(null);
   const [autoSaved, setAutoSaved]   = useState(false);
 
   // Debounce refs
@@ -1122,8 +1127,45 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
     return data.content;
   }
 
+  // Drafts the Analyst Note. With replace=false the server keeps any note
+  // already saved, and the local box is only filled if it is still empty.
+  async function draftAnalystNote(replace: boolean): Promise<"done" | "kept"> {
+    const res  = await fetch("/api/generate-analyst-note", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: order.id, replace }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Analyst Note generation failed");
+    if (!data.saved) return "kept";
+    if (replace) {
+      if (noteSaveTimer.current) clearTimeout(noteSaveTimer.current); // don't let a pending autosave overwrite it
+      setAnalystNote(data.note);
+    } else {
+      setAnalystNote(prev => (prev.trim() ? prev : data.note));
+    }
+    flashAutoSaved(); // API already saved to DB
+    return "done";
+  }
+
+  async function onDraftNoteClick() {
+    const replace = !!analystNote.trim();
+    if (replace && !window.confirm("Replace your current Analyst Note with a new AI draft?")) return;
+    setDraftingNote(true);
+    setNoteError(null);
+    try {
+      await draftAnalystNote(replace);
+    } catch (e) {
+      setNoteError(e instanceof Error ? e.message : "Analyst Note generation failed");
+    } finally {
+      setDraftingNote(false);
+    }
+  }
+
   async function generateDraft() {
     setGenerating(true);
+    setNoteStep("idle");
+    setNoteError(null);
     setGenError(null);
     setEditingSection(null);
     setGenDone({});
@@ -1142,6 +1184,22 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
         } catch (e) {
           failures[key] = e instanceof Error ? e.message : "Failed";
           setGenFailed(prev => ({ ...prev, [key]: failures[key] }));
+        }
+      }
+
+      // Last step: draft the Analyst Note, only if the analyst hasn't written one
+      if (succeeded > 0) {
+        if (analystNote.trim()) {
+          setNoteStep("kept");
+        } else {
+          setGenCurrent(null);
+          setNoteStep("active");
+          try {
+            setNoteStep(await draftAnalystNote(false));
+          } catch (e) {
+            setNoteStep("failed");
+            setNoteError(e instanceof Error ? e.message : "Analyst Note generation failed");
+          }
         }
       }
 
@@ -1695,6 +1753,16 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
                 </div>
               );
             })}
+            {noteStep !== "idle" && (
+              <div className="flex items-center gap-2.5">
+                {noteStep === "active" && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
+                {(noteStep === "done" || noteStep === "kept") && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                {noteStep === "failed" && <span className="text-red-500 text-xs shrink-0">✕</span>}
+                <span className={`text-sm ${noteStep === "active" ? "text-navy font-medium" : noteStep === "failed" ? "text-red-500" : "text-gray-500"}`}>
+                  Analyst Note{noteStep === "kept" && <span className="text-xs text-gray-400 ml-2">kept your note</span>}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -1730,11 +1798,26 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
                   A Note from the Analyst
                 </h4>
               </div>
-              <p className="text-xs text-gray-400 ml-3 mb-3 leading-relaxed">
-                Write one warm, personal closing paragraph in your own voice. This appears at the end of the PDF report. Auto-saved as you type.
-              </p>
+              <div className="flex items-start justify-between gap-3 ml-3 mb-3">
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  A personal note to the client, like a cover letter inside the report. Generate Draft writes a first version here if the box is empty; edit it to make it yours. Appears at the end of the PDF. Auto-saved as you type.
+                </p>
+                <button
+                  onClick={onDraftNoteClick}
+                  disabled={draftingNote || generating}
+                  className="shrink-0 inline-flex items-center gap-1.5 text-xs border border-seagreen/50 text-navy hover:bg-seagreen/10 font-semibold px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {draftingNote ? (
+                    <>
+                      <span className="w-3 h-3 border-2 border-navy border-t-transparent rounded-full animate-spin" />
+                      Drafting…
+                    </>
+                  ) : analystNote.trim() ? "Redraft with AI" : "Draft with AI"}
+                </button>
+              </div>
+              {noteError && <p className="text-red-500 text-xs ml-3 mb-2">{noteError}</p>}
               <textarea
-                rows={5}
+                rows={10}
                 placeholder={`e.g. "Working through your intake responses, what struck me most was the clarity of your instincts — you already know what makes you different…"`}
                 value={analystNote}
                 onChange={e => { setAnalystNote(e.target.value); scheduleNoteSave(e.target.value); }}
