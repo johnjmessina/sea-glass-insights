@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabase } from "@/lib/supabase";
-import { generateReport } from "@/lib/reportGenerator";
+import { renderMirReportPdf } from "@/lib/mirPdf/render";
 import type { Order } from "@/lib/supabase";
 import { missingMirSections, MIR_SECTION_LABELS } from "@/lib/mirSections";
+
+// Chromium cold start plus two render passes, then the email send
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,15 +44,11 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
 
-    // 2. Generate .docx
-    const docxBuffer = await generateReport(
-      order,
-      order.ai_draft,
-      order.analyst_note ?? "",
-    );
+    // 2. Generate the PDF
+    const pdfBuffer = await renderMirReportPdf(order, order.ai_draft, order.analyst_note ?? "");
 
     const businessName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    const filename     = `SeaGlassInsights-${businessName}-Report.docx`;
+    const filename     = `SeaGlassInsights-${businessName}-Report.pdf`;
 
     // 3. Send email with attachment
     const { error: emailError } = await resend.emails.send({
@@ -57,7 +56,7 @@ export async function POST(req: NextRequest) {
       to:          order.email,
       subject:     `Your Market Intelligence Report is Ready — ${order.business_name}`,
       html:        buildEmailHtml(order),
-      attachments: [{ filename, content: docxBuffer }],
+      attachments: [{ filename, content: pdfBuffer }],
     });
 
     if (emailError) throw new Error(emailError.message);
@@ -133,8 +132,7 @@ function buildEmailHtml(order: Order): string {
             <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
               Your Sea Glass Insights market intelligence report for
               <strong style="color:#0A2F61;">${order.business_name}</strong> is attached
-              to this email as a Word document (<code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:13px;">.docx</code>).
-              Open it in Microsoft Word, Google Docs, or Pages.
+              to this email as a PDF. It opens in any PDF viewer or web browser.
             </p>
             <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.7;">
               Here&rsquo;s what&rsquo;s inside:

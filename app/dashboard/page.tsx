@@ -1223,7 +1223,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-Report.docx`;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-Report.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
@@ -1423,7 +1423,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
     if (key === "recommendations") {
       if (!Array.isArray(d.recommendations)) return <OldFormatFallback text={String(d.recommendations)} />;
       const recs: Recommendation[] = d.recommendations;
-      // Same fallback as lib/reportGenerator.js recTier(): drafts made before
+      // Same fallback as lib/mirPdf/html.ts recTier(): drafts made before
       // `priority` existed are tiered by list order (4 items → 1, 1, 2, 3).
       const tierOf = (r: Recommendation, i: number) =>
         r.priority === 1 || r.priority === 2 || r.priority === 3
@@ -1731,7 +1731,7 @@ function MIROrderDetail({ order: initialOrder, onBack }: { order: Order; onBack:
                 </h4>
               </div>
               <p className="text-xs text-gray-400 ml-3 mb-3 leading-relaxed">
-                Write one warm, personal closing paragraph in your own voice. This appears at the end of the Word document. Auto-saved as you type.
+                Write one warm, personal closing paragraph in your own voice. This appears at the end of the PDF report. Auto-saved as you type.
               </p>
               <textarea
                 rows={5}

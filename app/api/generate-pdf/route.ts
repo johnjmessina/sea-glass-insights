@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateReport } from "@/lib/reportGenerator";
+import { renderMirReportPdf } from "@/lib/mirPdf/render";
 import { missingMirSections, MIR_SECTION_LABELS } from "@/lib/mirSections";
+
+// Chromium cold start plus two render passes; well under this in practice
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,22 +46,17 @@ export async function POST(req: NextRequest) {
     // Use note passed from dashboard (reflects unsaved edits); fall back to stored value
     const analystNote = passedNote ?? order.analyst_note ?? "";
 
-    const docxBuffer = await generateReport(
-      order,
-      order.ai_draft,
-      analystNote,
-    );
+    const pdfBuffer = await renderMirReportPdf(order, order.ai_draft, analystNote);
 
     const businessName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    const filename = `SeaGlassInsights-${businessName}-Report.docx`;
+    const filename = `SeaGlassInsights-${businessName}-Report.pdf`;
 
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Type":        "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length":      String(docxBuffer.length),
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
