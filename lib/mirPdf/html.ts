@@ -118,14 +118,39 @@ function executiveSummary(es: unknown): string {
     </div>`;
 }
 
+// "4 years" → "4" for the years tile; anything not in years ("8 months",
+// "Just opened") is shown as-is under a TIME IN BUSINESS label instead.
+function yearsTile(v: unknown): { value: string; label: string } {
+  const t = String(v ?? "").trim();
+  const m = /^(?:about |around |over |nearly |almost )?(\d+(?:\.\d+)?)\+?\s*(?:years?|yrs?)\b/i.exec(t);
+  return m ? { value: m[1], label: "Years in Business" } : { value: t || "—", label: "Time in Business" };
+}
+
+// Short business type for the stat tile: the first clause of the AI's
+// description ("Surf shop and beach lifestyle retail…" → "Surf shop").
+function shortType(v: unknown): string {
+  const t = String(v ?? "").trim();
+  const first = t.split(/,|;|\s+(?:and|with|offering|that|which|specializing)\s+|\s+[-–—]\s+/i)[0].trim();
+  const out = first.length >= 3 ? first : t;
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+// Stat values are 26px, stepping down so long values stay inside a tile
+function statSize(v: string): string {
+  return v.length <= 12 ? "" : v.length <= 20 ? " mid" : " small";
+}
+
 function businessSnapshot(bs: unknown, legacy: unknown): string {
   const b = obj(bs);
   if (!Object.keys(b).length) return paragraphs(legacy);           // legacy drafts
-  const rows: [string, unknown][] = [
-    ["Business Name",      b.business_name],
-    ["Location",           b.location],
-    ["Time in Business",   b.time_in_business],
-    ["Business Type",      b.business_type],
+
+  const years = yearsTile(b.time_in_business);
+  const stats: { value: string; label: string }[] = [
+    years,
+    { value: shortType(b.business_type) || "—", label: "Business Type" },
+    { value: String(b.location ?? "").trim() || "—", label: "Location" },
+  ];
+  const details: [string, unknown][] = [
     ["Primary Offering",   b.primary_offering],
     ["Target Customer",    b.target_customer],
     ["Top Competitors",    list(b.top_competitors)],
@@ -133,8 +158,24 @@ function businessSnapshot(bs: unknown, legacy: unknown): string {
     ["Key Challenge",      b.key_challenge],
     ["Success Goal",       b.success_goal],
   ];
-  return `<table class="snapshot">${rows.map(([l, v]) =>
-    `<tr><th>${esc(l)}</th><td>${text(v) || "&mdash;"}</td></tr>`).join("")}</table>`;
+
+  return `
+    <div class="snap-banner">
+      <div class="snap-name">${text(b.business_name)}</div>
+      ${b.location ? `<div class="snap-location">${text(b.location)}</div>` : ""}
+    </div>
+    <div class="snap-stats">${stats.map(st => `
+      <div class="snap-stat">
+        <div class="snap-stat-value${statSize(st.value)}">${text(st.value)}</div>
+        <div class="snap-stat-label">${esc(st.label)}</div>
+      </div>`).join("")}
+    </div>
+    <div class="snap-details">${details.map(([l, v]) => `
+      <div class="snap-card">
+        <div class="snap-card-label">${esc(l)}</div>
+        <p>${text(v) || "&mdash;"}</p>
+      </div>`).join("")}
+    </div>`;
 }
 
 function customerProfile(segs: unknown): string {
@@ -313,11 +354,23 @@ section.contents { page: contents; }
 .callout-label { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 6pt; }
 .callout.navy .callout-label { color: ${TEAL}; }
 
-/* Business Snapshot */
 table { border-collapse: collapse; width: 100%; }
-.snapshot th, .snapshot td { border: 1pt solid ${CREAM}; padding: 8pt 10pt; vertical-align: top; text-align: left; }
-.snapshot th { width: 32%; background: ${CREAM}; color: ${NAVY}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; }
-.snapshot td { background: ${WHITE}; }
+
+/* Business Snapshot — profile card: banner, stat tiles, detail cards.
+   Card shadows use no blur: blurred shadows print as flat gray bands. */
+.snap-banner { background: ${NAVY}; min-height: 80px; padding: 16px 22px; border-radius: 4pt; display: flex; flex-direction: column; justify-content: center; }
+.snap-name { color: ${WHITE}; font-size: 32px; font-weight: 700; line-height: 1.15; }
+.snap-location { color: ${TEAL}; font-size: 15px; margin-top: 4px; }
+.snap-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+.snap-stat { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-top: 3px solid ${TEAL}; border-radius: 4pt; padding: 12px 14px; }
+.snap-stat-value { color: ${NAVY}; font-size: 26px; font-weight: 700; line-height: 1.15; }
+.snap-stat-value.mid { font-size: 20px; }
+.snap-stat-value.small { font-size: 16px; }
+.snap-stat-label { color: ${GRAY}; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
+.snap-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.snap-card { background: ${WHITE}; border: 1px solid ${ROW_TINT}; border-radius: 4pt; padding: 12px 14px; box-shadow: 0 2px 0 rgba(10, 47, 97, 0.07); break-inside: avoid; }
+.snap-card-label { color: ${NAVY}; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+.snap-card p { margin: 0; color: #374151; font-size: 13px; line-height: 1.45; }
 
 /* Customer Profile */
 .segments { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
