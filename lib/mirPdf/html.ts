@@ -149,7 +149,7 @@ function customerProfile(segs: unknown): string {
 
 function competitiveLandscape(comps: unknown): string {
   return `<table class="compare">
-    <thead><tr><th>Competitor</th><th>Their Strength</th><th>Your Edge</th></tr></thead>
+    <thead><tr><th>Competitor</th><th>Their Strength</th><th class="edge">Your Edge</th></tr></thead>
     <tbody>${arr(comps).map(c => {
       const x = obj(c);
       return `<tr><th scope="row">${text(x.name)}</th><td>${text(x.strength) || "&mdash;"}</td><td>${text(x.edge) || "&mdash;"}</td></tr>`;
@@ -327,19 +327,23 @@ table { border-collapse: collapse; width: 100%; }
 
 /* Competitive Landscape */
 .compare thead { display: table-header-group; }
-.compare thead th { background: ${TEAL}; color: ${NAVY}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; text-align: left; padding: 8pt 10pt; }
+.compare thead th.edge { border-bottom: 3pt solid ${TEAL}; }
+.compare thead th { background: ${NAVY}; color: ${WHITE}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; text-align: left; padding: 8pt 10pt; }
 .compare tbody th { background: ${NAVY}; color: ${WHITE}; text-align: left; width: 24%; }
 .compare tbody td, .compare tbody th { padding: 10pt; vertical-align: top; font-size: 11pt; }
 .compare tbody tr:nth-child(odd) td { background: ${CREAM}; }
 .compare tbody tr:nth-child(even) td { background: ${WHITE}; }
-.compare tbody tr + tr th { border-top: 1pt solid rgba(255,255,255,0.25); }
+.compare tbody th { border-top: 1pt solid rgba(255,255,255,0.25); }
 
 /* Market Positioning */
 .positioning { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; align-items: stretch; }
 .pos-card { border-radius: 4pt; overflow: hidden; background: ${CREAM}; }
 .pos-head { padding: 9pt 14pt; font-size: 9pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; }
 .pos-card.navy .pos-head { background: ${NAVY}; color: ${WHITE}; }
-.pos-card.teal .pos-head { background: ${TEAL}; color: ${NAVY}; }
+/* Equal 3pt top borders keep both headers level; only the teal one shows */
+.pos-card.navy { border-top: 3pt solid ${NAVY}; }
+.pos-card.teal { border-top: 3pt solid ${TEAL}; }
+.pos-card.teal .pos-head { background: ${NAVY}; color: ${WHITE}; }
 .pos-card ul { margin: 0; padding: 12pt 14pt 12pt 28pt; }
 .pos-card li { font-size: 13px; margin-bottom: 6px; }
 .pos-card.navy li::marker { color: ${NAVY}; }
