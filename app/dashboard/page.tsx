@@ -1341,23 +1341,67 @@ function OrderDetail({ order: initialOrder, onBack }: { order: Order; onBack: ()
       );
     }
 
-    if (key === "insights" || key === "recommendations") {
-      const items = key === "insights" ? d.insights : d.recommendations;
-      if (!Array.isArray(items)) return <OldFormatFallback text={String(items)} />;
+    if (key === "insights") {
+      if (!Array.isArray(d.insights)) return <OldFormatFallback text={String(d.insights)} />;
+      const insights: Insight[] = d.insights;
       return (
-        <div className="space-y-3">
-          {(items as Array<Insight | Recommendation>).map((item, i) => (
-            <div key={i} className="flex gap-3">
-              <div className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
-                style={{ backgroundColor: key === "insights" ? "#0A2F61" : "#00CED1" }}>
-                {i + 1}
-              </div>
-              <div>
-                <p className="font-semibold text-navy text-sm">{item.title}</p>
-                <p className="text-sm text-gray-600 mt-0.5 leading-relaxed">{item.body}</p>
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {insights.map((ins, i) => (
+            <div key={i}
+              className={`rounded-lg bg-white px-3 py-2.5${insights.length % 2 === 1 && i === insights.length - 1 ? " sm:col-span-2" : ""}`}
+              style={{ border: "1.5px solid #F4EADA", borderLeft: "4px solid #00CED1" }}>
+              <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "#00CED1" }}>
+                Insight {String(i + 1).padStart(2, "0")}
+              </p>
+              <p className="text-sm font-semibold leading-snug mt-0.5" style={{ color: "#0A2F61" }}>{ins.title}</p>
+              <p className="text-sm text-gray-700 leading-relaxed mt-1">{ins.body}</p>
             </div>
           ))}
+        </div>
+      );
+    }
+
+    if (key === "recommendations") {
+      if (!Array.isArray(d.recommendations)) return <OldFormatFallback text={String(d.recommendations)} />;
+      const recs: Recommendation[] = d.recommendations;
+      // Same fallback as lib/reportGenerator.js recTier(): drafts made before
+      // `priority` existed are tiered by list order (4 items → 1, 1, 2, 3).
+      const tierOf = (r: Recommendation, i: number) =>
+        r.priority === 1 || r.priority === 2 || r.priority === 3
+          ? r.priority
+          : Math.min(3, 1 + Math.floor((i * 3) / recs.length));
+      const TIERS = [
+        { tier: 1, sub: "Do first",   bg: "#0A2F61", fg: "#FFFFFF", subFg: "#00CED1", edge: "#0A2F61" },
+        { tier: 2, sub: "Do next",    bg: "#00CED1", fg: "#0A2F61", subFg: "#0A2F61", edge: "#00CED1" },
+        { tier: 3, sub: "When ready", bg: "#F4EADA", fg: "#0A2F61", subFg: "#6B7280", edge: "#F4EADA" },
+      ];
+      let num = 0;
+      return (
+        <div className="space-y-3">
+          {TIERS.map(t => {
+            const items = recs.filter((r, i) => tierOf(r, i) === t.tier);
+            if (items.length === 0) return null;
+            return (
+              <div key={t.tier} className="rounded-lg overflow-hidden bg-white" style={{ border: `1.5px solid ${t.edge}` }}>
+                <div className="px-3 py-2 flex items-baseline gap-2" style={{ backgroundColor: t.bg }}>
+                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: t.fg }}>Priority {t.tier}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: t.subFg }}>{t.sub}</span>
+                </div>
+                {items.map((r, ri) => {
+                  num += 1;
+                  return (
+                    <div key={ri} className="grid grid-cols-1 sm:grid-cols-[2fr_3fr] gap-x-4 gap-y-1 px-3 py-2.5"
+                      style={ri > 0 ? { borderTop: "1px solid #F4EADA" } : undefined}>
+                      <p className="text-sm font-semibold leading-snug" style={{ color: "#0A2F61" }}>
+                        <span style={{ color: "#00CED1" }}>{num}.</span> {r.title}
+                      </p>
+                      <p className="text-sm text-gray-700 leading-relaxed">{r.body}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       );
     }

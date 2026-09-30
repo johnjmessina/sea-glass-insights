@@ -23,7 +23,8 @@ const MIR_FORMAT: Record<string, string> = {
   insights: `Return a JSON array of 4-5 items only — no other text. Each element must be exactly:
 {"title":"5-8 word insight title","body":"2-3 sentences unpacking this insight"}`,
   recommendations: `Return a JSON array of exactly 4 items only — no other text. Each element must be exactly:
-{"title":"5-8 word action-oriented title","body":"2-3 sentences explaining the recommendation"}`,
+{"title":"5-8 word action-oriented title","body":"2-3 sentences explaining the recommendation","priority":1}
+Order items by impact. priority is 1 (do first: highest impact for the effort), 2 (do next) or 3 (longer-term). Use at least one priority 1 and no more than two.`,
 };
 
 export async function POST(req: NextRequest) {

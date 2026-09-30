@@ -102,7 +102,8 @@ Return ONLY a valid JSON object with EXACTLY this structure. No markdown. No cod
   "recommendations": [
     {
       "title": "Action title (5-8 words)",
-      "body": "2-3 sentences on the action and why it matters now."
+      "body": "2-3 sentences on the action and why it matters now.",
+      "priority": 1
     }
   ]
 }
@@ -113,7 +114,7 @@ Requirements:
 - positioning.strengths: 4-5 items
 - positioning.vulnerabilities: 3-4 items
 - insights: 4-5 items
-- recommendations: 4 items
+- recommendations: 4 items, ordered by impact. Each has a priority of 1 (do first: highest impact for the effort), 2 (do next) or 3 (longer-term). Use at least one priority 1 and no more than two.
 
 Tone: warm, credible, direct. No corporate jargon. No em-dashes. Write like a smart person, not a consulting firm.`;
 

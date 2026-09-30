@@ -100,6 +100,7 @@ export interface Insight {
 export interface Recommendation {
   title: string;  // 5-8 word action title
   body:  string;  // 2-3 sentence explanation
+  priority?: 1 | 2 | 3;  // 1 = do first; absent on drafts made before tiers existed
 }
 
 // ── BusinessSnapshot — structured MIR section (post-restructure) ──────────────
