@@ -170,14 +170,16 @@ function positioning(pos: unknown): string {
   </div>`;
 }
 
+// 2-column grid like Customer Profile; an odd final insight spans full width
 function insights(ins: unknown): string {
-  return arr(ins).map((i, n) => {
+  const all = arr(ins);
+  return `<div class="insights">${all.map((i, n) => {
     const x = obj(i);
-    return `<div class="card insight">
-      <div class="insight-num">${String(n + 1).padStart(2, "0")}</div>
-      <div><h3>${text(x.title)}</h3><p>${text(x.body)}</p></div>
+    const span = all.length % 2 === 1 && n === all.length - 1 ? " span" : "";
+    return `<div class="card insight${span}">
+      <h3><span class="insight-num">${String(n + 1).padStart(2, "0")}</span>${text(x.title)}</h3><p>${text(x.body)}</p>
     </div>`;
-  }).join("");
+  }).join("")}</div>`;
 }
 
 function recommendations(recs: unknown): string {
@@ -339,15 +341,17 @@ table { border-collapse: collapse; width: 100%; }
 .pos-card.navy .pos-head { background: ${NAVY}; color: ${WHITE}; }
 .pos-card.teal .pos-head { background: ${TEAL}; color: ${NAVY}; }
 .pos-card ul { margin: 0; padding: 12pt 14pt 12pt 28pt; }
-.pos-card li { margin-bottom: 7pt; }
+.pos-card li { font-size: 13px; margin-bottom: 6px; }
 .pos-card.navy li::marker { color: ${NAVY}; }
 .pos-card.teal li::marker { color: ${TEAL}; }
 
 /* Key Insights */
-.insight { display: flex; gap: 14pt; border-left: 4pt solid ${TEAL}; margin-bottom: 12pt; }
-.insight-num { font-size: 18pt; font-weight: 700; color: ${TEAL}; line-height: 1.1; min-width: 28pt; }
-.insight h3 { font-size: 12.5pt; color: ${NAVY}; margin: 0 0 5pt; }
-.insight p { margin: 0; }
+.insights { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
+.insight { border-left: 4pt solid ${TEAL}; padding: 10pt 12pt; }
+.insight.span { grid-column: 1 / -1; }
+.insight-num { color: ${TEAL}; margin-right: 6pt; }
+.insight h3 { font-size: 12pt; line-height: 1.3; color: ${NAVY}; margin: 0 0 5pt; }
+.insight p { margin: 0; font-size: 13px; line-height: 1.45; }
 
 /* Recommendations */
 .tier { margin-bottom: 16pt; border-radius: 4pt; border: 1pt solid ${CREAM}; }
