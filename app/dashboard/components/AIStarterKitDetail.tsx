@@ -234,7 +234,7 @@ export default function AIStarterKitDetail({ order: initialOrder, onBack }: Prop
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-AIStarterKit.docx`;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-AIStarterKit.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
@@ -635,7 +635,7 @@ export default function AIStarterKitDetail({ order: initialOrder, onBack }: Prop
             </button>
             <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
               className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-              {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+              {downloadingDocx ? "Building Report…" : "⬇ Download PDF Report"}
             </button>
             {!allLocked && (
               <p className="text-xs text-amber-600 font-medium">

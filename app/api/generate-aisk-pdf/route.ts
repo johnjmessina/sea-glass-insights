@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateAISKReport } from "@/lib/aiskReportGenerator";
+import { renderAiskReportPdf } from "@/lib/aiskPdf/render";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,22 +31,22 @@ export async function POST(req: NextRequest) {
     const finalDraft = passedDraft ?? (order.ai_draft as Record<string, string>) ?? {};
     const finalNote  = passedNote  ?? order.analyst_note ?? "";
 
-    const docxBuffer: Buffer = await generateAISKReport(order, finalDraft, finalNote);
+    const pdfBuffer = await renderAiskReportPdf(order, finalDraft, finalNote);
 
     const safeName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-AIStarterKit.docx"`,
-        "Content-Length":      String(docxBuffer.length),
+        "Content-Type":        "application/pdf",
+        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-AIStarterKit.pdf"`,
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
-    console.error("AISK docx generation error:", err);
+    console.error("AISK PDF generation error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Report generation failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
