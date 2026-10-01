@@ -639,7 +639,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-VoiceOfCustomerReport.docx`;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-VoiceOfCustomerReport.pdf`;
       a.click(); URL.revokeObjectURL(url);
     } catch (e) { alert(e instanceof Error ? e.message : "Failed"); }
     finally { setDlDocx(false); }
@@ -1041,7 +1041,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
               </button>
               <button onClick={downloadDocx} disabled={!allLocked || dlDocx}
                 className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-                {dlDocx ? "Building…" : "⬇ Save as Word Document"}
+                {dlDocx ? "Building…" : "⬇ Download PDF Report"}
               </button>
               {!allLocked && hasDraft && (
                 <p className="text-xs text-amber-600 font-medium">

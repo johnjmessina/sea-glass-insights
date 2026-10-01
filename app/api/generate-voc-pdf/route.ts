@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateVOCReport } from "@/lib/vocReportGenerator";
+import { renderVocReportPdf } from "@/lib/vocPdf/render";
 import type { VocQuantData, VocQuestion } from "@/lib/vocTypes";
 
 export async function POST(req: NextRequest) {
@@ -33,17 +33,29 @@ export async function POST(req: NextRequest) {
     const finalQMap         = passedQMap         ?? (sd.voc_question_map as VocQuestion[])  ?? [];
     const finalQuant        = passedQuant        ?? (sd.voc_quant_data   as VocQuantData | undefined);
 
-    const docxBuffer: Buffer = await generateVOCReport(
-      order, finalDraft, finalNote, finalPerspectives, finalQMap, finalQuant
+    const pdfBuffer = await renderVocReportPdf(
+      {
+        business_name: order.business_name,
+        customer_name: order.customer_name ?? null,
+        location:      (order as Record<string, unknown>).location as string ?? null,
+        created_at:    order.created_at,
+      },
+      {
+        aiDraft:             finalDraft,
+        analystNote:         finalNote,
+        analystPerspectives: finalPerspectives,
+        questionMap:         finalQMap,
+        quantData:           finalQuant,
+      },
     );
 
     const safeName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type":        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-VoiceOfCustomerReport.docx"`,
-        "Content-Length":      String(docxBuffer.length),
+        "Content-Type":        "application/pdf",
+        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-VoiceOfCustomerReport.pdf"`,
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
