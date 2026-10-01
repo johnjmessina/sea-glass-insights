@@ -158,7 +158,7 @@ function businessSnapshot(bs: unknown, legacy: unknown): string {
     { label: "Business Stage",    value: stageValue(b.business_stage) },
   ].filter(st => st.value);
 
-  const details: [string, unknown][] = [
+  const details = ([
     ["Primary Offering",   b.primary_offering],
     ["Target Customer",    b.target_customer],
     ["Top Competitors",    list(b.top_competitors)],
@@ -166,7 +166,7 @@ function businessSnapshot(bs: unknown, legacy: unknown): string {
     ["Key Challenge",      b.key_challenge],
     ["Success Goal",       b.success_goal],
     ["Decision Focus",     b.decision_focus],
-  ].filter(([, v]) => v);
+  ] as [string, unknown][]).filter(([, v]) => v);
 
   return `
     <div class="snap-banner">
