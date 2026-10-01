@@ -244,7 +244,7 @@ function quantSectionContent(
   const scaleTbls  = scaleQs.map(q => scaleTable(q, quantData?.questionStats?.[q.id]!)).filter(Boolean);
   const freqTbls   = mcQs.map(q => freqTable(q, quantData?.questionStats?.[q.id]!)).filter(Boolean);
   const bannerTbls = quantData?.bannerCuts
-    ? Object.entries(quantData.bannerCuts).map(([svId, cuts]) => bannerTable(svId, cuts as Record<string, Record<string, VocQuantData["questionStats"][string]>>, questionMap)).filter(Boolean)
+    ? Object.entries(quantData.bannerCuts).map(([svId, cuts]) => bannerTable(svId, cuts as unknown as Record<string, Record<string, VocQuantData["questionStats"][string]>>, questionMap)).filter(Boolean)
     : [];
   const hasQuant = quantData && (scaleTbls.length + freqTbls.length + bannerTbls.length) > 0;
 
