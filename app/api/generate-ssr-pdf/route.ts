@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateSSRReport } from "@/lib/ssrReportGenerator";
+import { renderSsrReportPdf } from "@/lib/ssrPdf/render";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,27 +34,27 @@ export async function POST(req: NextRequest) {
     const finalNote         = passedNote         ?? order.analyst_note ?? "";
     const finalPerspectives = passedPerspectives ?? {};
 
-    const docxBuffer: Buffer = await generateSSRReport(
+    const pdfBuffer = await renderSsrReportPdf(
       order,
       finalDraft,
       finalNote,
-      finalPerspectives
+      finalPerspectives,
     );
 
     const safeName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-SyntheticSurveyReport.docx"`,
-        "Content-Length":      String(docxBuffer.length),
+        "Content-Type":        "application/pdf",
+        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-SyntheticSurveyReport.pdf"`,
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
-    console.error("SSR generation error:", err);
+    console.error("SSR PDF generation error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Report generation failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
