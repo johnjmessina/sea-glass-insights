@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { generateSSReport } = require("@/lib/ssReportGenerator");
+import { renderSsReportPdf } from "@/lib/ssPdf/render";
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,29 +45,26 @@ export async function POST(req: NextRequest) {
 
     // Merge current in-memory state (not yet auto-saved) over whatever is in Supabase
     const storedSD = (order.service_data as Record<string, unknown>) ?? {};
+
     const reportData = {
-      ...order,
-      service_data: {
-        ...storedSD,
-        ss_visit_overview: passedVO  ?? storedSD.ss_visit_overview ?? {},
-        ss_scorecard:      passedSC  ?? storedSD.ss_scorecard      ?? {},
-        ss_analyst_obs:    passedObs ?? storedSD.ss_analyst_obs    ?? {},
-        ss_summary_analyst_note: passedSummaryNote ?? "",
-      },
-      ai_draft: passedDraft ?? (order.ai_draft as Record<string, string> | null) ?? {},
+      visitOV:            passedVO  ?? (storedSD.ss_visit_overview as Record<string, unknown>) ?? {},
+      scorecard:          passedSC  ?? (storedSD.ss_scorecard as Record<string, boolean | number>) ?? {},
+      analystObs:         passedObs ?? (storedSD.ss_analyst_obs as Record<string, unknown>) ?? {},
+      aiDraft:            passedDraft ?? (order.ai_draft as Record<string, unknown>) ?? {},
+      summaryAnalystNote: passedSummaryNote ?? "",
     };
-    const docxBuffer: Buffer = await generateSSReport(reportData, analystNote);
+
+    const pdfBuffer = await renderSsReportPdf(order, reportData, analystNote);
 
     const businessName = (order.business_name as string).replace(/[^a-zA-Z0-9]/g, "");
-    const filename = `SeaGlassInsights-${businessName}-SecretShopping.docx`;
+    const filename = `SeaGlassInsights-${businessName}-SecretShopping.pdf`;
 
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Type":        "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length": String(docxBuffer.length),
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
