@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sample-pdfs": "BASE_URL=https://sea-glass-insights.vercel.app tsx scripts/generate-sample-pdfs.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
