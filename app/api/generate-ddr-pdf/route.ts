@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateDDRReport } from "@/lib/ddrReportGenerator";
+import { renderDdrReportPdf } from "@/lib/ddrPdf/render";
+
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +14,7 @@ export async function POST(req: NextRequest) {
     } = await req.json() as {
       orderId: string;
       analystNote?: string;
-      aiDraft?: Record<string, string>;
+      aiDraft?: Record<string, unknown>;
       analystPerspectives?: Record<string, string>;
     };
 
@@ -30,28 +32,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const finalDraft       = passedDraft        ?? (order.ai_draft as Record<string, string>) ?? {};
-    const finalNote        = passedNote         ?? order.analyst_note ?? "";
+    const finalDraft        = passedDraft        ?? (order.ai_draft as Record<string, unknown>) ?? {};
+    const finalNote         = passedNote         ?? order.analyst_note ?? "";
     const finalPerspectives = passedPerspectives ?? {};
 
-    const docxBuffer: Buffer = await generateDDRReport(
-      order,
+    const pdfBuffer = await renderDdrReportPdf(
+      {
+        business_name:  order.business_name,
+        customer_name:  order.customer_name ?? null,
+        location:       order.location      ?? null,
+        created_at:     order.created_at,
+      },
       finalDraft,
       finalNote,
-      finalPerspectives
+      finalPerspectives,
     );
 
     const safeName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-DeepDiveReport.docx"`,
-        "Content-Length":      String(docxBuffer.length),
+        "Content-Type":        "application/pdf",
+        "Content-Disposition": `attachment; filename="SeaGlassInsights-${safeName}-DeepDiveReport.pdf"`,
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
-    console.error("DDR generation error:", err);
+    console.error("DDR PDF generation error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Report generation failed" },
       { status: 500 }

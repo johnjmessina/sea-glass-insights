@@ -239,7 +239,7 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-DeepDiveReport.docx`;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-DeepDiveReport.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
@@ -644,7 +644,7 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
             </button>
             <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
               className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-              {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+              {downloadingDocx ? "Building PDF…" : "⬇ Download PDF Report"}
             </button>
             {!allLocked && (
               <p className="text-xs text-amber-600 font-medium">
