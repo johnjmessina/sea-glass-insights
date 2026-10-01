@@ -199,7 +199,7 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-SocialMediaAudit.docx`;
+      a.download = `SeaGlassInsights-${order.business_name.replace(/[^a-zA-Z0-9]/g, "")}-SocialMediaAudit.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
@@ -446,7 +446,7 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
               {serviceType === "social_media_audit" && hasDraft && (
                 <button onClick={downloadDocx} disabled={!allLocked || downloadingDocx}
                   className="bg-seagreen text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-                  {downloadingDocx ? "Building Report…" : "⬇ Save as Word Document"}
+                  {downloadingDocx ? "Building Report…" : "⬇ Download PDF Report"}
                 </button>
               )}
               {!allLocked && hasDraft && (

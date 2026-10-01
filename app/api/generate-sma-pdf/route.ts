@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateSMAReport } from "@/lib/smaReportGenerator";
+import { renderSmaReportPdf } from "@/lib/smaPdf/render";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,22 +26,21 @@ export async function POST(req: NextRequest) {
     // Use note passed from dashboard (reflects unsaved edits); fall back to stored value
     const analystNote = passedNote ?? order.analyst_note ?? "";
 
-    const docxBuffer = await generateSMAReport(
+    const pdfBuffer = await renderSmaReportPdf(
       order,
       order.ai_draft as Record<string, unknown>,
       analystNote,
     );
 
     const businessName = order.business_name.replace(/[^a-zA-Z0-9]/g, "");
-    const filename = `SeaGlassInsights-${businessName}-SocialMediaAudit.docx`;
+    const filename = `SeaGlassInsights-${businessName}-SocialMediaAudit.pdf`;
 
-    return new NextResponse(new Uint8Array(docxBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Type":        "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length":      String(docxBuffer.length),
+        "Content-Length":      String(pdfBuffer.length),
       },
     });
   } catch (err) {
