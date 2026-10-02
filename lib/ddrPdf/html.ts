@@ -238,6 +238,51 @@ function narrativeSection(content: unknown): string {
   }).join("");
 }
 
+// Market stat callout boxes — extract structured stats array and render as a row of tiles
+function marketStatCallouts(content: unknown): string {
+  const c = obj(content);
+  const stats: unknown[] = Array.isArray(c.key_stats) ? c.key_stats
+    : Array.isArray(c.market_stats) ? c.market_stats
+    : Array.isArray(c.statistics) ? c.statistics
+    : [];
+  if (!stats.length) return "";
+  return `<div class="stat-row">${stats.map(s => {
+    const g     = obj(s);
+    const value = String(g.value ?? g.stat ?? g.number ?? "");
+    const label = String(g.label ?? g.metric ?? g.name ?? "");
+    const note  = String(g.note ?? g.source ?? g.context ?? "");
+    if (!value) return "";
+    return `<div class="stat-tile">
+      <div class="stat-value">${esc(value)}</div>
+      ${label ? `<div class="stat-label">${esc(label)}</div>` : ""}
+      ${note  ? `<div class="stat-note">${esc(note)}</div>`  : ""}
+    </div>`;
+  }).join("")}</div>`;
+}
+
+// Decision focus callout
+function decisionFocusCallout(content: unknown): string {
+  const c = obj(content);
+  const focus = String(c.decision_focus ?? c.decision_question ?? c.research_question ?? "");
+  if (!focus) return "";
+  return `<div class="decision-callout">
+    <div class="decision-callout-label">Decision Focus</div>
+    <div class="decision-callout-text">${text(focus)}</div>
+  </div>`;
+}
+
+// Enhanced market context — stat tiles first, then prose
+function marketContextSection(content: unknown): string {
+  const stats = marketStatCallouts(content);
+  return stats + narrativeSection(content);
+}
+
+// Enhanced decision analysis — decision callout box first, then prose
+function decisionAnalysisSection(content: unknown): string {
+  const callout = decisionFocusCallout(content);
+  return callout + narrativeSection(content);
+}
+
 function extendedRecommendations(recs: unknown): string {
   if (typeof recs === "string") return paragraphs(recs);
   const all = arr(recs).map(obj);
@@ -454,6 +499,18 @@ table { border-collapse: collapse; width: 100%; }
 .subsection { margin-bottom: 14pt; }
 .subsection-head { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid ${TEAL}; }
 
+/* Market Stat Callout Tiles */
+.stat-row { display: flex; gap: 10pt; margin-bottom: 20pt; }
+.stat-tile { flex: 1; background: ${NAVY}; color: ${WHITE}; border-radius: 4pt; padding: 14pt 16pt; text-align: center; border-top: 3pt solid ${TEAL}; }
+.stat-value { font-size: 24pt; font-weight: 700; color: ${TEAL}; line-height: 1; margin-bottom: 5pt; }
+.stat-label { font-size: 9pt; font-weight: 700; letter-spacing: 1pt; text-transform: uppercase; color: ${WHITE}; margin-bottom: 4pt; }
+.stat-note { font-size: 8pt; color: rgba(255,255,255,0.65); font-style: italic; }
+
+/* Decision Focus Callout */
+.decision-callout { background: ${ROW_TINT}; border-left: 4pt solid ${TEAL}; border-radius: 0 4pt 4pt 0; padding: 14pt 16pt; margin-bottom: 18pt; break-inside: avoid; }
+.decision-callout-label { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; color: ${NAVY}; margin-bottom: 6pt; }
+.decision-callout-text { font-size: 12pt; font-style: italic; color: ${INK}; line-height: 1.5; }
+
 /* Extended Recommendations */
 .tier { margin-bottom: 10pt; border-radius: 4pt; border: 1pt solid ${CREAM}; }
 .tier-head { display: flex; align-items: baseline; gap: 10pt; padding: 5pt 12pt; font-size: 10pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; border-radius: 4pt 4pt 0 0; }
@@ -511,8 +568,8 @@ export function buildDdrReportHtml(
     business_snapshot:              () => businessSnapshot(draft.business_snapshot, draft.snapshot),
     customer_segments:              () => customerSegments(draft.customer_segments),
     competitive_intelligence:       () => competitiveIntelligence(draft.competitive_intelligence),
-    market_context:                  () => narrativeSection(draft.market_context),
-    decision_specific_analysis:     () => narrativeSection(draft.decision_specific_analysis),
+    market_context:                  () => marketContextSection(draft.market_context),
+    decision_specific_analysis:     () => decisionAnalysisSection(draft.decision_specific_analysis),
     extended_recommendations:       () => extendedRecommendations(draft.extended_recommendations),
     priority_action_framework:      () => priorityActionFramework(draft.priority_action_framework),
     expanded_analyst_interpretation: () => narrativeSection(draft.expanded_analyst_interpretation),

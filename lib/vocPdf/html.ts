@@ -260,6 +260,49 @@ function quantSectionContent(
     ${perspectiveCallout(analystPerspectives["quant_summary"] ?? "")}`;
 }
 
+// ── Prose section renderers ────────────────────────────────────────────────
+
+// Parse numbered themes from prose text (looks for "1.", "2.", or "Theme 1" patterns)
+function vocThematicContent(rawText: string): string {
+  if (!rawText || !rawText.trim()) return "";
+  // Try to split on numbered theme headers: "1. Theme Title\nBody" or "**Theme 1: Title**\nBody"
+  const themeRegex = /(?:^|\n)(?:\*{0,2})(?:\d+\.\s+|Theme\s+\d+[:\-\s]+)(.+?)(?:\*{0,2})\n([\s\S]+?)(?=(?:\n(?:\*{0,2})(?:\d+\.\s+|Theme\s+\d+[:\-\s]+)|$))/gi;
+  const matches = [...rawText.matchAll(themeRegex)];
+  if (matches.length >= 2) {
+    return `<div class="voc-themes">${matches.map((m, i) => `
+      <div class="voc-theme-card">
+        <div class="voc-theme-num">${String(i + 1).padStart(2, "0")}</div>
+        <div class="voc-theme-body">
+          <div class="voc-theme-title">${text(m[1])}</div>
+          <div class="voc-theme-text">${paragraphs(m[2].trim())}</div>
+        </div>
+      </div>`).join("")}</div>`;
+  }
+  // Fall back to subsection-style rendering if object, else plain paragraphs
+  return paragraphs(rawText);
+}
+
+// Analyst Interpretation: pull out recommendation bullets visually
+function vocInterpretationContent(rawText: string): string {
+  if (!rawText || !rawText.trim()) return "";
+  // Look for a "Recommendations" block followed by bullets
+  const recSplit = rawText.split(/\n(?=Recommendation|Key Recommendation|Strategic Recommendation|Next Step)/i);
+  if (recSplit.length >= 2) {
+    return paragraphs(recSplit[0]) + `<div class="voc-rec-list">${
+      recSplit.slice(1).map((r, i) => {
+        const lines = r.trim().split("\n");
+        const title = lines[0].replace(/^#+\s+/, "").replace(/\*{2,}/g, "").trim();
+        const body  = lines.slice(1).join("\n").trim();
+        return `<div class="voc-rec-card" style="border-left:4pt solid ${i % 2 === 0 ? NAVY : TEAL}">
+          <div class="voc-rec-title" style="color:${i % 2 === 0 ? NAVY : TEAL}">${text(title)}</div>
+          ${body ? `<div class="voc-rec-body">${paragraphs(body)}</div>` : ""}
+        </div>`;
+      }).join("")
+    }</div>`;
+  }
+  return paragraphs(rawText);
+}
+
 // ── CSS ────────────────────────────────────────────────────────────────────
 
 function fontFaces(): string {
@@ -397,6 +440,20 @@ section.contents { page: contents; }
 .brand-footer img { width: 40pt; height: 40pt; object-fit: contain; }
 .brand-name { font-weight: 700; color: ${NAVY}; font-size: 12pt; }
 .brand-meta { color: ${GRAY}; font-size: 9.5pt; }
+
+/* VoC Thematic Analysis cards */
+.voc-themes { display: flex; flex-direction: column; gap: 12pt; margin-bottom: 8pt; }
+.voc-theme-card { display: flex; gap: 14pt; padding: 12pt 14pt; background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; break-inside: avoid; }
+.voc-theme-num { font-size: 22pt; font-weight: 700; color: ${TEAL}; opacity: 0.6; line-height: 1; min-width: 28pt; padding-top: 2pt; }
+.voc-theme-body { flex: 1; }
+.voc-theme-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin-bottom: 5pt; }
+.voc-theme-text p { margin: 0 0 5pt; font-size: 11pt; }
+
+/* VoC Recommendation cards */
+.voc-rec-list { display: flex; flex-direction: column; gap: 10pt; margin-top: 12pt; }
+.voc-rec-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 0 4pt 4pt 0; padding: 12pt 14pt; break-inside: avoid; }
+.voc-rec-title { font-size: 12pt; font-weight: 700; margin-bottom: 5pt; }
+.voc-rec-body p { margin: 0 0 5pt; font-size: 11pt; }
 `;
 
 // ── Document ───────────────────────────────────────────────────────────────
@@ -425,8 +482,15 @@ export function buildVocReportHtml(
         analyst_interpretation:  "analyst_interpretation",
       };
       const key = draftKey[id] ?? id;
+      const rawContent = aiDraft[key] ?? "";
+      // For thematic analysis and visual findings: render numbered theme cards if structured
+      const renderedContent = (id === "thematic_analysis" || id === "visual_findings_summary")
+        ? vocThematicContent(rawContent)
+        : id === "analyst_interpretation"
+          ? vocInterpretationContent(rawContent)
+          : paragraphs(rawContent);
       content = `
-        ${paragraphs(aiDraft[key] ?? "")}
+        ${renderedContent}
         ${perspectiveCallout(analystPerspectives[key] ?? "")}`;
     }
 

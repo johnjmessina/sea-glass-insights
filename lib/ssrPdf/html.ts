@@ -79,6 +79,9 @@ function paragraphs(v: unknown, cls = ""): string {
     .map(p => `<p${cls ? ` class="${cls}"` : ""}>${text(p)}</p>`).join("");
 }
 
+const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
+
 // Generic narrative section: handles plain string or keyed object
 function narrativeSection(content: unknown): string {
   if (typeof content === "string") return paragraphs(content);
@@ -93,6 +96,74 @@ function narrativeSection(content: unknown): string {
       ${paragraphs((c as Obj)[k])}
     </div>`;
   }).join("");
+}
+
+// Persona cards — if AI returns an array of persona objects, render as cards;
+// otherwise fall back to narrativeSection prose
+function personaCards(content: unknown): string {
+  if (Array.isArray(content) && content.length) {
+    const PERSONA_ACCENTS = [TEAL, NAVY, "#059669", "#6B7280", "#D97706", "#0A2F61"];
+    return `<div class="persona-grid">${content.map((p, i) => {
+      const g = obj(p);
+      const accent = PERSONA_ACCENTS[i % PERSONA_ACCENTS.length];
+      const name   = String(g.name ?? g.persona_name ?? `Persona ${i + 1}`);
+      const desc   = String(g.description ?? g.desc ?? g.profile ?? "");
+      const motivation = String(g.motivation ?? g.motivations ?? g.primary_motivation ?? "");
+      const concern    = String(g.concern ?? g.concerns ?? g.primary_concern ?? g.objection ?? "");
+      const likelihood = String(g.likelihood ?? g.subscription_likelihood ?? g.likelihood_to_subscribe ?? "");
+      const quote      = String(g.quote ?? g.simulated_response ?? g.representative_response ?? "");
+      return `<div class="persona-card" style="border-top:3pt solid ${accent}">
+        <div class="persona-name" style="color:${accent}">${esc(name)}</div>
+        ${desc ? `<p class="persona-desc">${text(desc)}</p>` : ""}
+        ${motivation ? `<div class="persona-field"><span class="persona-field-label">Motivation</span>${text(motivation)}</div>` : ""}
+        ${concern    ? `<div class="persona-field"><span class="persona-field-label">Concern</span>${text(concern)}</div>` : ""}
+        ${likelihood ? `<div class="persona-field"><span class="persona-field-label">Likelihood</span>${text(likelihood)}</div>` : ""}
+        ${quote      ? `<div class="persona-quote">&ldquo;${text(quote)}&rdquo;</div>` : ""}
+      </div>`;
+    }).join("")}</div>`;
+  }
+  return narrativeSection(content);
+}
+
+// Directional recommendations — if AI returns array, render tiered rec cards
+function recommendationCards(content: unknown): string {
+  if (Array.isArray(content) && content.length) {
+    return `<div class="rec-list">${content.map((r, i) => {
+      const g = obj(r);
+      const title    = String(g.title ?? g.recommendation ?? g.action ?? `Recommendation ${i + 1}`);
+      const body     = String(g.body ?? g.description ?? g.rationale ?? "");
+      const priority = Number(g.priority ?? 0);
+      const accent   = priority === 1 ? NAVY : priority === 2 ? TEAL : "#6B7280";
+      const label    = priority === 1 ? "Priority 1" : priority === 2 ? "Priority 2" : `Rec ${i + 1}`;
+      return `<div class="ssr-rec" style="border-left:4pt solid ${accent}">
+        <div class="ssr-rec-label" style="color:${accent}">${esc(label)}</div>
+        <div class="ssr-rec-title">${text(title)}</div>
+        ${body ? `<p class="ssr-rec-body">${text(body)}</p>` : ""}
+      </div>`;
+    }).join("")}</div>`;
+  }
+  return narrativeSection(content);
+}
+
+// Thematic analysis — pull out numbered themes if structured, else fallback
+function thematicAnalysis(content: unknown): string {
+  if (Array.isArray(content) && content.length) {
+    return `<div class="themes">${content.map((t, i) => {
+      const g = obj(t);
+      const title   = String(g.theme ?? g.title ?? g.finding ?? `Theme ${i + 1}`);
+      const body    = String(g.body ?? g.description ?? g.detail ?? "");
+      const support = String(g.evidence ?? g.support ?? "");
+      return `<div class="theme-card">
+        <div class="theme-num">${String(i + 1).padStart(2, "0")}</div>
+        <div class="theme-body">
+          <div class="theme-title">${text(title)}</div>
+          ${body    ? `<p>${text(body)}</p>` : ""}
+          ${support ? `<p class="theme-evidence">${text(support)}</p>` : ""}
+        </div>
+      </div>`;
+    }).join("")}</div>`;
+  }
+  return narrativeSection(content);
 }
 
 // Analyst Perspective callout — navy left border, light navy background
@@ -214,6 +285,31 @@ section.contents { page: contents; }
 .subsection { margin-bottom: 14pt; }
 .subsection-head { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid ${TEAL}; }
 
+/* Persona Cards */
+.persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; margin-bottom: 8pt; }
+.persona-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; break-inside: avoid; }
+.persona-name { font-size: 13pt; font-weight: 700; margin-bottom: 6pt; }
+.persona-desc { font-size: 11pt; color: ${INK}; margin: 0 0 8pt; }
+.persona-field { font-size: 10pt; margin-bottom: 5pt; color: ${INK}; }
+.persona-field-label { font-weight: 700; color: ${NAVY}; text-transform: uppercase; font-size: 8.5pt; letter-spacing: 1pt; margin-right: 6pt; }
+.persona-quote { margin-top: 8pt; padding: 8pt 10pt; background: ${ROW_TINT}; border-left: 3pt solid ${TEAL}; font-style: italic; font-size: 10.5pt; color: ${INK}; border-radius: 0 3pt 3pt 0; }
+
+/* Thematic Analysis */
+.themes { display: flex; flex-direction: column; gap: 12pt; }
+.theme-card { display: flex; gap: 14pt; padding: 12pt 14pt; background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; break-inside: avoid; }
+.theme-num { font-size: 22pt; font-weight: 700; color: ${TEAL}; opacity: 0.6; line-height: 1; min-width: 28pt; padding-top: 2pt; }
+.theme-body { flex: 1; }
+.theme-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin-bottom: 5pt; }
+.theme-body p { margin: 0 0 5pt; font-size: 11pt; }
+.theme-evidence { font-style: italic; color: ${GRAY}; font-size: 10.5pt; }
+
+/* Directional Recommendations */
+.rec-list { display: flex; flex-direction: column; gap: 10pt; }
+.ssr-rec { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 0 4pt 4pt 0; padding: 12pt 14pt; break-inside: avoid; }
+.ssr-rec-label { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 4pt; }
+.ssr-rec-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin-bottom: 5pt; }
+.ssr-rec-body { margin: 0; font-size: 11pt; color: ${INK}; }
+
 /* Analyst Perspective callout */
 .perspective-callout {
   margin: 12pt 0;
@@ -254,6 +350,14 @@ export function buildSsrReportHtml(
 ): string {
   const LAST_ID = SSR_SECTIONS[SSR_SECTIONS.length - 1].id;
 
+  const sectionBody = (id: SsrSectionId, content: unknown): string => {
+    if (id === "customer_personas")           return personaCards(content);
+    if (id === "persona_response_simulation") return personaCards(content);
+    if (id === "thematic_analysis")           return thematicAnalysis(content);
+    if (id === "directional_recommendations") return recommendationCards(content);
+    return narrativeSection(content);
+  };
+
   const section = (id: SsrSectionId, title: string) => {
     const isLast = id === LAST_ID;
     const content = draft[id];
@@ -261,7 +365,7 @@ export function buildSsrReportHtml(
     return `
     <section class="page sec-${id}">
       <h1 class="section-title">${esc(title)}</h1>
-      ${narrativeSection(content)}
+      ${sectionBody(id, content)}
       ${perspectiveCallout(perspective)}
       ${isLast ? `
         <div style="margin-top:32pt;padding-top:14pt;border-top:2pt solid ${TEAL}">

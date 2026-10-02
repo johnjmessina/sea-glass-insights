@@ -78,6 +78,9 @@ function paragraphs(v: unknown, cls = ""): string {
     .map(p => `<p${cls ? ` class="${cls}"` : ""}>${text(p)}</p>`).join("");
 }
 
+const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
+
 // Generic narrative section: handles plain string or object with keys
 function narrativeSection(content: unknown): string {
   if (typeof content === "string") return paragraphs(content);
@@ -92,6 +95,132 @@ function narrativeSection(content: unknown): string {
       ${paragraphs((c as Obj)[k])}
     </div>`;
   }).join("");
+}
+
+function scoreBand(score: number): string {
+  if (score >= 90) return "Excellent";
+  if (score >= 75) return "Good";
+  if (score >= 60) return "Fair";
+  if (score >= 45) return "Needs Work";
+  return "Critical";
+}
+
+function bandColor(score: number): string {
+  if (score >= 90) return "#059669";
+  if (score >= 75) return "#0A2F61";
+  if (score >= 60) return "#6B7280";
+  if (score >= 45) return "#D97706";
+  return "#DC2626";
+}
+
+// Try to extract a numeric score (0–100) from structured content
+function extractScore(content: unknown): number | null {
+  const c = obj(content);
+  const candidates = [
+    c.score, c.overall_score, c.total_score, c.rating, c.overall_rating,
+    c.section_score, c.audit_score,
+  ];
+  for (const v of candidates) {
+    const n = Number(v);
+    if (!isNaN(n) && n >= 0) return Math.min(100, n <= 10 ? n * 10 : n);
+  }
+  return null;
+}
+
+// Score hero for sections that carry a numeric score
+function scoreHero(score: number, label: string): string {
+  const band  = scoreBand(score);
+  const color = bandColor(score);
+  return `
+  <div class="sma-score-hero">
+    <div class="sma-score-left">
+      <div class="sma-score-label">${esc(label)}</div>
+      <div class="sma-score-number" style="color:${color}">${score}</div>
+      <div class="sma-score-denom">/100</div>
+      <div class="sma-score-band" style="background:${color}">${esc(band)}</div>
+    </div>
+    <div class="sma-score-bar-wrap">
+      <div class="sma-score-bar-track">
+        <div class="sma-score-bar-fill" style="width:${score}%;background:${color}"></div>
+      </div>
+      <div class="sma-score-scale">0 &nbsp;&mdash;&nbsp; Needs Work &nbsp;&mdash;&nbsp; Fair &nbsp;&mdash;&nbsp; Good &nbsp;&mdash;&nbsp; 100</div>
+    </div>
+  </div>`;
+}
+
+// Overall Presence Score — full visual treatment with per-dimension rows
+function overallPresenceSection(content: unknown): string {
+  const c     = obj(content);
+  const score = extractScore(content);
+
+  // Try to find a per-dimension breakdown
+  const dims: unknown[] = Array.isArray(c.dimensions) ? c.dimensions
+    : Array.isArray(c.scores) ? c.scores
+    : Array.isArray(c.category_scores) ? c.category_scores
+    : [];
+
+  const hero = score !== null ? scoreHero(score, "Overall Social Media Presence Score") : "";
+  const dimTable = dims.length ? `
+    <table class="sma-dim-table">
+      <thead><tr><th>Category</th><th style="text-align:center">Score</th><th>Rating</th><th>Bar</th></tr></thead>
+      <tbody>${dims.map((d, i) => {
+        const g     = obj(d);
+        const dName = String(g.category ?? g.dimension ?? g.name ?? g.label ?? `Category ${i + 1}`);
+        const dScore = Math.min(100, Number(g.score ?? g.value ?? 0) <= 10 ? Number(g.score ?? g.value ?? 0) * 10 : Number(g.score ?? g.value ?? 0));
+        const color  = bandColor(dScore);
+        return `<tr class="${i % 2 ? "even" : ""}">
+          <th scope="row">${esc(dName)}</th>
+          <td style="text-align:center"><strong style="color:${color}">${dScore}</strong></td>
+          <td><span class="band-badge" style="background:${color}20;color:${color};border:1pt solid ${color}40">${esc(scoreBand(dScore))}</span></td>
+          <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${dScore}%;background:${color}"></div></div></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>` : "";
+
+  // Render any prose/recommendations that aren't the score numbers
+  const remainingKeys = Object.keys(c).filter(k =>
+    !["score","overall_score","total_score","rating","overall_rating","dimensions","scores","category_scores"].includes(k)
+  );
+  const prose = remainingKeys.length ? remainingKeys.map(k => {
+    const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    return `<div class="subsection"><h3 class="subsection-head">${esc(label)}</h3>${paragraphs(c[k])}</div>`;
+  }).join("") : (score === null ? narrativeSection(content) : "");
+
+  return hero + dimTable + (dimTable ? `<div style="margin-top:16pt">${prose}</div>` : prose);
+}
+
+// Platform grid — if content has per-platform data, render as platform cards
+function platformSection(content: unknown): string {
+  const c = obj(content);
+  // Look for per-platform keys (instagram, facebook, tiktok, etc.)
+  const platformKeys = Object.keys(c).filter(k =>
+    /instagram|facebook|tiktok|twitter|linkedin|pinterest|youtube|yelp/i.test(k)
+  );
+  if (platformKeys.length >= 2) {
+    return `<div class="platform-grid">${platformKeys.map(k => {
+      const p = obj(c[k]);
+      const score = extractScore(c[k]);
+      const color = score !== null ? bandColor(score) : NAVY;
+      return `<div class="platform-card" style="border-top:3pt solid ${color}">
+        <div class="platform-name" style="color:${color}">${esc(k.charAt(0).toUpperCase() + k.slice(1))}</div>
+        ${score !== null ? `<div class="platform-score" style="color:${color}">${score}<span class="platform-denom">/100</span></div>` : ""}
+        ${Object.keys(p).filter(pk => !["score","rating"].includes(pk)).map(pk => {
+          const label = pk.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+          return `<div class="platform-field"><span class="platform-field-label">${esc(label)}</span>${text(p[pk])}</div>`;
+        }).join("")}
+      </div>`;
+    }).join("")}</div>` + (c.summary || c.overall_summary ? `<div style="margin-top:14pt">${paragraphs(c.summary ?? c.overall_summary)}</div>` : "");
+  }
+  return narrativeSection(content);
+}
+
+// Scoring section — renders score hero if numeric score present, else narrative
+function scoringSection(content: unknown, sectionLabel: string): string {
+  const score = extractScore(content);
+  if (score !== null) {
+    return scoreHero(score, sectionLabel) + narrativeSection(content);
+  }
+  return narrativeSection(content);
 }
 
 function analystNote(note: string, icon: string): string {
@@ -189,6 +318,38 @@ section.contents { page: contents; }
 .subsection { margin-bottom: 14pt; }
 .subsection-head { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid ${TEAL}; }
 
+/* Score Hero */
+.sma-score-hero { display: flex; align-items: flex-start; gap: 24pt; padding: 18pt 20pt; background: ${ROW_TINT}; border-radius: 4pt; border-top: 4pt solid ${TEAL}; margin-bottom: 20pt; }
+.sma-score-left { min-width: 100pt; }
+.sma-score-label { font-size: 8.5pt; font-weight: 700; color: ${GRAY}; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 4pt; }
+.sma-score-number { font-size: 48pt; font-weight: 700; line-height: 1; }
+.sma-score-denom { font-size: 14pt; color: ${GRAY}; margin-top: -4pt; }
+.sma-score-band { display: inline-block; margin-top: 8pt; padding: 3pt 10pt; border-radius: 12pt; color: ${WHITE}; font-size: 10pt; font-weight: 700; }
+.sma-score-bar-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6pt; }
+.sma-score-bar-track { height: 12pt; background: #E0E0E0; border-radius: 6pt; overflow: hidden; }
+.sma-score-bar-fill { height: 100%; border-radius: 6pt; }
+.sma-score-scale { font-size: 8pt; color: ${GRAY}; }
+
+/* Dimension table */
+table { border-collapse: collapse; width: 100%; }
+.sma-dim-table thead th { background: ${NAVY}; color: ${WHITE}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; text-align: left; padding: 8pt 10pt; }
+.sma-dim-table tbody th { background: ${NAVY}; color: ${WHITE}; text-align: left; font-weight: 700; padding: 9pt 10pt; border-top: 1pt solid rgba(255,255,255,0.15); width: 34%; }
+.sma-dim-table tbody td { padding: 9pt 10pt; background: ${WHITE}; border-bottom: 1px solid #E0E0E0; }
+.sma-dim-table tbody tr.even td { background: ${ROW_TINT}; }
+.band-badge { display: inline-block; padding: 2pt 8pt; border-radius: 10pt; font-size: 9pt; font-weight: 700; }
+.bar-cell { width: 100pt; }
+.bar-track { height: 8pt; background: #E0E0E0; border-radius: 4pt; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4pt; }
+
+/* Platform Grid */
+.platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; margin-bottom: 16pt; }
+.platform-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; break-inside: avoid; }
+.platform-name { font-size: 13pt; font-weight: 700; margin-bottom: 4pt; }
+.platform-score { font-size: 24pt; font-weight: 700; line-height: 1; margin-bottom: 8pt; }
+.platform-denom { font-size: 12pt; color: ${GRAY}; }
+.platform-field { font-size: 10pt; margin-bottom: 4pt; }
+.platform-field-label { font-weight: 700; color: ${NAVY}; text-transform: uppercase; font-size: 8pt; letter-spacing: 1pt; display: block; margin-bottom: 1pt; }
+
 /* Analyst Note */
 .note p { font-style: italic; font-size: 12pt; line-height: 1.6; color: ${INK}; margin-bottom: 12pt; }
 .signature { margin-top: 26pt; padding-top: 10pt; border-top: 2pt solid ${NAVY}; width: 3in; }
@@ -210,13 +371,22 @@ export function buildSmaReportHtml(
 ): string {
   const LAST_ID = SMA_SECTIONS[SMA_SECTIONS.length - 1].id;
 
+  const sectionBody = (id: SmaSectionId, title: string, content: unknown): string => {
+    if (id === "overall_presence_score")       return overallPresenceSection(content);
+    if (id === "platform_utilization_review")  return platformSection(content);
+    if (id === "content_quality_scoring")      return scoringSection(content, "Content Quality Score");
+    if (id === "engagement_assessment")        return scoringSection(content, "Engagement Score");
+    if (id === "brand_consistency_evaluation") return scoringSection(content, "Brand Consistency Score");
+    return narrativeSection(content);
+  };
+
   const section = (id: SmaSectionId, title: string) => {
     const isLast = id === LAST_ID;
     const content = draft[id];
     return `
     <section class="page sec-${id}">
       <h1 class="section-title">${esc(title)}</h1>
-      ${narrativeSection(content)}
+      ${sectionBody(id, title, content)}
       ${isLast ? `
         <div style="margin-top:32pt;padding-top:14pt;border-top:2pt solid ${TEAL}">
           <h2 style="font-size:14pt;font-weight:700;color:${NAVY};margin:0 0 10pt">Analyst Note</h2>

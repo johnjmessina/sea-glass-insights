@@ -109,6 +109,74 @@ function narrativeSection(content: unknown): string {
   }).join("");
 }
 
+/** Key insight callout — teal left border highlight box */
+function insightCallout(label: string, body: string): string {
+  return `<div class="aisk-callout">
+    <div class="aisk-callout-label">${esc(label)}</div>
+    <div class="aisk-callout-body">${text(body)}</div>
+  </div>`;
+}
+
+/** Use-case card — navy-accented card for each real example */
+function useCaseCard(title: string, body: string, idx: number): string {
+  const accent = idx % 2 === 0 ? NAVY : TEAL;
+  return `<div class="aisk-usecase-card" style="border-top:3pt solid ${accent}">
+    <div class="aisk-usecase-title" style="color:${accent}">${esc(title)}</div>
+    <div class="aisk-usecase-body">${paragraphs(body)}</div>
+  </div>`;
+}
+
+/** Renders business_type_analysis — pull the summary/overview into a callout, rest as subsections */
+function businessAnalysisSection(content: unknown): string {
+  if (typeof content === "string") {
+    // Try to extract a first paragraph as a callout
+    const paras = content.split(/\n\s*\n/).filter(Boolean);
+    if (paras.length >= 2) {
+      return insightCallout("Business Profile", paras[0]) +
+        `<div class="aisk-narrative">${paras.slice(1).map(p => `<p>${text(p)}</p>`).join("")}</div>`;
+    }
+    return paragraphs(content);
+  }
+  const c = content as Obj;
+  if (!c || typeof c !== "object" || Array.isArray(c)) return "";
+  const keys = Object.keys(c);
+  // Put first key (often "overview" or "summary") in a callout
+  const [firstKey, ...restKeys] = keys;
+  const firstLabel = firstKey.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  return insightCallout(firstLabel, String((c as Obj)[firstKey] ?? "")) +
+    restKeys.map(k => {
+      const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+      return `<div class="subsection">
+        <h3 class="subsection-head">${esc(label)}</h3>
+        ${paragraphs((c as Obj)[k])}
+      </div>`;
+    }).join("");
+}
+
+/** Renders real_use_case_examples — each top-level key becomes a use-case card */
+function useCasesSection(content: unknown): string {
+  if (typeof content === "string") {
+    // Attempt to split on numbered list or heading patterns
+    const parts = content.split(/\n(?=(?:\d+\.\s+|Use Case \d+|Example \d+|#{1,3}\s+))/i).filter(Boolean);
+    if (parts.length >= 2) {
+      return `<div class="aisk-usecase-grid">${parts.map((p, i) => {
+        const lines = p.trim().split("\n");
+        const titleLine = lines[0].replace(/^(?:\d+\.\s+|#{1,3}\s+)/, "").trim();
+        const body = lines.slice(1).join("\n").trim();
+        return useCaseCard(titleLine, body || p, i);
+      }).join("")}</div>`;
+    }
+    return paragraphs(content);
+  }
+  const c = content as Obj;
+  if (!c || typeof c !== "object" || Array.isArray(c)) return "";
+  const keys = Object.keys(c);
+  return `<div class="aisk-usecase-grid">${keys.map((k, i) => {
+    const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    return useCaseCard(label, String((c as Obj)[k] ?? ""), i);
+  }).join("")}</div>`;
+}
+
 /** Prompt card: split on \n---\n; prompt in monospace box, instructions below in italic */
 function promptCard(content: unknown): string {
   const raw    = String(content ?? "").trim();
@@ -258,6 +326,18 @@ section.contents { page: contents; }
 .brand-footer img { width: 40pt; height: 40pt; object-fit: contain; }
 .brand-name { font-weight: 700; color: ${NAVY}; font-size: 12pt; }
 .brand-meta { color: ${GRAY}; font-size: 9.5pt; }
+
+/* AISK narrative callout */
+.aisk-callout { background: ${LGRY}; border-left: 5pt solid ${TEAL}; border-radius: 0 4pt 4pt 0; padding: 14pt 16pt; margin-bottom: 16pt; break-inside: avoid; }
+.aisk-callout-label { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; color: ${TEAL}; margin-bottom: 6pt; }
+.aisk-callout-body { font-size: 11pt; color: ${INK}; }
+.aisk-narrative p { margin: 0 0 8pt; }
+
+/* AISK use-case cards */
+.aisk-usecase-grid { display: flex; flex-direction: column; gap: 12pt; margin-top: 4pt; }
+.aisk-usecase-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 14pt 16pt; break-inside: avoid; }
+.aisk-usecase-title { font-size: 12pt; font-weight: 700; margin-bottom: 7pt; }
+.aisk-usecase-body p { margin: 0 0 6pt; font-size: 11pt; }
 `;
 
 // ── Document ───────────────────────────────────────────────────────────────
@@ -277,7 +357,13 @@ export function buildAiskReportHtml(
     return `
     <section class="page sec-${s.id}">
       <h1 class="section-title">${esc(s.title)}</h1>
-      ${s.isPrompt ? promptCard(content) : narrativeSection(content)}
+      ${s.isPrompt
+        ? promptCard(content)
+        : s.id === "business_type_analysis"
+          ? businessAnalysisSection(content)
+          : s.id === "real_use_case_examples"
+            ? useCasesSection(content)
+            : narrativeSection(content)}
       ${isLast ? `
         <div style="margin-top:32pt;padding-top:14pt;border-top:2pt solid ${TEAL}">
           <h2 style="font-size:14pt;font-weight:700;color:${NAVY};margin:0 0 10pt">Analyst Note</h2>

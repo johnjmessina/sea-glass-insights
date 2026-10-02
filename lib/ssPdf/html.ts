@@ -185,52 +185,64 @@ function visitOverviewSection(visitOV: Record<string, unknown>): string {
 }
 
 function scorecardSection(sc: Record<string, boolean | number | unknown>): string {
-  const total     = totalScore(sc);
-  const totalBand = scoreBand(total);
+  const total      = totalScore(sc);
+  const totalBand  = scoreBand(total);
   const totalColor = bandColor(total);
 
+  // Mini dimension pills for the callout header
+  const dimPills = SS_DIMS.map(dim => {
+    const raw   = dimScore(dim, sc);
+    const color = bandColor(raw);
+    return `<div class="dim-pill">
+      <div class="dim-pill-bar" style="height:${Math.round(raw * 0.36)}pt;background:${color}"></div>
+      <div class="dim-pill-label">${esc(dim.label.replace(" ", " "))}</div>
+      <div class="dim-pill-score" style="color:${color}">${raw}</div>
+    </div>`;
+  }).join("");
+
   return `
-    <div class="score-callout">
-      <div class="score-total">
-        <span class="score-number" style="color:${totalColor}">${total}</span>
-        <span class="score-denom">/100</span>
-        <span class="score-band" style="color:${totalColor}">${esc(totalBand)}</span>
+    <div class="score-callout-hero">
+      <div class="score-hero-left">
+        <div class="score-hero-label">Overall Experience Score</div>
+        <div class="score-hero-number" style="color:${totalColor}">${total}</div>
+        <div class="score-hero-denom">/100</div>
+        <div class="score-hero-band" style="background:${totalColor}">${esc(totalBand)}</div>
+        <div class="score-scale">90–100 Exceptional · 75–89 Strong · 60–74 Average · 45–59 Below Avg · &lt;45 Critical</div>
       </div>
-      <div class="score-scale">90–100 Exceptional &nbsp;·&nbsp; 75–89 Strong &nbsp;·&nbsp; 60–74 Average &nbsp;·&nbsp; 45–59 Below Average &nbsp;·&nbsp; Below 45 Critical</div>
+      <div class="dim-pills-wrap">${dimPills}</div>
     </div>
     <table class="compare scorecard-table">
       <thead>
         <tr>
           <th>Dimension</th>
-          <th>Score</th>
-          <th>Weight</th>
+          <th style="text-align:center">Score</th>
+          <th style="text-align:center">Weight</th>
           <th>Rating</th>
-          <th>Bar</th>
+          <th>Visual</th>
         </tr>
       </thead>
       <tbody>
         ${SS_DIMS.map((dim, i) => {
-          const raw  = dimScore(dim, sc);
-          const band = scoreBand(raw);
+          const raw   = dimScore(dim, sc);
+          const band  = scoreBand(raw);
           const color = bandColor(raw);
-          const pct  = raw;
           return `<tr class="${i % 2 === 1 ? "even" : ""}">
             <th scope="row">${esc(dim.label)}</th>
-            <td><strong style="color:${color}">${raw}</strong>/100</td>
-            <td>${Math.round(dim.weight * 100)}%</td>
-            <td style="color:${color}">${esc(band)}</td>
+            <td style="text-align:center"><strong style="color:${color}">${raw}</strong></td>
+            <td style="text-align:center">${Math.round(dim.weight * 100)}%</td>
+            <td><span class="band-badge" style="background:${color}20;color:${color};border:1pt solid ${color}40">${esc(band)}</span></td>
             <td class="bar-cell">
               <div class="score-bar-track">
-                <div class="score-bar-fill" style="width:${pct}%;background:${color}"></div>
+                <div class="score-bar-fill" style="width:${raw}%;background:${color}"></div>
               </div>
             </td>
           </tr>`;
         }).join("")}
         <tr class="total-row">
           <th scope="row">TOTAL WEIGHTED SCORE</th>
-          <td><strong style="color:${totalColor}">${total}</strong>/100</td>
-          <td>100%</td>
-          <td style="color:${totalColor}">${esc(totalBand)}</td>
+          <td style="text-align:center"><strong style="color:${totalColor}">${total}</strong></td>
+          <td style="text-align:center">100%</td>
+          <td><span class="band-badge" style="background:${totalColor};color:#fff">${esc(totalBand)}</span></td>
           <td class="bar-cell">
             <div class="score-bar-track">
               <div class="score-bar-fill" style="width:${total}%;background:${totalColor}"></div>
@@ -242,25 +254,34 @@ function scorecardSection(sc: Record<string, boolean | number | unknown>): strin
 }
 
 function analystObservationsSection(obs: Record<string, unknown>): string {
-  const fields: [string, unknown][] = [
-    ["Best Moment",                obs.best_moment],
-    ["Biggest Missed Opportunity", obs.biggest_miss],
-    ["Immediate Fix",              obs.immediate_fix],
-    ["Additional Observations",    obs.additional_observations],
+  const cards: { label: string; val: unknown; accent: string; icon: string }[] = [
+    { label: "Best Moment",                val: obs.best_moment,             accent: "#059669", icon: "&#9650;" },
+    { label: "Biggest Missed Opportunity", val: obs.biggest_miss,            accent: "#DC2626", icon: "&#9660;" },
+    { label: "Immediate Fix",              val: obs.immediate_fix,           accent: "#0A2F61", icon: "&#9654;" },
+    { label: "Additional Observations",    val: obs.additional_observations, accent: "#6B7280", icon: "&#9632;" },
   ];
-  return fields.filter(([, v]) => String(v ?? "").trim()).map(([label, val]) => `
-    <div class="obs-block">
-      <h3 class="obs-head">${esc(label as string)}</h3>
-      ${paragraphs(val)}
-    </div>`).join("");
+  return `<div class="obs-cards">${
+    cards.filter(({ val }) => String(val ?? "").trim()).map(({ label, val, accent, icon }) => `
+    <div class="obs-card" style="border-left:4pt solid ${accent}">
+      <div class="obs-card-head" style="color:${accent}">
+        <span class="obs-icon">${icon}</span> ${esc(label)}
+      </div>
+      <div class="obs-card-body">${paragraphs(val)}</div>
+    </div>`).join("")
+  }</div>`;
 }
 
+const NARRATIVE_ACCENTS = [TEAL, NAVY, "#059669", "#6B7280", "#0A2F61", "#D97706", "#059669"];
+
 function narrativeNotesSection(aiDraft: Record<string, unknown>): string {
-  return NARRATIVE_SECTIONS.map(({ key, label }) => `
-    <div class="narrative-block">
-      <h3 class="obs-head">${esc(label)}</h3>
+  return NARRATIVE_SECTIONS.map(({ key, label }, i) => {
+    const accent = NARRATIVE_ACCENTS[i % NARRATIVE_ACCENTS.length];
+    return `
+    <div class="narrative-block narrative-card" style="border-left:3pt solid ${accent}">
+      <h3 class="narrative-head" style="color:${accent}">${esc(label)}</h3>
       ${paragraphs(aiDraft[key])}
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 function summarySection(
@@ -375,13 +396,21 @@ table { border-collapse: collapse; width: 100%; }
 .overview-table tr.even th, .overview-table tr.even td { background: ${WHITE}; }
 .overview-table tr:last-child th, .overview-table tr:last-child td { border-bottom: none; }
 
-/* Scorecard */
-.score-callout { border-left: 4pt solid ${TEAL}; padding: 12pt 16pt; margin-bottom: 18pt; background: ${ROW_TINT}; border-radius: 0 4pt 4pt 0; }
-.score-total { display: flex; align-items: baseline; gap: 8pt; }
-.score-number { font-size: 32pt; font-weight: 700; line-height: 1; }
-.score-denom { font-size: 16pt; color: ${GRAY}; }
-.score-band { font-size: 14pt; font-weight: 700; margin-left: 8pt; }
-.score-scale { font-size: 9pt; color: ${GRAY}; margin-top: 6pt; }
+/* Scorecard Hero */
+.score-callout-hero { display: flex; align-items: flex-start; gap: 20pt; padding: 18pt 20pt; margin-bottom: 20pt; background: ${ROW_TINT}; border-radius: 4pt; border-top: 4pt solid ${TEAL}; }
+.score-hero-left { min-width: 120pt; }
+.score-hero-label { font-size: 8.5pt; font-weight: 700; color: ${GRAY}; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 4pt; }
+.score-hero-number { font-size: 54pt; font-weight: 700; line-height: 1; color: ${NAVY}; }
+.score-hero-denom { font-size: 14pt; color: ${GRAY}; margin-top: -4pt; }
+.score-hero-band { display: inline-block; margin-top: 8pt; padding: 3pt 10pt; border-radius: 12pt; color: ${WHITE}; font-size: 10pt; font-weight: 700; letter-spacing: 0.5pt; }
+.score-scale { font-size: 8pt; color: ${GRAY}; margin-top: 10pt; line-height: 1.4; }
+.dim-pills-wrap { display: flex; align-items: flex-end; gap: 8pt; flex: 1; justify-content: flex-end; padding-bottom: 4pt; }
+.dim-pill { display: flex; flex-direction: column; align-items: center; gap: 3pt; min-width: 40pt; }
+.dim-pill-bar { width: 14pt; border-radius: 2pt 2pt 0 0; min-height: 4pt; }
+.dim-pill-label { font-size: 6.5pt; color: ${GRAY}; text-align: center; line-height: 1.2; white-space: nowrap; }
+.dim-pill-score { font-size: 8pt; font-weight: 700; }
+
+/* Scorecard table */
 .scorecard-table thead th { background: ${NAVY}; color: ${WHITE}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; text-align: left; padding: 8pt 10pt; }
 .scorecard-table tbody th { background: ${NAVY}; color: ${WHITE}; text-align: left; width: 30%; font-weight: 700; padding: 9pt 10pt; border-top: 1pt solid rgba(255,255,255,0.15); }
 .scorecard-table tbody td { padding: 9pt 10pt; font-size: 11pt; background: ${WHITE}; border-bottom: 1px solid ${RULE}; }
@@ -389,11 +418,22 @@ table { border-collapse: collapse; width: 100%; }
 .scorecard-table .total-row th { background: ${NAVY}; color: ${TEAL}; }
 .scorecard-table .total-row td { background: ${NAVY}; color: ${WHITE}; font-weight: 700; }
 .bar-cell { width: 120pt; }
-.score-bar-track { height: 6pt; background: ${RULE}; border-radius: 3pt; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 3pt; }
+.score-bar-track { height: 8pt; background: ${RULE}; border-radius: 4pt; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 4pt; }
+.band-badge { display: inline-block; padding: 2pt 8pt; border-radius: 10pt; font-size: 9pt; font-weight: 700; letter-spacing: 0.3pt; }
 
-/* Analyst Observations & Narrative */
-.obs-block, .narrative-block { margin-bottom: 18pt; }
+/* Analyst Observations Cards */
+.obs-cards { display: flex; flex-direction: column; gap: 16pt; }
+.obs-card { background: ${WHITE}; border: 1pt solid ${RULE}; border-radius: 0 6pt 6pt 0; padding: 14pt 16pt; break-inside: avoid; }
+.obs-card-head { font-size: 11pt; font-weight: 700; margin-bottom: 8pt; display: flex; align-items: center; gap: 6pt; }
+.obs-icon { font-size: 9pt; }
+.obs-card-body p { margin: 0 0 6pt; font-size: 11pt; }
+.obs-card-body p:last-child { margin-bottom: 0; }
+
+/* Narrative Notes */
+.narrative-block { margin-bottom: 16pt; }
+.narrative-card { padding: 12pt 14pt 12pt 16pt; background: ${WHITE}; border: 1pt solid ${RULE}; border-radius: 0 4pt 4pt 0; }
+.narrative-head { font-size: 11pt; font-weight: 700; margin: 0 0 8pt; }
 .obs-head { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid ${TEAL}; }
 .summary-analyst-note { margin-top: 16pt; padding: 12pt 14pt; background: ${ROW_TINT}; border-radius: 4pt; }
 .gray-text { color: ${GRAY}; font-style: italic; }
