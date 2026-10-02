@@ -333,7 +333,7 @@ async function run() {
       await sleep(1000);
       const filename = "SamplePDF-SecretShopping.pdf";
       log(`  Downloading PDF…`);
-      await downloadPdf("/api/generate-ss-pdf", { orderId, ssScorecard }, filename);
+      await downloadPdf("/api/generate-ss-pdf", { orderId, scorecard: ssScorecard, analystObs: ssAnalystObs }, filename);
       log(`  ✓ ${filename}`);
       results.push({ service: label, file: filename, status: "ok" });
     } catch (err) {
