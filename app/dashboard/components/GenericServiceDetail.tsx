@@ -45,8 +45,18 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
   const questionLabels = getQuestionLabels(serviceType);
 
   const [order, setOrder]       = useState(initialOrder);
+  // Normalize draft values to strings — newer SMA drafts store structured objects
+  const normalizeDraft = (raw: unknown): Record<string, string> => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    return Object.fromEntries(
+      Object.entries(raw as Record<string, unknown>).map(([k, v]) => [
+        k,
+        typeof v === "string" ? v : JSON.stringify(v, null, 2),
+      ])
+    );
+  };
   const [draft, setDraft]       = useState<Record<string, string>>(
-    (initialOrder.ai_draft as Record<string, string>) ?? {}
+    normalizeDraft(initialOrder.ai_draft)
   );
   const [meta, setMeta]         = useState<MetaMap>(() =>
     initMeta(sections, initialOrder.analyst_commentary as Record<string, unknown> | null)
@@ -130,7 +140,7 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Generation failed");
-      setDraft(data.draft as Record<string, string>);
+      setDraft(normalizeDraft(data.draft));
       const reset = defaultMeta(sections);
       setMeta(reset);
       persist({ analyst_commentary: reset });
@@ -154,7 +164,8 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Regeneration failed");
-      setDraft(p => ({ ...p, [key]: data.content as string }));
+      const val = data.content;
+      setDraft(p => ({ ...p, [key]: typeof val === "string" ? val : JSON.stringify(val, null, 2) }));
       flashSaved();
     } catch (e) {
       setRegenError(p => ({ ...p, [key]: e instanceof Error ? e.message : "Failed" }));
