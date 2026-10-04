@@ -143,7 +143,7 @@ function executiveSummary(es: unknown): string {
     ${e.intro ? `<p class="lead">${text(e.intro)}</p>` : ""}
     ${bullets.length ? `<ul class="bullets">${bullets.map(b => `<li>${labeledBullet(b)}</li>`).join("")}</ul>` : ""}
     <div class="callouts">
-      <div class="callout navy"><div class="callout-label">Key Finding</div><p>${text(e.your_edge ?? e.key_finding)}</p></div>
+      <div class="callout navy"><div class="callout-label">Key Finding</div><p>${text(e.key_finding ?? e.your_edge)}</p></div>
       <div class="callout teal"><div class="callout-label">Priority Action</div><p>${text(e.priority_action)}</p></div>
     </div>`;
 }
@@ -250,7 +250,7 @@ function marketStatCallouts(content: unknown): string {
     const g     = obj(s);
     const value = String(g.value ?? g.stat ?? g.number ?? "");
     const label = String(g.label ?? g.metric ?? g.name ?? "");
-    const note  = String(g.note ?? g.source ?? g.context ?? "");
+    const note  = String(g.context ?? g.note ?? g.source ?? "");
     if (!value) return "";
     return `<div class="stat-tile">
       <div class="stat-value">${esc(value)}</div>
