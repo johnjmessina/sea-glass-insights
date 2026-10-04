@@ -9,7 +9,7 @@ export const metadata: Metadata = { robots: "noindex" };
 
 const NAVY  = "#0A2F61";
 const TEAL  = "#00CED1";
-const SAND  = "#F4EADA";
+const CREAM = "#F4EADA";
 const WHITE = "#FFFFFF";
 
 interface Obs { label: string; title: string; body: string }
@@ -84,6 +84,14 @@ function LogoMark() {
   );
 }
 
+function SvgCheck({ size = 8, color = TEAL }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "1px" }}>
+      <path d="M1 4L3 6L7 2" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 export default async function BusinessPulsePrintPage(
   props: { searchParams: Promise<Record<string, string>> }
 ) {
@@ -111,7 +119,7 @@ export default async function BusinessPulsePrintPage(
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap"
           rel="stylesheet"
         />
         <style>{`
@@ -154,109 +162,159 @@ export default async function BusinessPulsePrintPage(
         {/* ────────────── FRONT ────────────── */}
         <div className="card-front">
 
-          {/* Header */}
+          {/* Brand bar at very top */}
           <div style={{
-            padding: "18px 22px 14px",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
+            padding: "14px 22px 10px",
             flexShrink: 0,
           }}>
-            <div>
-              <div style={{ fontFamily: MT, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: TEAL, marginBottom: "7px" }}>
-                Business Pulse
-              </div>
-              <div style={{ fontFamily: CG, fontSize: "19px", fontWeight: 700, color: WHITE, lineHeight: 1.15 }}>
-                Three things we<br />noticed about<br />
-                <span style={{ color: TEAL }}>{card.businessName || "Your Business"}</span>
-              </div>
-              {card.location && (
-                <div style={{ fontFamily: MT, fontSize: "7px", color: "rgba(255,255,255,0.35)", marginTop: "5px", letterSpacing: "0.1em" }}>
-                  {card.location}
-                </div>
-              )}
+            <div style={{
+              fontFamily: MT,
+              fontSize: "6.5px",
+              letterSpacing: "0.32em",
+              textTransform: "uppercase",
+              fontVariant: "small-caps",
+              color: TEAL,
+              marginBottom: "7px",
+              fontWeight: 600,
+            }}>
+              Sea Glass Insights
             </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px" }}>
-              <LogoMark />
-              <div style={{ fontFamily: MT, fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginTop: "3px" }}>
-                {card.businessName || "Business Name"}
-              </div>
-              {card.location && (
-                <div style={{ fontFamily: MT, fontSize: "6.5px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.05em" }}>
-                  {card.location}
+            {/* Thin TEAL rule */}
+            <div style={{ height: "0.75px", background: TEAL, opacity: 0.6, marginBottom: "14px" }} />
+
+            {/* Headline block */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{
+                  fontFamily: CG,
+                  fontSize: "21px",
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  color: CREAM,
+                  lineHeight: 1.2,
+                  marginBottom: "5px",
+                }}>
+                  We looked at<br />
+                  <span style={{ fontWeight: 600 }}>{card.businessName || "Your Business"}.</span>
                 </div>
-              )}
+                <div style={{
+                  fontFamily: MT,
+                  fontSize: "7.5px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: TEAL,
+                  fontWeight: 500,
+                }}>
+                  Here&apos;s what we found.
+                </div>
+              </div>
+              <div style={{ flexShrink: 0, marginTop: "2px" }}>
+                <LogoMark />
+              </div>
             </div>
           </div>
 
           {/* Observations — flex-grow to fill remaining height before footer */}
-          <div style={{ flex: 1, padding: "10px 22px", display: "flex", flexDirection: "column", justifyContent: "space-around" }}>
+          <div style={{ flex: 1, padding: "8px 22px 6px", display: "flex", flexDirection: "column", justifyContent: "space-around" }}>
             {card.obs.map((obs, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  paddingBottom: i < 2 ? "10px" : 0,
-                  borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                }}
-              >
-                {/* Ghost number */}
-                <div style={{ fontFamily: CG, fontSize: "28px", fontWeight: 700, color: "rgba(0,206,209,0.15)", lineHeight: 1, flexShrink: 0, width: "22px", marginTop: "-3px" }}>
-                  {i + 1}
-                </div>
-                <div>
-                  {obs.label && (
-                    <div style={{ fontFamily: MT, fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: TEAL, marginBottom: "4px" }}>
-                      {obs.label}
-                    </div>
-                  )}
-                  <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 700, color: SAND, lineHeight: 1.25, marginBottom: "4px" }}>
-                    {obs.title || `Observation ${i + 1}`}
+              <div key={i} style={{ position: "relative" }}>
+                {/* Separator line above (except first) */}
+                {i > 0 && (
+                  <div style={{ height: "0.5px", background: TEAL, opacity: 0.25, marginBottom: "9px" }} />
+                )}
+                <div style={{ display: "flex", gap: "10px", paddingBottom: i < 2 ? "9px" : 0 }}>
+                  {/* Ghost number */}
+                  <div style={{
+                    fontFamily: CG,
+                    fontSize: "36px",
+                    fontWeight: 700,
+                    color: `rgba(0,206,209,0.13)`,
+                    lineHeight: 1,
+                    flexShrink: 0,
+                    width: "24px",
+                    marginTop: "-4px",
+                    userSelect: "none",
+                  }}>
+                    {i + 1}
                   </div>
-                  {obs.body && (
-                    <div style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: "rgba(244,234,218,0.55)", lineHeight: 1.65 }}>
-                      {obs.body}
+                  <div style={{ flex: 1 }}>
+                    {obs.label && (
+                      <div style={{
+                        fontFamily: MT,
+                        fontSize: "6px",
+                        letterSpacing: "0.26em",
+                        textTransform: "uppercase",
+                        color: TEAL,
+                        marginBottom: "3px",
+                        fontWeight: 600,
+                      }}>
+                        {obs.label}
+                      </div>
+                    )}
+                    <div style={{
+                      fontFamily: CG,
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: CREAM,
+                      lineHeight: 1.25,
+                      marginBottom: "4px",
+                    }}>
+                      {obs.title || `Observation ${i + 1}`}
                     </div>
-                  )}
+                    {obs.body && (
+                      <div style={{
+                        fontFamily: MT,
+                        fontSize: "7.5px",
+                        fontWeight: 300,
+                        color: `rgba(255,255,255,0.62)`,
+                        lineHeight: 1.6,
+                      }}>
+                        {obs.body}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Teal footer */}
+          {/* Teal footer bar */}
           <div style={{
             background: TEAL,
-            padding: "12px 22px",
+            padding: "10px 22px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexShrink: 0,
           }}>
-            <div>
-              <div style={{ fontFamily: MT, fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(10,47,97,0.6)", marginBottom: "3px" }}>
-                Want the complete picture?
-              </div>
-              <div style={{ fontFamily: CG, fontSize: "11px", fontWeight: 700, color: NAVY }}>
-                Market Intelligence Report
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <LogoMark />
+              <div style={{
+                fontFamily: MT,
+                fontSize: "7px",
+                fontWeight: 500,
+                color: NAVY,
+                lineHeight: 1.4,
+                maxWidth: "200px",
+              }}>
+                Ready for the full picture? Ask about our <strong>Market Intelligence Report.</strong>
               </div>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontFamily: MT, fontSize: "18px", fontWeight: 600, color: NAVY, lineHeight: 1 }}>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontFamily: MT, fontSize: "16px", fontWeight: 600, color: NAVY, lineHeight: 1 }}>
                 {card.ctaPrice}
               </div>
-              <div style={{ fontFamily: MT, fontSize: "6.5px", color: "rgba(10,47,97,0.5)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "2px" }}>
+              <div style={{ fontFamily: MT, fontSize: "5.5px", color: `rgba(10,47,97,0.55)`, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "2px" }}>
                 Flat fee · 48–72 hrs
               </div>
             </div>
           </div>
         </div>
 
-        {/* ────────────── BACK — cream hero ────────────── */}
-        <div className="card-back" style={{ padding: "18px 20px 24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* ────────────── BACK — white ────────────── */}
+        <div className="card-back" style={{ padding: "16px 20px 18px", display: "flex", flexDirection: "column", gap: "10px" }}>
 
-          {/* TOP — logo + headline + subtext, centered */}
+          {/* TOP — logo + headline, centered */}
           <div style={{ textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -264,50 +322,52 @@ export default async function BusinessPulsePrintPage(
               alt="Sea Glass Insights"
               style={{ width: "150px", height: "auto", display: "block", margin: "0 auto 8px" }}
             />
-            <div style={{ fontFamily: CG, fontSize: "13px", fontWeight: 700, color: NAVY, lineHeight: 1.25, marginBottom: "5px" }}>
-              Know your market.<br />Refine your edge.
+            <div style={{ fontFamily: CG, fontSize: "13px", fontStyle: "italic", fontWeight: 600, color: NAVY, lineHeight: 1.3, marginBottom: "7px" }}>
+              Know your market. Refine your edge.
             </div>
-            <div style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, lineHeight: 1.65, opacity: 0.72 }}>
-              Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore. From competitive analysis and customer research to secret shopping, surveys, and AI-powered tools, every service is reviewed by a local analyst and built to give you a real edge.
-            </div>
+            {/* Thin TEAL rule */}
+            <div style={{ height: "0.75px", background: TEAL, opacity: 0.55, marginBottom: "0" }} />
           </div>
 
           {/* MIR HERO — full-width featured card */}
-          <div style={{ borderLeft: "2px solid rgba(10,47,97,0.3)", backgroundColor: "rgba(10,47,97,0.04)", borderRadius: "3px", padding: "8px 10px" }}>
-            <div style={{ fontFamily: MT, fontSize: "6px", fontWeight: 700, color: "rgba(10,47,97,0.55)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "3px" }}>
+          <div style={{
+            borderLeft: `2.5px solid ${NAVY}`,
+            backgroundColor: `rgba(10,47,97,0.04)`,
+            borderRadius: "2px",
+            padding: "8px 10px",
+          }}>
+            <div style={{ fontFamily: MT, fontSize: "5.5px", fontWeight: 700, color: `rgba(10,47,97,0.5)`, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: "3px" }}>
               Most Popular
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
               <span style={{ fontFamily: CG, fontSize: "13px", fontWeight: 700, color: NAVY }}>Market Intelligence Report</span>
-              <span style={{ fontFamily: MT, fontSize: "11px", fontWeight: 700, color: NAVY, flexShrink: 0, marginLeft: "8px" }}>$199</span>
+              <span style={{ fontFamily: MT, fontSize: "10px", fontWeight: 700, color: NAVY, flexShrink: 0, marginLeft: "8px" }}>$199</span>
             </div>
-            <div style={{ fontFamily: MT, fontSize: "6px", color: "rgba(10,47,97,0.5)", marginBottom: "4px" }}>
+            <div style={{ fontFamily: MT, fontSize: "5.5px", color: `rgba(10,47,97,0.5)`, marginBottom: "5px" }}>
               48-72 hr delivery · Flat fee
             </div>
-            {BACK_SERVICES[0].checklist.map(item => (
-              <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
-                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "1px" }}>
-                  <path d="M1 4L3 6L7 2" stroke="#0A2F61" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 300, color: NAVY, opacity: 0.65, lineHeight: 1.35 }}>{item}</span>
-              </div>
-            ))}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 8px" }}>
+              {BACK_SERVICES[0].checklist.map(item => (
+                <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "2px" }}>
+                  <SvgCheck size={7} color={TEAL} />
+                  <span style={{ fontFamily: MT, fontSize: "6px", fontWeight: 400, color: NAVY, opacity: 0.72, lineHeight: 1.35 }}>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* 6-SERVICE COMPACT GRID — 2×3 with checklists */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px" }}>
             {BACK_SERVICES.slice(1).map(svc => (
               <div key={svc.name}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
-                  <span style={{ fontFamily: MT, fontSize: "7px", fontWeight: 600, color: NAVY }}>{svc.name}</span>
-                  <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 700, color: NAVY, flexShrink: 0, marginLeft: "4px" }}>{svc.price}</span>
+                  <span style={{ fontFamily: MT, fontSize: "6.5px", fontWeight: 600, color: NAVY }}>{svc.name}</span>
+                  <span style={{ fontFamily: MT, fontSize: "6px", fontWeight: 700, color: NAVY, flexShrink: 0, marginLeft: "4px" }}>{svc.price}</span>
                 </div>
                 {svc.checklist.map(item => (
                   <div key={item} style={{ display: "flex", gap: "3px", alignItems: "flex-start", marginBottom: "1.5px" }}>
-                    <svg width="7" height="7" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "1px" }}>
-                      <path d="M1 4L3 6L7 2" stroke="#0A2F61" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{ fontFamily: MT, fontSize: "6px", fontWeight: 300, color: NAVY, opacity: 0.6, lineHeight: 1.35 }}>{item}</span>
+                    <SvgCheck size={6} color={TEAL} />
+                    <span style={{ fontFamily: MT, fontSize: "5.5px", fontWeight: 300, color: NAVY, opacity: 0.65, lineHeight: 1.35 }}>{item}</span>
                   </div>
                 ))}
               </div>

@@ -2066,86 +2066,123 @@ function BusinessPulse() {
   const CardPreview = (
     <div id="pulse-card" style={{ fontFamily: MT }}>
       <p id="pulse-screen-label-front" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#aaa", marginBottom: "14px" }}>Front</p>
-      <div id="pulse-front" style={{ width: "620px", background: NAVY_HEX, borderRadius: "3px", overflow: "hidden", marginBottom: "32px" }}>
-        <div style={{ padding: "36px 44px 28px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div>
-            <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: TEAL_HEX, marginBottom: "10px" }}>Business Pulse</div>
-            <h1 style={{ fontFamily: CG, fontSize: "30px", fontWeight: 700, color: "#fff", lineHeight: 1.1, margin: 0 }}>
-              Three things we<br />noticed about<br />
-              <span style={{ color: TEAL_HEX }}>{form.businessName || "Your Business"}</span>
-            </h1>
+
+      {/* ── FRONT — navy background ── */}
+      <div id="pulse-front" style={{ width: "620px", background: NAVY_HEX, borderRadius: "3px", overflow: "hidden", marginBottom: "32px", display: "flex", flexDirection: "column" }}>
+
+        {/* Brand bar */}
+        <div style={{ padding: "28px 44px 20px", flexShrink: 0 }}>
+          <div style={{ fontFamily: MT, fontSize: "10px", letterSpacing: "0.32em", textTransform: "uppercase", fontVariant: "small-caps", color: TEAL_HEX, marginBottom: "10px", fontWeight: 600 }}>
+            Sea Glass Insights
           </div>
-          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
-            <LogoMark />
-            <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginTop: "2px" }}>{form.businessName || "Business Name"}</div>
-            {form.location && <div style={{ fontFamily: MT, fontSize: "9px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.05em" }}>{form.location}</div>}
+          {/* Thin TEAL rule */}
+          <div style={{ height: "1px", background: TEAL_HEX, opacity: 0.6, marginBottom: "20px" }} />
+          {/* Headline block */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <div style={{ fontFamily: CG, fontSize: "33px", fontWeight: 400, fontStyle: "italic", color: SAND_HEX, lineHeight: 1.2, marginBottom: "8px" }}>
+                We looked at<br />
+                <span style={{ fontWeight: 600 }}>{form.businessName || "Your Business"}.</span>
+              </div>
+              <div style={{ fontFamily: MT, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: TEAL_HEX, fontWeight: 500 }}>
+                Here&apos;s what we found.
+              </div>
+            </div>
+            <div style={{ flexShrink: 0, marginTop: "4px" }}>
+              <LogoMark />
+            </div>
           </div>
         </div>
-        <div style={{ padding: "32px 44px", background: NAVY_HEX }}>
-          <p style={{ fontFamily: CG, fontSize: "16px", fontStyle: "italic", color: "rgba(244,234,218,0.55)", lineHeight: 1.7, marginBottom: "30px" }}>{form.introText}</p>
+
+        {/* Observations */}
+        <div style={{ flex: 1, padding: "12px 44px 10px", display: "flex", flexDirection: "column", justifyContent: "space-around" }}>
           {form.obs.map((obs, i) => (
-            <div key={i} style={{ display: "flex", gap: "22px", marginBottom: i < 2 ? "26px" : 0, paddingBottom: i < 2 ? "26px" : 0, borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-              <div style={{ fontFamily: CG, fontSize: "40px", fontWeight: 700, color: "rgba(0,206,209,0.15)", lineHeight: 1, flexShrink: 0, width: "34px", marginTop: "-4px" }}>{i + 1}</div>
-              <div>
-                {obs.label && <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: TEAL_HEX, marginBottom: "6px" }}>{obs.label}</div>}
-                {obs.title
-                  ? <div style={{ fontFamily: CG, fontSize: "19px", fontWeight: 700, color: SAND_HEX, marginBottom: "8px", lineHeight: 1.3 }}>{obs.title}</div>
-                  : <div style={{ fontFamily: CG, fontSize: "19px", color: "rgba(244,234,218,0.2)", marginBottom: "8px", fontStyle: "italic" }}>Observation {i + 1} title</div>
-                }
-                {obs.body && <div style={{ fontFamily: MT, fontSize: "12px", fontWeight: 300, color: "rgba(244,234,218,0.5)", lineHeight: 1.8 }}>{obs.body}</div>}
+            <div key={i} style={{ position: "relative" }}>
+              {i > 0 && (
+                <div style={{ height: "1px", background: TEAL_HEX, opacity: 0.22, marginBottom: "14px" }} />
+              )}
+              <div style={{ display: "flex", gap: "16px", paddingBottom: i < 2 ? "14px" : 0 }}>
+                {/* Ghost number */}
+                <div style={{ fontFamily: CG, fontSize: "56px", fontWeight: 700, color: "rgba(0,206,209,0.13)", lineHeight: 1, flexShrink: 0, width: "38px", marginTop: "-6px", userSelect: "none" }}>
+                  {i + 1}
+                </div>
+                <div style={{ flex: 1 }}>
+                  {obs.label && (
+                    <div style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.26em", textTransform: "uppercase", color: TEAL_HEX, marginBottom: "5px", fontWeight: 600 }}>
+                      {obs.label}
+                    </div>
+                  )}
+                  {obs.title
+                    ? <div style={{ fontFamily: CG, fontSize: "20px", fontWeight: 700, color: SAND_HEX, lineHeight: 1.25, marginBottom: "6px" }}>{obs.title}</div>
+                    : <div style={{ fontFamily: CG, fontSize: "20px", color: "rgba(244,234,218,0.2)", lineHeight: 1.25, marginBottom: "6px", fontStyle: "italic" }}>Observation {i + 1} title</div>
+                  }
+                  {obs.body && (
+                    <div style={{ fontFamily: MT, fontSize: "11px", fontWeight: 300, color: "rgba(255,255,255,0.62)", lineHeight: 1.6 }}>
+                      {obs.body}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
-        <div style={{ background: TEAL_HEX, padding: "20px 44px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ fontFamily: MT, fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(10,47,97,0.6)", marginBottom: "4px" }}>Want the complete picture?</div>
-            <div style={{ fontFamily: CG, fontSize: "16px", fontWeight: 700, color: NAVY_HEX }}>Market Intelligence Report — your complete edge</div>
+
+        {/* Teal footer bar */}
+        <div style={{ background: TEAL_HEX, padding: "16px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <LogoMark />
+            <div style={{ fontFamily: MT, fontSize: "10px", fontWeight: 500, color: NAVY_HEX, lineHeight: 1.4, maxWidth: "280px" }}>
+              Ready for the full picture? Ask about our <strong>Market Intelligence Report.</strong>
+            </div>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div style={{ textAlign: "right", flexShrink: 0 }}>
             <div style={{ fontFamily: MT, fontSize: "24px", fontWeight: 600, color: NAVY_HEX, lineHeight: 1 }}>{form.ctaPrice}</div>
-            <div style={{ fontFamily: MT, fontSize: "9px", color: "rgba(10,47,97,0.5)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "3px" }}>Flat fee · 48–72 hrs</div>
+            <div style={{ fontFamily: MT, fontSize: "8px", color: "rgba(10,47,97,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "3px" }}>Flat fee · 48–72 hrs</div>
           </div>
         </div>
       </div>
 
       <p id="pulse-screen-label-back" style={{ fontFamily: MT, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#bbb", margin: "8px 0 14px" }}>— Back —</p>
-      {/* ── Back panel — cream, services page layout ── */}
-      <div id="pulse-back" style={{ width: "620px", minHeight: "490px", background: "#FFFFFF", border: "1px solid #E8EDF4", borderRadius: "3px", overflow: "hidden", padding: "26px 36px", display: "flex", flexDirection: "column", gap: "14px" }}>
 
-        {/* TOP — logo + headline + subtext, centered */}
+      {/* ── Back panel — white ── */}
+      <div id="pulse-back" style={{ width: "620px", background: "#FFFFFF", border: "1px solid #E8EDF4", borderRadius: "3px", overflow: "hidden", padding: "26px 36px", display: "flex", flexDirection: "column", gap: "14px" }}>
+
+        {/* TOP — logo + headline, centered */}
         <div style={{ textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/logo_transparent_FINAL.png" alt="Sea Glass Insights" style={{ width: "260px", height: "auto", display: "block", margin: "0 auto 12px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-          <div style={{ fontFamily: CG, fontSize: "20px", fontWeight: 700, color: NAVY_HEX, lineHeight: 1.25, marginBottom: "8px" }}>
-            Know your market.<br />Refine your edge.
+          <img src="/logos/logo_transparent_FINAL.png" alt="Sea Glass Insights" style={{ width: "240px", height: "auto", display: "block", margin: "0 auto 12px" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+          <div style={{ fontFamily: CG, fontSize: "20px", fontStyle: "italic", fontWeight: 600, color: NAVY_HEX, lineHeight: 1.3, marginBottom: "10px" }}>
+            Know your market. Refine your edge.
           </div>
-          <div style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: NAVY_HEX, lineHeight: 1.7, opacity: 0.7, maxWidth: "440px", margin: "0 auto" }}>
-            Sea Glass Insights delivers professional market research and business intelligence for small businesses on the Jersey Shore. From competitive analysis and customer research to secret shopping, surveys, and AI-powered tools, every service is reviewed by a local analyst and built to give you a real edge.
-          </div>
+          {/* Thin TEAL rule */}
+          <div style={{ height: "1px", background: TEAL_HEX, opacity: 0.5, marginBottom: "0" }} />
         </div>
 
-        {/* MIR HERO — full-width featured card */}
-        <div style={{ borderLeft: "3px solid rgba(10,47,97,0.3)", backgroundColor: "rgba(10,47,97,0.04)", borderRadius: "4px", padding: "12px 14px" }}>
-          <div style={{ fontFamily: MT, fontSize: "7.5px", fontWeight: 700, color: "rgba(10,47,97,0.55)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "5px" }}>
+        {/* MIR HERO — full-width featured card, NAVY border */}
+        <div style={{ borderLeft: `3.5px solid ${NAVY_HEX}`, backgroundColor: "rgba(10,47,97,0.04)", borderRadius: "3px", padding: "12px 14px" }}>
+          <div style={{ fontFamily: MT, fontSize: "8px", fontWeight: 700, color: "rgba(10,47,97,0.5)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: "4px" }}>
             Most Popular
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "3px" }}>
-            <span style={{ fontFamily: CG, fontSize: "17px", fontWeight: 700, color: NAVY_HEX }}>Market Intelligence Report</span>
+            <span style={{ fontFamily: CG, fontSize: "18px", fontWeight: 700, color: NAVY_HEX }}>Market Intelligence Report</span>
             <span style={{ fontFamily: MT, fontSize: "14px", fontWeight: 700, color: NAVY_HEX, flexShrink: 0, marginLeft: "12px" }}>$199</span>
           </div>
-          <div style={{ fontFamily: MT, fontSize: "8px", color: "rgba(10,47,97,0.5)", marginBottom: "6px" }}>
+          <div style={{ fontFamily: MT, fontSize: "8px", color: "rgba(10,47,97,0.5)", marginBottom: "7px" }}>
             48-72 hr delivery · Flat fee
           </div>
-          {BACK_SERVICES[0].checklist.map(item => (
-            <div key={item} style={{ display: "flex", gap: "5px", alignItems: "flex-start", marginBottom: "2px" }}>
-              <span style={{ fontFamily: MT, fontSize: "9px", fontWeight: 700, color: NAVY_HEX, flexShrink: 0, lineHeight: 1.2 }}>✓</span>
-              <span style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 300, color: "rgba(10,47,97,0.65)", lineHeight: 1.4 }}>{item}</span>
-            </div>
-          ))}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 12px" }}>
+            {BACK_SERVICES[0].checklist.map(item => (
+              <div key={item} style={{ display: "flex", gap: "5px", alignItems: "flex-start", marginBottom: "3px" }}>
+                <svg width="9" height="9" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "2px" }}>
+                  <path d="M1 4L3 6L7 2" stroke={TEAL_HEX} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span style={{ fontFamily: MT, fontSize: "9px", fontWeight: 400, color: NAVY_HEX, opacity: 0.72, lineHeight: 1.35 }}>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* 6-SERVICE COMPACT GRID — 2×3 with checklists */}
+        {/* 6-SERVICE COMPACT GRID — 2×3 with SVG checkmarks */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px" }}>
           {BACK_SERVICES.slice(1).map(svc => (
             <div key={svc.name}>
@@ -2155,8 +2192,10 @@ function BusinessPulse() {
               </div>
               {svc.checklist.map(item => (
                 <div key={item} style={{ display: "flex", gap: "4px", alignItems: "flex-start", marginBottom: "2px" }}>
-                  <span style={{ fontFamily: MT, fontSize: "8.5px", fontWeight: 700, color: NAVY_HEX, flexShrink: 0, lineHeight: 1.2 }}>✓</span>
-                  <span style={{ fontFamily: MT, fontSize: "8px", fontWeight: 300, color: "rgba(10,47,97,0.6)", lineHeight: 1.4 }}>{item}</span>
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: "2px" }}>
+                    <path d="M1 4L3 6L7 2" stroke={TEAL_HEX} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{ fontFamily: MT, fontSize: "8px", fontWeight: 300, color: "rgba(10,47,97,0.65)", lineHeight: 1.4 }}>{item}</span>
                 </div>
               ))}
             </div>
