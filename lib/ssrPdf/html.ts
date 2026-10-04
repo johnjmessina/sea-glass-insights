@@ -102,7 +102,7 @@ function narrativeSection(content: unknown): string {
 // otherwise fall back to narrativeSection prose
 function personaCards(content: unknown): string {
   if (Array.isArray(content) && content.length) {
-    const PERSONA_ACCENTS = [TEAL, NAVY, "#059669", "#6B7280", "#D97706", "#0A2F61"];
+    const PERSONA_ACCENTS = [TEAL, NAVY, "#059669", "#8FADC8", "#DC6B6B", "#059669"];
     return `<div class="persona-grid">${content.map((p, i) => {
       const g = obj(p);
       const accent = PERSONA_ACCENTS[i % PERSONA_ACCENTS.length];

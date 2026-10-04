@@ -123,11 +123,9 @@ function scoreBand(score: number): string {
 }
 
 function bandColor(score: number): string {
-  if (score >= 90) return "#059669"; // green
-  if (score >= 75) return "#0A2F61"; // navy
-  if (score >= 60) return "#6B7280"; // gray
-  if (score >= 45) return "#D97706"; // amber
-  return "#DC2626";                  // red
+  if (score >= 75) return "#059669"; // emerald green — strong/exceptional
+  if (score >= 60) return "#8FADC8"; // blue-gray — average
+  return "#DC6B6B";                  // soft red — below average/critical
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -256,9 +254,9 @@ function scorecardSection(sc: Record<string, boolean | number | unknown>): strin
 function analystObservationsSection(obs: Record<string, unknown>): string {
   const cards: { label: string; val: unknown; accent: string; icon: string }[] = [
     { label: "Best Moment",                val: obs.best_moment,             accent: "#059669", icon: "&#9650;" },
-    { label: "Biggest Missed Opportunity", val: obs.biggest_miss,            accent: "#DC2626", icon: "&#9660;" },
-    { label: "Immediate Fix",              val: obs.immediate_fix,           accent: "#0A2F61", icon: "&#9654;" },
-    { label: "Additional Observations",    val: obs.additional_observations, accent: "#6B7280", icon: "&#9632;" },
+    { label: "Biggest Missed Opportunity", val: obs.biggest_miss,            accent: "#DC6B6B", icon: "&#9660;" },
+    { label: "Immediate Fix",              val: obs.immediate_fix,           accent: "#8FADC8", icon: "&#9654;" },
+    { label: "Additional Observations",    val: obs.additional_observations, accent: NAVY,      icon: "&#9632;" },
   ];
   return `<div class="obs-cards">${
     cards.filter(({ val }) => String(val ?? "").trim()).map(({ label, val, accent, icon }) => `
@@ -271,7 +269,7 @@ function analystObservationsSection(obs: Record<string, unknown>): string {
   }</div>`;
 }
 
-const NARRATIVE_ACCENTS = [TEAL, NAVY, "#059669", "#6B7280", "#0A2F61", "#D97706", "#059669"];
+const NARRATIVE_ACCENTS = [TEAL, NAVY, "#059669", "#8FADC8", "#DC6B6B", "#059669", TEAL];
 
 function narrativeNotesSection(aiDraft: Record<string, unknown>): string {
   return NARRATIVE_SECTIONS.map(({ key, label }, i) => {

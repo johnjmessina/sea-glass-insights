@@ -106,11 +106,9 @@ function scoreBand(score: number): string {
 }
 
 function bandColor(score: number): string {
-  if (score >= 90) return "#059669";
-  if (score >= 75) return "#0A2F61";
-  if (score >= 60) return "#6B7280";
-  if (score >= 45) return "#D97706";
-  return "#DC2626";
+  if (score >= 75) return "#059669"; // emerald green — strong/exceptional
+  if (score >= 60) return "#8FADC8"; // blue-gray — average
+  return "#DC6B6B";                  // soft red — below average/critical
 }
 
 // Try to extract a numeric score (0–100) from structured content
