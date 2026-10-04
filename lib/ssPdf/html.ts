@@ -163,23 +163,20 @@ function paragraphs(v: unknown, cls = ""): string {
 // ── Section renderers ──────────────────────────────────────────────────────
 
 function visitOverviewSection(visitOV: Record<string, unknown>): string {
-  const rows: [string, unknown][] = [
-    ["Business Name",    visitOV.business_name],
-    ["Location",         visitOV.location],
-    ["Date of Visit",    visitOV.date_of_visit ? fmtDate(String(visitOV.date_of_visit)) : "—"],
-    ["Time of Visit",    visitOV.time_of_visit],
-    ["Shopper Scenario", visitOV.shopper_scenario],
-    ["Template Used",    visitOV.template_used],
+  const fields: [string, string, unknown][] = [
+    ["&#9679;", "Business",        visitOV.business_name],
+    ["&#9679;", "Location",        visitOV.location],
+    ["&#9679;", "Date of Visit",   visitOV.date_of_visit ? fmtDate(String(visitOV.date_of_visit)) : null],
+    ["&#9679;", "Time of Visit",   visitOV.time_of_visit],
+    ["&#9679;", "Shopper Scenario",visitOV.shopper_scenario],
+    ["&#9679;", "Template Used",   visitOV.template_used],
   ];
-  return `
-    <table class="overview-table">
-      <tbody>${rows.map(([label, val], i) => `
-        <tr class="${i % 2 === 1 ? "even" : ""}">
-          <th>${esc(label)}</th>
-          <td>${text(val) || "—"}</td>
-        </tr>`).join("")}
-      </tbody>
-    </table>`;
+  const cards = fields.map(([, label, val]) => `
+    <div class="ov-card">
+      <div class="ov-label">${esc(label)}</div>
+      <div class="ov-value">${text(val) || "—"}</div>
+    </div>`).join("");
+  return `<div class="ov-grid">${cards}</div>`;
 }
 
 function scorecardSection(sc: Record<string, boolean | number | unknown>): string {
@@ -286,8 +283,45 @@ function summarySection(
   aiDraft: Record<string, unknown>,
   summaryAnalystNote: string,
 ): string {
+  const raw = String(aiDraft.summary_and_recommendations ?? "").trim();
+
+  // Split prose into paragraphs; detect any "First, ... Second, ... Third, ... Fourth," action sequence
+  const paras = raw.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+
+  // Find the paragraph containing the ordered action sequence
+  const actionPara = paras.find(p => /\bFirst[,:]/.test(p) && /\bSecond[,:]/.test(p));
+  const otherParas = paras.filter(p => p !== actionPara);
+
+  // Parse numbered actions from the action paragraph
+  let actionCards = "";
+  if (actionPara) {
+    const actions: { label: string; body: string }[] = [];
+    const actionRe = /\b(First|Second|Third|Fourth|Fifth)[,:]\s*/g;
+    const splits = actionPara.split(actionRe).filter(Boolean);
+    // splits = ["First", "text...", "Second", "text...", ...]
+    for (let i = 0; i < splits.length - 1; i++) {
+      if (/^(First|Second|Third|Fourth|Fifth)$/.test(splits[i])) {
+        actions.push({ label: splits[i], body: (splits[i + 1] ?? "").replace(/\s+$/, "") });
+      }
+    }
+    if (actions.length >= 2) {
+      const ICONS = ["&#9654;", "&#9654;", "&#9654;", "&#9654;", "&#9654;"];
+      const COLORS = ["#059669", "#8FADC8", "#8FADC8", "#DC6B6B"];
+      actionCards = `<div class="summary-actions">
+        <div class="summary-actions-label">Priority Actions</div>
+        <div class="summary-action-grid">${actions.map((a, idx) => `
+          <div class="summary-action-card" style="border-left:3pt solid ${COLORS[idx] ?? TEAL}">
+            <div class="summary-action-num" style="color:${COLORS[idx] ?? TEAL}">${ICONS[idx]} ${a.label}</div>
+            <div class="summary-action-body">${esc(a.body)}</div>
+          </div>`).join("")}
+        </div>
+      </div>`;
+    }
+  }
+
   return `
-    ${paragraphs(aiDraft.summary_and_recommendations)}
+    ${otherParas.map(p => `<p>${esc(p)}</p>`).join("")}
+    ${actionCards}
     ${summaryAnalystNote && summaryAnalystNote.trim() ? `
       <div class="summary-analyst-note">
         <div class="obs-head">Analyst Notes</div>
@@ -371,13 +405,14 @@ section.contents { page: contents; }
 
 /* Cover */
 .cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.cover-logo { width: 2.6in; margin-top: 0.6in; }
-.cover-type { font-size: 10pt; font-weight: 700; color: ${TEAL}; letter-spacing: 2.5pt; text-transform: uppercase; margin: 0.55in 0 0; }
-.cover-title { font-size: 26pt; font-weight: 700; color: ${NAVY}; letter-spacing: 2.5pt; margin: 6pt 0 0; line-height: 1.2; }
-.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 18pt auto; }
-.cover-business { font-size: 20pt; color: ${NAVY}; margin: 0; }
-.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 10pt; }
-.cover-conf { margin-top: auto; font-size: 9pt; color: ${GRAY}; font-style: italic; border-top: 1pt solid ${CREAM}; padding-top: 10pt; width: 100%; }
+.cover-logo { width: 2.8in; margin-top: 0.7in; }
+.cover-type { font-size: 9pt; font-weight: 700; color: ${TEAL}; letter-spacing: 3pt; text-transform: uppercase; margin: 0.65in 0 0; }
+.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }
+.cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
+.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 12pt; }
+.cover-footer { margin-top: auto; width: calc(100% + 2in); margin-left: -1in; margin-right: -1in; background: ${NAVY}; padding: 22pt 1in; text-align: left; }
+.cover-footer-biz { font-size: 13pt; font-weight: 700; color: ${WHITE}; margin-bottom: 4pt; }
+.cover-footer-meta { font-size: 9pt; color: rgba(255,255,255,0.65); font-style: italic; }
 
 /* Contents */
 .toc { list-style: none; margin: 8pt 0 0; padding: 0; }
@@ -386,27 +421,26 @@ section.contents { page: contents; }
 .toc .toc-dots { flex: 1; border-bottom: 1pt dotted ${GRAY}; margin: 0 8pt; transform: translateY(-3pt); }
 .toc .toc-page { font-weight: 700; min-width: 18pt; text-align: right; }
 
-/* Visit Overview table */
+/* Visit Overview grid */
 table { border-collapse: collapse; width: 100%; }
-.overview-table th, .overview-table td { padding: 9pt 12pt; font-size: 11pt; vertical-align: top; border-bottom: 1px solid ${RULE}; }
-.overview-table th { width: 32%; color: ${NAVY}; font-weight: 700; font-size: 10pt; letter-spacing: 1px; text-transform: uppercase; background: ${ROW_TINT}; }
-.overview-table td { color: ${INK}; }
-.overview-table tr.even th, .overview-table tr.even td { background: ${WHITE}; }
-.overview-table tr:last-child th, .overview-table tr:last-child td { border-bottom: none; }
+.ov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; margin-bottom: 8pt; }
+.ov-card { background: ${ROW_TINT}; border-radius: 4pt; padding: 12pt 14pt; border-left: 3pt solid ${TEAL}; break-inside: avoid; }
+.ov-label { font-size: 8.5pt; font-weight: 700; color: ${GRAY}; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 5pt; }
+.ov-value { font-size: 12pt; color: ${NAVY}; font-weight: 700; line-height: 1.3; }
 
 /* Scorecard Hero */
-.score-callout-hero { display: flex; align-items: flex-start; gap: 20pt; padding: 18pt 20pt; margin-bottom: 20pt; background: ${ROW_TINT}; border-radius: 4pt; border-top: 4pt solid ${TEAL}; }
-.score-hero-left { min-width: 120pt; }
-.score-hero-label { font-size: 8.5pt; font-weight: 700; color: ${GRAY}; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 4pt; }
-.score-hero-number { font-size: 54pt; font-weight: 700; line-height: 1; color: ${NAVY}; }
-.score-hero-denom { font-size: 14pt; color: ${GRAY}; margin-top: -4pt; }
-.score-hero-band { display: inline-block; margin-top: 8pt; padding: 3pt 10pt; border-radius: 12pt; color: ${WHITE}; font-size: 10pt; font-weight: 700; letter-spacing: 0.5pt; }
-.score-scale { font-size: 8pt; color: ${GRAY}; margin-top: 10pt; line-height: 1.4; }
-.dim-pills-wrap { display: flex; align-items: flex-end; gap: 8pt; flex: 1; justify-content: flex-end; padding-bottom: 4pt; }
-.dim-pill { display: flex; flex-direction: column; align-items: center; gap: 3pt; min-width: 40pt; }
-.dim-pill-bar { width: 14pt; border-radius: 2pt 2pt 0 0; min-height: 4pt; }
-.dim-pill-label { font-size: 6.5pt; color: ${GRAY}; text-align: center; line-height: 1.2; white-space: nowrap; }
-.dim-pill-score { font-size: 8pt; font-weight: 700; }
+.score-callout-hero { display: flex; align-items: stretch; gap: 0; margin-bottom: 20pt; background: ${ROW_TINT}; border-radius: 4pt; overflow: hidden; border: 1pt solid ${RULE}; }
+.score-hero-left { min-width: 140pt; padding: 20pt 22pt; border-right: 1pt solid ${RULE}; display: flex; flex-direction: column; justify-content: center; }
+.score-hero-label { font-size: 8pt; font-weight: 700; color: ${GRAY}; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 6pt; }
+.score-hero-number { font-size: 68pt; font-weight: 700; line-height: 1; }
+.score-hero-denom { font-size: 13pt; color: ${GRAY}; margin-top: 0; }
+.score-hero-band { display: inline-block; margin-top: 10pt; padding: 4pt 12pt; border-radius: 12pt; color: ${WHITE}; font-size: 10pt; font-weight: 700; letter-spacing: 0.5pt; }
+.score-scale { font-size: 7.5pt; color: ${GRAY}; margin-top: 10pt; line-height: 1.5; }
+.dim-pills-wrap { display: flex; align-items: flex-end; gap: 10pt; flex: 1; justify-content: space-around; padding: 18pt 16pt 14pt; }
+.dim-pill { display: flex; flex-direction: column; align-items: center; gap: 4pt; }
+.dim-pill-bar { width: 18pt; border-radius: 2pt 2pt 0 0; min-height: 4pt; }
+.dim-pill-label { font-size: 7pt; color: ${GRAY}; text-align: center; line-height: 1.3; max-width: 44pt; }
+.dim-pill-score { font-size: 9pt; font-weight: 700; }
 
 /* Scorecard table */
 .scorecard-table thead th { background: ${NAVY}; color: ${WHITE}; font-size: 8.5pt; letter-spacing: 1pt; text-transform: uppercase; text-align: left; padding: 8pt 10pt; }
@@ -435,6 +469,14 @@ table { border-collapse: collapse; width: 100%; }
 .obs-head { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid ${TEAL}; }
 .summary-analyst-note { margin-top: 16pt; padding: 12pt 14pt; background: ${ROW_TINT}; border-radius: 4pt; }
 .gray-text { color: ${GRAY}; font-style: italic; }
+
+/* Summary Actions */
+.summary-actions { margin: 20pt 0; }
+.summary-actions-label { font-size: 8pt; font-weight: 700; color: ${GRAY}; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 10pt; }
+.summary-action-grid { display: flex; flex-direction: column; gap: 10pt; }
+.summary-action-card { padding: 11pt 14pt; background: ${ROW_TINT}; border-radius: 0 4pt 4pt 0; break-inside: avoid; }
+.summary-action-num { font-size: 9pt; font-weight: 700; letter-spacing: 0.5pt; text-transform: uppercase; margin-bottom: 4pt; }
+.summary-action-body { font-size: 10.5pt; color: ${INK}; line-height: 1.5; }
 
 /* Analyst Note */
 .note p { font-style: italic; font-size: 12pt; line-height: 1.6; color: ${INK}; margin-bottom: 12pt; }
@@ -499,11 +541,13 @@ export function buildSsReportHtml(
         <div class="cover-inner">
           <img class="cover-logo" src="data:image/png;base64,${logoAssets.coverLogo}" alt="Sea Glass Insights">
           <div class="cover-type">Secret Shopping Report</div>
-          <div class="cover-title">SECRET SHOPPING REPORT</div>
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
-          <div class="cover-conf">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          <div class="cover-footer">
+            <div class="cover-footer-biz">${esc(order.business_name)}</div>
+            <div class="cover-footer-meta">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          </div>
         </div>
       </section>`;
     const contents = `
