@@ -2056,7 +2056,7 @@ function BusinessPulse() {
   const inp = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam";
   const lbl = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
 
-  const CG       = "'Cormorant Garamond', Georgia, serif";
+  const CG       = "Gelasio, Georgia, serif";
   const MT       = "'Montserrat', sans-serif";
   const NAVY_HEX = "#0A2F61";
   const TEAL_HEX = "#00CED1";

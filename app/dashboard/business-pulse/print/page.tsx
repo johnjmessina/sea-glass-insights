@@ -105,7 +105,7 @@ export default async function BusinessPulsePrintPage(
     // use fallback
   }
 
-  const CG = "'Cormorant Garamond', Georgia, serif";
+  const CG = "Gelasio, Georgia, serif";
   const MT = "'Montserrat', sans-serif";
 
   const qrDataUrl = await QRCode.toDataURL("https://www.seaglassinsights.com", {
@@ -119,7 +119,7 @@ export default async function BusinessPulsePrintPage(
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap"
           rel="stylesheet"
         />
         <style>{`
