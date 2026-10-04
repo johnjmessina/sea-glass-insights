@@ -84,18 +84,20 @@ function paragraphs(v: unknown, cls = ""): string {
 }
 
 // Analyst Perspective callout — navy left border, light navy background
-function perspectiveCallout(perspectiveText: string): string {
-  if (!perspectiveText?.trim()) return "";
+function perspectiveCallout(perspectiveText: unknown): string {
+  const s = String(perspectiveText ?? "");
+  if (!s.trim()) return "";
   return `
     <div class="perspective-callout">
       <div class="perspective-label">Analyst Perspective</div>
-      <p>${text(perspectiveText)}</p>
+      <p>${text(s)}</p>
     </div>`;
 }
 
 function analystNoteBlock(note: string, icon: string): string {
+  const noteStr = String(note ?? "");
   return `
-    ${note.trim() ? `<div class="note">${paragraphs(note)}</div>` : ""}
+    ${noteStr.trim() ? `<div class="note">${paragraphs(noteStr)}</div>` : ""}
     <div class="signature">
       <div class="sig-name">John Messina</div>
       <div class="sig-title">Founder, Sea Glass Insights</div>
@@ -273,8 +275,9 @@ function quantSectionContent(
 // ── Prose section renderers ────────────────────────────────────────────────
 
 // Parse numbered themes from prose text (looks for "1.", "2.", or "Theme 1" patterns)
-function vocThematicContent(rawText: string): string {
-  if (!rawText || !rawText.trim()) return "";
+function vocThematicContent(rawTextIn: unknown): string {
+  const rawText = String(rawTextIn ?? "");
+  if (!rawText.trim()) return "";
   // Try to split on numbered theme headers: "1. Theme Title\nBody" or "**Theme 1: Title**\nBody"
   const themeRegex = /(?:^|\n)(?:\*{0,2})(?:\d+\.\s+|Theme\s+\d+[:\-\s]+)(.+?)(?:\*{0,2})\n([\s\S]+?)(?=(?:\n(?:\*{0,2})(?:\d+\.\s+|Theme\s+\d+[:\-\s]+)|$))/gi;
   const matches = [...rawText.matchAll(themeRegex)];
@@ -293,8 +296,9 @@ function vocThematicContent(rawText: string): string {
 }
 
 // Analyst Interpretation: pull out recommendation bullets visually
-function vocInterpretationContent(rawText: string): string {
-  if (!rawText || !rawText.trim()) return "";
+function vocInterpretationContent(rawTextIn: unknown): string {
+  const rawText = String(rawTextIn ?? "");
+  if (!rawText.trim()) return "";
   // Look for a "Recommendations" block followed by bullets
   const recSplit = rawText.split(/\n(?=Recommendation|Key Recommendation|Strategic Recommendation|Next Step)/i);
   if (recSplit.length >= 2) {
