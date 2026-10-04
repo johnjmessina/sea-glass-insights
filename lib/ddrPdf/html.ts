@@ -343,6 +343,22 @@ function priorityActionFramework(paf: unknown): string {
   }).join("")}</div>`;
 }
 
+// Expanded Analyst Interpretation — card-per-key visual treatment
+function expandedAnalystSection(content: unknown): string {
+  if (typeof content === "string") return paragraphs(content);
+  const c = obj(content);
+  const keys = Object.keys(c);
+  if (!keys.length) return "";
+  const cards = keys.map(k => {
+    const label = k.replace(/_/g, " ").toUpperCase();
+    return `<div class="expanded-card">
+      <div class="expanded-card-heading">${esc(label)}</div>
+      ${paragraphs(c[k])}
+    </div>`;
+  }).join("");
+  return `<div class="expanded-cards">${cards}</div>`;
+}
+
 function analystNote(note: string, perspectives: Record<string, string>, icon: string): string {
   const hasPerspectives = Object.values(perspectives).some(v => v?.trim());
   return `
@@ -429,13 +445,14 @@ section.contents { page: contents; }
 
 /* Cover */
 .cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.cover-logo { width: 2.6in; margin-top: 0.6in; }
-.cover-type { font-size: 10pt; font-weight: 700; color: ${TEAL}; letter-spacing: 2.5pt; text-transform: uppercase; margin: 0.55in 0 0; }
-.cover-title { font-size: 26pt; font-weight: 700; color: ${NAVY}; letter-spacing: 2.5pt; margin: 6pt 0 0; line-height: 1.2; }
-.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 18pt auto; }
-.cover-business { font-size: 20pt; color: ${NAVY}; margin: 0; }
-.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 10pt; }
-.cover-conf { margin-top: auto; font-size: 9pt; color: ${GRAY}; font-style: italic; border-top: 1pt solid ${CREAM}; padding-top: 10pt; width: 100%; }
+.cover-logo { width: 2.8in; margin-top: 0.7in; }
+.cover-type { font-size: 9pt; font-weight: 700; color: ${TEAL}; letter-spacing: 3pt; text-transform: uppercase; margin: 0.65in 0 0; }
+.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }
+.cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
+.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 12pt; }
+.cover-footer { margin-top: auto; width: calc(100% + 2in); margin-left: -1in; margin-right: -1in; background: ${NAVY}; padding: 22pt 1in; text-align: left; }
+.cover-footer-biz { font-size: 13pt; font-weight: 700; color: ${WHITE}; margin-bottom: 4pt; }
+.cover-footer-meta { font-size: 9pt; color: rgba(255,255,255,0.65); font-style: italic; }
 
 /* Contents */
 .toc { list-style: none; margin: 8pt 0 0; padding: 0; }
@@ -539,6 +556,13 @@ table { border-collapse: collapse; width: 100%; }
 .paf-actions li { font-size: 11pt; margin-bottom: 5pt; }
 .paf-actions li::marker { color: ${TEAL}; }
 
+/* Expanded Analyst Interpretation cards */
+.expanded-cards { display: flex; flex-direction: column; gap: 14pt; margin-bottom: 16pt; }
+.expanded-card { background: ${ROW_TINT}; border-left: 3pt solid ${TEAL}; border-radius: 0 4pt 4pt 0; padding: 14pt; break-inside: avoid; }
+.expanded-card-heading { font-size: 11pt; font-weight: 700; color: ${NAVY}; letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 6pt; }
+.expanded-card p { margin: 0 0 6pt; font-size: 11pt; }
+.expanded-card p:last-child { margin-bottom: 0; }
+
 /* Analyst Note */
 .note p { font-style: italic; font-size: 12pt; line-height: 1.6; color: ${INK}; margin-bottom: 12pt; }
 .signature { margin-top: 26pt; padding-top: 10pt; border-top: 2pt solid ${NAVY}; width: 3in; }
@@ -572,7 +596,7 @@ export function buildDdrReportHtml(
     decision_specific_analysis:     () => decisionAnalysisSection(draft.decision_specific_analysis),
     extended_recommendations:       () => extendedRecommendations(draft.extended_recommendations),
     priority_action_framework:      () => priorityActionFramework(draft.priority_action_framework),
-    expanded_analyst_interpretation: () => narrativeSection(draft.expanded_analyst_interpretation),
+    expanded_analyst_interpretation: () => expandedAnalystSection(draft.expanded_analyst_interpretation),
   };
 
   // Wrap each section — the last one (expanded_analyst_interpretation) gets the
@@ -602,11 +626,13 @@ export function buildDdrReportHtml(
         <div class="cover-inner">
           <img class="cover-logo" src="data:image/png;base64,${logoAssets.coverLogo}" alt="Sea Glass Insights">
           <div class="cover-type">Deep Dive Report</div>
-          <div class="cover-title">DEEP DIVE REPORT</div>
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)}${order.location ? ` &nbsp;|&nbsp; ${esc(order.location)}` : ""} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
-          <div class="cover-conf">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          <div class="cover-footer">
+            <div class="cover-footer-biz">${esc(order.business_name)}</div>
+            <div class="cover-footer-meta">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          </div>
         </div>
       </section>`;
     const contents = `

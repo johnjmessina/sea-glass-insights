@@ -355,12 +355,13 @@ section.contents { page: contents; }
 
 /* Cover */
 .cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.cover-logo { width: 2.6in; margin-top: 0.6in; }
-.cover-title { font-size: 26pt; font-weight: 700; color: ${NAVY}; letter-spacing: 2.5pt; margin: 0.55in 0 0; line-height: 1.2; }
-.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 18pt auto; }
-.cover-business { font-size: 20pt; color: ${NAVY}; margin: 0; }
-.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 10pt; }
-.cover-conf { margin-top: auto; font-size: 9pt; color: ${GRAY}; font-style: italic; border-top: 1pt solid ${CREAM}; padding-top: 10pt; width: 100%; }
+.cover-logo { width: 2.8in; margin-top: 0.7in; }
+.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }
+.cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
+.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 12pt; }
+.cover-footer { margin-top: auto; width: calc(100% + 2in); margin-left: -1in; margin-right: -1in; background: ${NAVY}; padding: 22pt 1in; text-align: left; }
+.cover-footer-biz { font-size: 13pt; font-weight: 700; color: ${WHITE}; margin-bottom: 4pt; }
+.cover-footer-meta { font-size: 9pt; color: rgba(255,255,255,0.65); font-style: italic; }
 
 /* Contents */
 .toc { list-style: none; margin: 8pt 0 0; padding: 0; }
@@ -495,11 +496,13 @@ export function buildMirReportHtml(
       <section class="page cover">
         <div class="cover-inner">
           <img class="cover-logo" src="data:image/png;base64,${logoAssets.coverLogo}" alt="Sea Glass Insights">
-          <div class="cover-title">MARKET INTELLIGENCE REPORT</div>
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
-          <div class="cover-conf">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          <div class="cover-footer">
+            <div class="cover-footer-biz">${esc(order.business_name)}</div>
+            <div class="cover-footer-meta">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          </div>
         </div>
       </section>`;
     const contents = `

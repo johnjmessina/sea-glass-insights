@@ -212,11 +212,18 @@ function bannerTable(
   if (!sv) return "";
   const scaleQs = questions.filter(q => q.type === "scale_1_7" && q.id !== svId);
   if (!scaleQs.length) return "";
-  const headerCols = scaleQs.map(q => `<th>${esc(q.text.slice(0, 32) + (q.text.length > 32 ? "…" : ""))}</th>`).join("");
+  const headerCols = scaleQs.map(q => {
+    const label = esc(q.text.slice(0, 28) + (q.text.length > 28 ? "…" : ""));
+    return `<th colspan="2" class="banner-q-head">${label}</th>`;
+  }).join("");
+  const subHeaderCols = scaleQs.map(() =>
+    `<th class="banner-sub-head">T2B</th><th class="banner-sub-head">Mean</th>`
+  ).join("");
   const rows = Object.entries(cuts).map(([sv2, segData], ri) => {
     const dataCols = scaleQs.map(tq => {
       const cell = segData[tq.id] as { t2b?: number; mean?: number } | undefined;
-      return `<td>${cell ? `T2B: ${cell.t2b ?? 0}%  M: ${cell.mean ?? 0}` : "—"}</td>`;
+      if (!cell) return `<td class="banner-no-data">—</td><td class="banner-no-data">—</td>`;
+      return `<td class="banner-t2b">${cell.t2b ?? 0}%</td><td class="banner-mean">${cell.mean ?? 0}</td>`;
     }).join("");
     return `<tr${ri % 2 === 1 ? ` class="shade"` : ""}><td class="seg-val">${esc(sv2)}</td>${dataCols}</tr>`;
   }).join("");
@@ -226,8 +233,11 @@ function bannerTable(
       <table class="quant-table banner-table">
         <thead>
           <tr>
-            <th>Segment</th>
+            <th rowspan="2">Segment</th>
             ${headerCols}
+          </tr>
+          <tr>
+            ${subHeaderCols}
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -363,18 +373,19 @@ section.contents { page: contents; }
 
 /* Cover */
 .cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.cover-logo { width: 2.6in; margin-top: 0.6in; }
-.cover-type { font-size: 10pt; font-weight: 700; color: ${TEAL}; letter-spacing: 2.5pt; text-transform: uppercase; margin: 0.55in 0 0; }
-.cover-title { font-size: 26pt; font-weight: 700; color: ${NAVY}; letter-spacing: 2.5pt; margin: 6pt 0 0; line-height: 1.2; }
-.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 18pt auto; }
-.cover-business { font-size: 20pt; color: ${NAVY}; margin: 0; }
-.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 10pt; }
+.cover-logo { width: 2.8in; margin-top: 0.7in; }
+.cover-type { font-size: 9pt; font-weight: 700; color: ${TEAL}; letter-spacing: 3pt; text-transform: uppercase; margin: 0.65in 0 0; }
+.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }
+.cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
+.cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 12pt; }
 .cover-includes { margin-top: 24pt; text-align: left; width: 4in; }
 .cover-includes-head { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; color: ${TEAL}; margin-bottom: 10pt; }
 .cover-includes ul { list-style: none; margin: 0; padding: 0; }
 .cover-includes li { font-size: 11pt; color: ${NAVY}; margin-bottom: 5pt; }
 .cover-includes li::before { content: "\\2014\\00a0"; color: ${TEAL}; font-weight: 700; }
-.cover-conf { margin-top: auto; font-size: 9pt; color: ${GRAY}; font-style: italic; border-top: 1pt solid ${CREAM}; padding-top: 10pt; width: 100%; }
+.cover-footer { margin-top: auto; width: calc(100% + 2in); margin-left: -1in; margin-right: -1in; background: ${NAVY}; padding: 22pt 1in; text-align: left; }
+.cover-footer-biz { font-size: 13pt; font-weight: 700; color: ${WHITE}; margin-bottom: 4pt; }
+.cover-footer-meta { font-size: 9pt; color: rgba(255,255,255,0.65); font-style: italic; }
 
 /* Contents */
 .toc { list-style: none; margin: 8pt 0 0; padding: 0; }
@@ -415,6 +426,11 @@ section.contents { page: contents; }
 .quant-table .bold-cell { font-weight: 700; }
 .quant-table .wide-col { width: 66%; }
 .quant-table .seg-val { font-weight: 700; }
+.banner-q-head { text-align: center; border-bottom: 1pt solid rgba(255,255,255,0.3); }
+.banner-sub-head { font-size: 8pt; text-align: center; letter-spacing: 0.5pt; color: rgba(255,255,255,0.85); }
+.banner-t2b { font-weight: 700; text-align: center; color: ${NAVY}; }
+.banner-mean { text-align: center; color: ${GRAY}; font-size: 9.5pt; }
+.banner-no-data { text-align: center; color: ${GRAY}; }
 
 /* Analyst Perspective callout */
 .perspective-callout {
@@ -525,7 +541,6 @@ export function buildVocReportHtml(
         <div class="cover-inner">
           <img class="cover-logo" src="data:image/png;base64,${logoAssets.coverLogo}" alt="Sea Glass Insights">
           <div class="cover-type">Voice of Customer Survey</div>
-          <div class="cover-title">VOICE OF CUSTOMER SURVEY</div>
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)}${order.location ? ` &nbsp;|&nbsp; ${esc(order.location)}` : ""} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
@@ -533,7 +548,10 @@ export function buildVocReportHtml(
             <div class="cover-includes-head">This Report Contains</div>
             <ul>${COVER_SECTIONS.map(s => `<li>${esc(s)}</li>`).join("")}</ul>
           </div>
-          <div class="cover-conf">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          <div class="cover-footer">
+            <div class="cover-footer-biz">${esc(order.business_name)}</div>
+            <div class="cover-footer-meta">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
+          </div>
         </div>
       </section>`;
     const contents = `
