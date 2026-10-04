@@ -587,7 +587,7 @@ function overallPresenceSection(content: unknown): string {
   // Recommendations rendered as a teal-bordered action callout, not plain prose
   const recsRaw = c.recommendations ?? c.recommendation ?? c.next_steps ?? c.action_plan ?? null;
   const recsHtml = recsRaw
-    ? `<div class="recs-callout" style="margin-top:16pt;border-left:4pt solid ${TEAL};background:${TEAL}12;padding:10pt 14pt;border-radius:2pt">
+    ? `<div class="recs-callout" style="margin-top:16pt;border-left:4pt solid ${TEAL};background:${TEAL}12;padding:10pt 14pt;border-radius:2pt;break-inside:avoid;page-break-inside:avoid">
         <div class="recs-callout-label" style="font-size:7pt;font-weight:700;letter-spacing:1.5pt;text-transform:uppercase;color:${TEAL};margin-bottom:6pt">Recommendations</div>
         ${paragraphs(recsRaw)}
       </div>`
@@ -806,8 +806,9 @@ table { border-collapse: collapse; width: 100%; }
 .scorecard-rating { }
 
 /* Performance Metric Cards */
-.metric-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12pt; margin-bottom: 16pt; }
-.metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; break-inside: avoid; }
+/* Use flex-wrap instead of CSS grid so cards can flow across page breaks cleanly */
+.metric-cards { display: flex; flex-wrap: wrap; gap: 12pt; margin-bottom: 16pt; }
+.metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; break-inside: avoid; page-break-inside: avoid; flex: 1 1 calc(33% - 8pt); min-width: 140pt; }
 .metric-card-header { display: flex; align-items: center; gap: 6pt; margin-bottom: 8pt; }
 .metric-card-icon { font-size: 16pt; }
 .metric-card-title { font-size: 11pt; font-weight: 700; flex: 1; }
