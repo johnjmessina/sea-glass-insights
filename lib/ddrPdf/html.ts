@@ -213,7 +213,7 @@ function competitiveIntelligence(comps: unknown): string {
     <tbody>${competitors.map(c => {
       const x = obj(c);
       return `<tr>
-        <th scope="row">${text(x.name)}</th>
+        <th scope="row">${text(x.name ?? x.competitor)}</th>
         <td>${text(x.strength) || "&mdash;"}</td>
         <td>${text(x.vulnerability ?? x.weakness) || "&mdash;"}</td>
         <td>${text(x.edge ?? x.your_edge) || "&mdash;"}</td>
@@ -274,6 +274,11 @@ function decisionFocusCallout(content: unknown): string {
 // Enhanced market context — stat tiles first, then prose
 function marketContextSection(content: unknown): string {
   const stats = marketStatCallouts(content);
+  // If content is a structured object with a narrative field, render just that prose
+  if (content && typeof content === "object" && !Array.isArray(content)) {
+    const c = obj(content);
+    if (c.narrative) return stats + paragraphs(c.narrative);
+  }
   return stats + narrativeSection(content);
 }
 
@@ -295,7 +300,8 @@ function extendedRecommendations(recs: unknown): string {
   ];
 
   function recTier(rec: Obj, i: number, n: number): 1|2|3 {
-    const p = Number(rec.priority);
+    const raw = String(rec.priority ?? "").replace(/^P/i, "");
+    const p = Number(raw);
     if (p === 1 || p === 2 || p === 3) return p;
     return Math.min(3, 1 + Math.floor((i * 3) / n)) as 1|2|3;
   }
@@ -585,16 +591,29 @@ export function buildDdrReportHtml(
   analystPerspectives: Record<string, string> = {},
   opts: BuildOptions = {},
 ): string {
+  // JSON pre-parse pass: strip code fences and parse any JSON strings back to
+  // structured objects so the visual renderers receive what they expect.
+  const parsedDraft: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(draft)) {
+    if (typeof v !== "string") { parsedDraft[k] = v; continue; }
+    const stripped = v.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+    if (stripped.startsWith("{") || stripped.startsWith("[")) {
+      try { parsedDraft[k] = JSON.parse(stripped); continue; } catch { /* fall through */ }
+    }
+    parsedDraft[k] = v;
+  }
+  const d = parsedDraft as Record<string, unknown>;
+
   const body: Record<DdrSectionId, () => string> = {
-    executive_summary:               () => executiveSummary(draft.executive_summary),
-    business_snapshot:              () => businessSnapshot(draft.business_snapshot, draft.snapshot),
-    customer_segments:              () => customerSegments(draft.customer_segments),
-    competitive_intelligence:       () => competitiveIntelligence(draft.competitive_intelligence),
-    market_context:                  () => marketContextSection(draft.market_context),
-    decision_specific_analysis:     () => decisionAnalysisSection(draft.decision_specific_analysis),
-    extended_recommendations:       () => extendedRecommendations(draft.extended_recommendations),
-    priority_action_framework:      () => priorityActionFramework(draft.priority_action_framework),
-    expanded_analyst_interpretation: () => expandedAnalystSection(draft.expanded_analyst_interpretation),
+    executive_summary:               () => executiveSummary(d.executive_summary),
+    business_snapshot:              () => businessSnapshot(d.business_snapshot, d.snapshot),
+    customer_segments:              () => customerSegments(d.customer_segments),
+    competitive_intelligence:       () => competitiveIntelligence(d.competitive_intelligence),
+    market_context:                  () => marketContextSection(d.market_context),
+    decision_specific_analysis:     () => decisionAnalysisSection(d.decision_specific_analysis),
+    extended_recommendations:       () => extendedRecommendations(d.extended_recommendations),
+    priority_action_framework:      () => priorityActionFramework(d.priority_action_framework),
+    expanded_analyst_interpretation: () => expandedAnalystSection(d.expanded_analyst_interpretation),
   };
 
   // Wrap each section — the last one (expanded_analyst_interpretation) gets the

@@ -338,13 +338,13 @@ const SSR_SECTION_CONFIG: Record<string, string> = {
   research_question_framework:
     "Reframe the assumptions and research questions from the intake as a clear research framework. What are we testing and why? 2-3 paragraphs of prose.",
   customer_personas:
-    "Build 3-5 distinct customer personas for this business based on the intake. Each persona: a name, brief demographics, their motivation for engaging with this type of business, and their relationship to this specific business. Flowing prose per persona — no bullet lists.",
+    `Build 3-5 distinct customer personas for this business based on the intake. Return a JSON array only — no prose, no markdown, no code fences. Each element must match this schema exactly: {"name": "Persona Name", "description": "Short 1-sentence descriptor", "motivation": "What drives them to engage with this type of business", "concern": "Their main worry or objection", "likelihood": "High, Medium, or Low", "quote": "A representative quote this persona might say"}. Return only the JSON array, nothing else.`,
   persona_response_simulation:
     "Simulate how each persona responds to the research questions from the intake. Organize by persona. For each: their likely reaction, key objections or enthusiasm points, and what would drive their decision. Prose paragraphs, not lists.",
   thematic_analysis:
-    "Identify 4-5 patterns across the persona responses above. What do the personas agree on? Where do they diverge meaningfully? What is the most important theme for the business to act on? 3-4 prose paragraphs.",
+    `Identify 4-5 patterns across the persona responses above. Return a JSON array only — no prose, no markdown, no code fences. Each element must match this schema exactly: {"title": "Theme Name", "body": "2-3 sentences explaining this theme and what it means for the business", "evidence": "What from the persona analysis supports this theme"}. Return only the JSON array, nothing else.`,
   directional_recommendations:
-    "Write 5-6 directional recommendations grounded in the persona findings above. Clearly label each as directional insight, not statistically validated data. For each: what to consider, why the personas point this way, and what to watch for in practice.",
+    `Write 5-6 directional recommendations grounded in the persona findings above. Return a JSON array only — no prose, no markdown, no code fences. Each element must match this schema exactly: {"label": "P1", "title": "Recommendation title", "body": "Specific recommendation text grounded in the persona findings, including what to consider and what to watch for"}. Labels must be "P1", "P2", or "P3" — use P1 for highest-priority items, P2 for medium, P3 for supporting. Return only the JSON array, nothing else.`,
   methodology_disclosure:
     "Explain in plain language what AI persona simulation is, how this report was created, and how to interpret and use these findings appropriately. Warm, transparent tone. 2-3 paragraphs.",
   honest_limitations_statement:
@@ -377,7 +377,11 @@ export async function generateSSRSection(
     if (blocks.length > 0) priorContext = "\n\nPRIOR SECTIONS:\n" + blocks.join("\n\n");
   }
 
-  const system = `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Synthetic Survey Report. Return plain prose only — no JSON, no headers, no bullet points, no markdown. Tone: warm, credible, transparent. No em-dashes. No corporate jargon.`;
+  const jsonSections = new Set(["customer_personas", "thematic_analysis", "directional_recommendations"]);
+  const isJsonSection = jsonSections.has(sectionKey);
+  const system = isJsonSection
+    ? `You are a senior research analyst at Sea Glass Insights. For the "${sectionLabel}" section, return ONLY a valid JSON array — no prose, no markdown, no code fences, no explanation. The instructions specify the exact schema to follow.`
+    : `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Synthetic Survey Report. Return plain prose only — no JSON, no headers, no bullet points, no markdown. Tone: warm, credible, transparent. No em-dashes. No corporate jargon.`;
   const user   = `BUSINESS INTAKE:\n${intake}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${instructions}`;
 
   try {
@@ -759,7 +763,8 @@ const DDR_SECTION_CONFIG: Record<string, DDRSectionConfig> = {
   executive_summary: {
     useSearch: true,
     searchDirective: "Search for this business — find their website, Google reviews, and any recent coverage.",
-    writeInstructions: "Write 2-3 paragraphs: where they stand today, their biggest opportunity, and their most urgent action.",
+    writeInstructions: `Return ONLY a JSON object — no prose, no markdown, no code fences — matching this exact shape:
+{"intro": "2-3 sentence paragraph about the business today", "bullets": ["key observation 1", "key observation 2", "key observation 3"], "key_finding": "One sentence: the most important insight", "priority_action": "One sentence: the most urgent action to take"}`,
   },
   business_snapshot: {
     useSearch: true,
@@ -769,38 +774,45 @@ const DDR_SECTION_CONFIG: Record<string, DDRSectionConfig> = {
   customer_segments: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Describe 4-5 distinct customer segments as prose. For each: name the segment, who they are, their motivation for choosing this business, and their key unmet need. No bullet points.",
+    writeInstructions: `Return ONLY a JSON array — no prose, no markdown, no code fences — of 3-5 customer segment objects matching this shape:
+[{"name": "Segment Name", "description": "2-3 sentences about who they are and what they want"}]`,
   },
   competitive_intelligence: {
     useSearch: true,
     // Single combined query — do not search competitor-by-competitor
     searchDirective: "Run ONE search combining the business type and the competitor names from the intake to get an overview of each competitor's positioning, pricing, and reputation.",
-    writeInstructions: "Analyze each competitor from the intake. For each: strengths from research, specific vulnerabilities, and where the client has a real edge.",
+    writeInstructions: `Return ONLY a JSON array — no prose, no markdown, no code fences — of 3-5 competitor objects matching this shape:
+[{"competitor": "Name", "strength": "Their main strength", "vulnerability": "Their weakness", "your_edge": "Client's advantage over them"}]`,
   },
   market_context: {
     useSearch: true,
     searchDirective: "Search once for current trends in this industry and relevant local or regional market conditions.",
-    writeInstructions: "Write about industry trends, seasonal and local factors, and macro conditions. Focus on what is changing and why it matters to this business.",
+    writeInstructions: `Return ONLY a JSON object — no prose, no markdown, no code fences — matching this exact shape:
+{"key_stats": [{"label": "Stat Label", "value": "$XB", "context": "brief context"}], "narrative": "3-4 paragraphs of market analysis prose separated by blank lines"}`,
   },
   decision_specific_analysis: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Analyze the specific decision in Q11 using the intake answers and prior analysis above. Cover: the core tradeoffs, key risks, the strongest option, and a clear directional recommendation. Be specific.",
+    writeInstructions: "Analyze the specific decision in Q11 using the intake answers and prior analysis above. Cover: the core tradeoffs, key risks, the strongest option, and a clear directional recommendation. Be specific. Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs.",
   },
   extended_recommendations: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Write 5-6 specific, actionable recommendations grounded in the prior analysis above. For each: what to do, why it matters, how to start.",
+    writeInstructions: `Return ONLY a JSON array — no prose, no markdown, no code fences — of 5-6 recommendation objects matching this shape:
+[{"priority": "P1", "title": "Recommendation title", "body": "What to do and why", "timeline": "2 weeks", "steps": ["Step 1", "Step 2"]}]
+Use priority "P1", "P2", or "P3" to indicate urgency. Ground each recommendation in the prior analysis.`,
   },
   priority_action_framework: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Organize as three tiers — Do Now / Do Soon / Do Eventually — with 2-3 items per tier. Ground each item in the prior analysis. For each: what it is, why it belongs in that tier, and sequencing rationale.",
+    writeInstructions: `Return ONLY a JSON object — no prose, no markdown, no code fences — with a "phases" array matching this shape:
+{"phases": [{"phase": 1, "title": "Do Now", "timeline": "0-30 days", "actions": ["Action 1", "Action 2"]}, {"phase": 2, "title": "Do Soon", "timeline": "30-90 days", "actions": ["Action 1", "Action 2"]}, {"phase": 3, "title": "Do Eventually", "timeline": "90+ days", "actions": ["Action 1", "Action 2"]}]}
+Ground each action in the prior analysis.`,
   },
   expanded_analyst_interpretation: {
     useSearch: false,
     searchDirective: "",
-    writeInstructions: "Write a synthesis using the prior analysis above: the thread connecting all findings, what this means for this business and the specific decision, and the one insight that reframes everything. Warm, direct analyst voice.",
+    writeInstructions: "Write a synthesis using the prior analysis above: the thread connecting all findings, what this means for this business and the specific decision, and the one insight that reframes everything. Warm, direct analyst voice. Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs.",
   },
 };
 
@@ -832,8 +844,16 @@ export async function generateDDRSectionWithSearch(
     useSearch: false, searchDirective: "", writeInstructions: "Write 2-4 paragraphs of clear professional prose.",
   };
 
+  const DDR_JSON_SECTIONS = new Set([
+    "executive_summary", "customer_segments", "competitive_intelligence",
+    "market_context", "extended_recommendations", "priority_action_framework",
+  ]);
+  const isJsonSection = DDR_JSON_SECTIONS.has(sectionKey);
+
   const baseSystem = `You are a senior market research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Deep Dive Report.`;
-  const styleRule  = `Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
+  const styleRule  = isJsonSection
+    ? `Return ONLY valid JSON — no prose wrapper, no markdown code fences, no explanation. Your entire response must be parseable by JSON.parse().`
+    : `Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
 
   const searchSystem   = [baseSystem, cfg.searchDirective, `Perform at most ONE focused web search with a short, specific query.`, styleRule].join("\n\n");
   const noSearchSystem = [baseSystem, styleRule].join("\n\n");
