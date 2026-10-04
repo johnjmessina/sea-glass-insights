@@ -698,10 +698,10 @@ Keys required:
 const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   // SMA
   profile_setup_review:        `Return a JSON object with: summary (string), per-platform keys like instagram/facebook/tiktok each containing { status, handle, followers, bio, profile_photo, highlights[] }, key_takeaways (string[]), action_items (string[]). Only include platforms the business actually uses.`,
-  content_quality_scoring:     `Return a JSON object with: score (0-100 number), dimensions (array of { category, score, notes }), observations (string). Score each dimension: Visual Quality, Caption Quality, Brand Consistency, Call to Action, Content Variety.`,
-  performance_metrics:         `Return a JSON object with: posting: { score, observations[], actions[] }, engagement: { score, observations[], actions[] }, brand: { score, observations[], actions[] }.`,
-  platform_utilization_review: `Return a JSON object with per-platform keys (instagram, facebook, tiktok, etc.) each containing { score, strengths, gaps }, plus a summary string.`,
-  overall_presence_score:      `Return a JSON object with: score (0-100 number), dimensions (array of { category, score } for Profile Setup / Content Quality / Posting Consistency / Engagement / Brand Consistency / Platform Utilization), recommendations (string paragraph).`,
+  content_quality_scoring:     `Return a JSON object with: score (1-10 number), dimensions (array of { category, score, notes } — each score 1-10), observations (string). Score each dimension: Visual Quality, Caption Quality, Brand Consistency, Call to Action, Content Variety.`,
+  performance_metrics:         `Return a JSON object with: posting: { score (1-10), observations[], actions[] }, engagement: { score (1-10), observations[], actions[] }, brand: { score (1-10), observations[], actions[] }.`,
+  platform_utilization_review: `Return a JSON object with per-platform keys (instagram, facebook, tiktok, etc.) each containing { score (1-10), strengths, gaps }, plus a summary string.`,
+  overall_presence_score:      `Return a JSON object with: score (1-10 number, weighted average), dimensions (array of { category, score (1-10) } for Profile Setup / Content Quality / Posting Consistency / Engagement / Brand Consistency / Platform Utilization), recommendations (string paragraph).`,
   // Deep Dive
   executive_summary:             "Write 2-3 paragraphs — where they stand, biggest opportunity, most urgent action.",
   business_snapshot:             "Write 3-4 paragraphs describing the business, market context, and competitive position.",
@@ -1012,6 +1012,15 @@ export async function generateDDRSection(
   return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
 }
 
+// SMA sections that must return structured JSON (not plain text)
+const SMA_JSON_SECTIONS = new Set([
+  "profile_setup_review",
+  "content_quality_scoring",
+  "performance_metrics",
+  "platform_utilization_review",
+  "overall_presence_score",
+]);
+
 export async function regenerateServiceSection(
   order: Order,
   sectionKey: string,
@@ -1022,7 +1031,11 @@ export async function regenerateServiceSection(
   const formatInstructions = SECTION_REGEN_INSTRUCTIONS[sectionKey]
     ?? "Revise this section as plain text, 2-3 paragraphs.";
 
-  const system = `You are a senior analyst at Sea Glass Insights. Revise the following report section based on the analyst's notes. Return ONLY the revised section as plain text — no JSON, no markdown, no preamble. ${formatInstructions}`;
+  const isJsonSection = SMA_JSON_SECTIONS.has(sectionKey);
+
+  const system = isJsonSection
+    ? `You are a senior social media analyst at Sea Glass Insights. Revise the following report section based on the analyst's notes. Return ONLY valid JSON — no prose wrapper, no markdown code fences, no preamble. Your entire response must be parseable by JSON.parse(). ALL scores must be on a 1–10 scale. ${formatInstructions}`
+    : `You are a senior analyst at Sea Glass Insights. Revise the following report section based on the analyst's notes. Return ONLY the revised section as plain text — no JSON, no markdown, no preamble. ${formatInstructions}`;
 
   const user = `BUSINESS INTAKE:\n${intake}\n\nCURRENT SECTION (${sectionKey}):\n${currentContent}\n\nANALYST NOTES:\n${analystNotes?.trim() || "(no notes — improve and sharpen the existing content)"}`;
 

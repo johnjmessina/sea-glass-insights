@@ -64,7 +64,12 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Non-MIR sections — plain text regeneration ─────────────────────────────
-    const currentContent = ((order.ai_draft as Record<string, unknown>)[sectionKey] as string) ?? "";
+    const rawContent = (order.ai_draft as Record<string, unknown>)[sectionKey];
+    // If stored as a JSONB object (SMA structured sections), serialize it so the
+    // regeneration prompt can see the current content; the regen will return new JSON.
+    const currentContent = typeof rawContent === "string"
+      ? rawContent
+      : rawContent != null ? JSON.stringify(rawContent, null, 2) : "";
 
     // Special handling: SMA competitive comparison — inject table data into prompt
     const isCompTable = serviceType === "social_media_audit" && sectionKey === "competitive_social_comparison";
@@ -78,10 +83,21 @@ export async function POST(req: NextRequest) {
         : (analystNotes ?? "")
     );
 
-    const updatedDraft = { ...(order.ai_draft as object), [sectionKey]: newContent };
+    // For SMA JSON sections, try to parse the returned content back to an object
+    // so it's stored as structured JSONB (consistent with initial generation).
+    let storeContent: unknown = newContent;
+    if (typeof newContent === "string") {
+      const trimmed = newContent.trim()
+        .replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+        try { storeContent = JSON.parse(trimmed); } catch { /* keep as string */ }
+      }
+    }
+
+    const updatedDraft = { ...(order.ai_draft as object), [sectionKey]: storeContent };
     await supabase.from("orders").update({ ai_draft: updatedDraft }).eq("id", orderId);
 
-    return NextResponse.json({ content: newContent });
+    return NextResponse.json({ content: storeContent });
 
   } catch (err) {
     console.error("Regenerate section error:", err);
