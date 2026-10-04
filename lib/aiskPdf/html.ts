@@ -347,12 +347,24 @@ export function buildAiskReportHtml(
   analystNoteText: string,
   opts: BuildOptions = {},
 ): string {
-  const effective = effectiveAiskSections(draft);
+  // Pre-parse any JSON-stringified values (strips code fences too)
+  const parsedDraft: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(draft)) {
+    if (typeof v !== "string") { parsedDraft[k] = v; continue; }
+    const stripped = v.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+    if (stripped.startsWith("{") || stripped.startsWith("[")) {
+      try { parsedDraft[k] = JSON.parse(stripped); continue; } catch { /* fall through */ }
+    }
+    parsedDraft[k] = v;
+  }
+  const d = parsedDraft as Record<string, unknown>;
+
+  const effective = effectiveAiskSections(d as Obj);
   const LAST_ID   = effective[effective.length - 1]?.id ?? AISK_SECTIONS[AISK_SECTIONS.length - 1].id;
 
   const section = (s: typeof AISK_SECTIONS[0]) => {
     const isLast  = s.id === LAST_ID;
-    const content = draft[s.id];
+    const content = d[s.id];
     return `
     <section class="page sec-${s.id}">
       <h1 class="section-title">${esc(s.title)}</h1>

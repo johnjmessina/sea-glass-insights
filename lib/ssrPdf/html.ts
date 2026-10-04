@@ -132,9 +132,11 @@ function recommendationCards(content: unknown): string {
       const g = obj(r);
       const title    = String(g.title ?? g.recommendation ?? g.action ?? `Recommendation ${i + 1}`);
       const body     = String(g.body ?? g.description ?? g.rationale ?? "");
-      const priority = Number(g.priority ?? 0);
-      const accent   = priority === 1 ? NAVY : priority === 2 ? TEAL : "#6B7280";
-      const label    = priority === 1 ? "Priority 1" : priority === 2 ? "Priority 2" : `Rec ${i + 1}`;
+      const rawLabel = String(g.label ?? g.priority ?? "");
+      const p1 = rawLabel === "P1" || rawLabel === "1" || Number(g.priority) === 1;
+      const p2 = rawLabel === "P2" || rawLabel === "2" || Number(g.priority) === 2;
+      const accent   = p1 ? NAVY : p2 ? TEAL : "#6B7280";
+      const label    = p1 ? "Priority 1" : p2 ? "Priority 2" : rawLabel ? `Priority ${rawLabel.replace(/^P/, "")}` : `Rec ${i + 1}`;
       return `<div class="ssr-rec" style="border-left:4pt solid ${accent}">
         <div class="ssr-rec-label" style="color:${accent}">${esc(label)}</div>
         <div class="ssr-rec-title">${text(title)}</div>
@@ -347,6 +349,18 @@ export function buildSsrReportHtml(
   analystPerspectives: Record<string, string> = {},
   opts: BuildOptions = {},
 ): string {
+  // Pre-parse any JSON-stringified values (strips code fences too)
+  const parsedDraft: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(draft)) {
+    if (typeof v !== "string") { parsedDraft[k] = v; continue; }
+    const stripped = v.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+    if (stripped.startsWith("{") || stripped.startsWith("[")) {
+      try { parsedDraft[k] = JSON.parse(stripped); continue; } catch { /* fall through */ }
+    }
+    parsedDraft[k] = v;
+  }
+  const d = parsedDraft as Record<string, unknown>;
+
   const LAST_ID = SSR_SECTIONS[SSR_SECTIONS.length - 1].id;
 
   const sectionBody = (id: SsrSectionId, content: unknown): string => {
@@ -359,7 +373,7 @@ export function buildSsrReportHtml(
 
   const section = (id: SsrSectionId, title: string) => {
     const isLast = id === LAST_ID;
-    const content = draft[id];
+    const content = d[id];
     const perspective = analystPerspectives[id] ?? "";
     return `
     <section class="page sec-${id}">

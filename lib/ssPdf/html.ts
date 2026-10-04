@@ -503,7 +503,20 @@ export function buildSsReportHtml(
   analystNoteText: string,
   opts: BuildOptions = {},
 ): string {
-  const { visitOV, scorecard, analystObs, aiDraft, summaryAnalystNote } = reportData;
+  // Pre-parse any JSON-stringified values in aiDraft (strips code fences too)
+  const parsedDraft: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(reportData.aiDraft)) {
+    if (typeof v !== "string") { parsedDraft[k] = v; continue; }
+    const stripped = v.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+    if (stripped.startsWith("{") || stripped.startsWith("[")) {
+      try { parsedDraft[k] = JSON.parse(stripped); continue; } catch { /* fall through */ }
+    }
+    parsedDraft[k] = v;
+  }
+  const d = parsedDraft as Record<string, unknown>;
+
+  const { visitOV, scorecard, analystObs, summaryAnalystNote } = reportData;
+  const aiDraft = d;
   const LAST_ID = SS_SECTIONS[SS_SECTIONS.length - 1].id;
 
   const bodies: Record<SsSectionId, () => string> = {
