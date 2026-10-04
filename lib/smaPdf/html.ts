@@ -744,8 +744,22 @@ export function buildSmaReportHtml(
   analystNoteText: string,
   opts: BuildOptions = {},
 ): string {
+  // Parse any JSON-stringified values back to objects so section renderers
+  // receive the structured data they expect. The dashboard normalizes objects
+  // to strings for display; we reverse that here before building the PDF.
+  const parsedDraft: Obj = {};
+  for (const [k, v] of Object.entries(draft)) {
+    if (typeof v === "string") {
+      const trimmed = v.trim();
+      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+        try { parsedDraft[k] = JSON.parse(trimmed); continue; } catch { /* fall through */ }
+      }
+    }
+    parsedDraft[k] = v;
+  }
+
   // Merge any legacy section keys into the new structure
-  const normalizedDraft: Obj = { ...draft };
+  const normalizedDraft: Obj = { ...parsedDraft };
   for (const [legacyKey, newId] of Object.entries(LEGACY_MAP)) {
     if (legacyKey in normalizedDraft && !(newId in normalizedDraft)) {
       normalizedDraft[newId] = normalizedDraft[legacyKey];
