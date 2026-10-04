@@ -522,9 +522,11 @@ function performanceMetricsSection(content: unknown): string {
       const color  = score !== null ? bandColor(score) : NAVY;
       const fields = Object.keys(m.data).filter(k => !["score","overall_score","rating"].includes(k));
 
-      // Key observations and actions
-      const obs  = arr(m.data.observations ?? m.data.highlights ?? m.data.key_points ?? []);
-      const acts = arr(m.data.actions ?? m.data.recommendations ?? m.data.improvements ?? []);
+      // Key observations and actions — cap at 2 items, truncate to 120 chars each
+      // to prevent verbose AI output from overflowing the fixed-height card column
+      const truncate = (s: string, n = 120) => s.length > n ? s.slice(0, n).trimEnd() + "…" : s;
+      const obs  = arr(m.data.observations ?? m.data.highlights ?? m.data.key_points ?? []).slice(0, 2).map(o => truncate(String(o)));
+      const acts = arr(m.data.actions ?? m.data.recommendations ?? m.data.improvements ?? []).slice(0, 2).map(a => truncate(String(a)));
 
       const dispScore = score !== null
         ? (Number.isInteger(score) ? score.toString() : score.toFixed(1))
