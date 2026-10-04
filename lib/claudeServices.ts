@@ -81,19 +81,66 @@ CRITICAL OUTPUT RULES — read carefully before writing your response:
 • Do NOT include markdown, backticks, code fences, or any text before or after the JSON object.
 • Write all facts as plain prose sentences only. If you observed a follower count from a web search result, state it as plain text: "The account has 1,243 followers." — never as "The account has 1,243 followers<cite>source.com</cite>".
 
-Return ONLY a raw JSON object with exactly these 7 keys:
+Return ONLY a raw JSON object with exactly these 5 keys:
 
 {
-  "profile_setup_review": "2-4 paragraphs on actual profile setup based on research",
-  "content_quality_scoring": "2-4 paragraphs on actual observed content quality",
-  "posting_consistency_analysis": "2-4 paragraphs on actual posting frequency and consistency",
-  "engagement_assessment": "2-4 paragraphs on actual engagement rates and community interaction",
-  "brand_consistency_evaluation": "2-4 paragraphs on visual identity and voice based on observed content",
-  "platform_utilization_review": "2-4 paragraphs on effective use of each platform observed",
-  "overall_presence_score": "2-4 paragraphs with qualitative rating (Strong / Developing / Needs Attention) and top 3-4 recommendations"
+  "profile_setup_review": {
+    "summary": "2-3 sentence overview of profile setup quality across all platforms",
+    "instagram": { "status": "Active / Incomplete / Missing", "handle": "@username", "followers": "1,234", "bio": true, "profile_photo": true, "highlights": ["one key observation"] },
+    "facebook":  { "status": "Active / Incomplete / Missing", "handle": "@username", "followers": "1,234", "bio": true, "profile_photo": true },
+    "tiktok":    { "status": "Active / Incomplete / Missing", "handle": "@username", "followers": "1,234" },
+    "key_takeaways": ["Takeaway 1", "Takeaway 2", "Takeaway 3"],
+    "action_items": ["Action 1", "Action 2", "Action 3"]
+  },
+  "content_quality_scoring": {
+    "score": 72,
+    "dimensions": [
+      { "category": "Visual Quality", "score": 80, "notes": "1-sentence observation" },
+      { "category": "Caption Quality", "score": 65, "notes": "1-sentence observation" },
+      { "category": "Brand Consistency", "score": 70, "notes": "1-sentence observation" },
+      { "category": "Call to Action", "score": 55, "notes": "1-sentence observation" },
+      { "category": "Content Variety", "score": 68, "notes": "1-sentence observation" }
+    ],
+    "observations": "2-3 sentences of supporting narrative"
+  },
+  "performance_metrics": {
+    "posting": {
+      "score": 65,
+      "observations": ["Key observation 1", "Key observation 2"],
+      "actions": ["Recommended action 1", "Recommended action 2"]
+    },
+    "engagement": {
+      "score": 55,
+      "observations": ["Key observation 1", "Key observation 2"],
+      "actions": ["Recommended action 1", "Recommended action 2"]
+    },
+    "brand": {
+      "score": 70,
+      "observations": ["Key observation 1", "Key observation 2"],
+      "actions": ["Recommended action 1", "Recommended action 2"]
+    }
+  },
+  "platform_utilization_review": {
+    "instagram": { "score": 72, "strengths": "What they do well", "gaps": "What is underused or missing" },
+    "facebook":  { "score": 58, "strengths": "What they do well", "gaps": "What is underused or missing" },
+    "tiktok":    { "score": 40, "strengths": "What they do well", "gaps": "What is underused or missing" },
+    "summary": "2-3 sentences overall"
+  },
+  "overall_presence_score": {
+    "score": 64,
+    "dimensions": [
+      { "category": "Profile Setup",        "score": 70 },
+      { "category": "Content Quality",      "score": 65 },
+      { "category": "Posting Consistency",  "score": 60 },
+      { "category": "Engagement",           "score": 55 },
+      { "category": "Brand Consistency",    "score": 72 },
+      { "category": "Platform Utilization", "score": 62 }
+    ],
+    "recommendations": "3-4 specific, actionable recommendations as a paragraph"
+  }
 }
 
-Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
+Only include platform keys (instagram, facebook, tiktok, etc.) for platforms the business actually uses. Do not add placeholder data for platforms they are not on. Use real observed data from your research — real follower counts, real handles, real content observations. Tone: warm, credible, direct. No corporate jargon. No em-dashes.`;
 
   const response = await client.messages.create({
     model:      "claude-sonnet-4-6",
@@ -625,13 +672,11 @@ Keys required:
 
 const SECTION_REGEN_INSTRUCTIONS: Record<string, string> = {
   // SMA
-  profile_setup_review:          "Write 2-4 paragraphs of plain text assessing profile setup and configuration.",
-  content_quality_scoring:       "Write 2-4 paragraphs analyzing content quality across platforms.",
-  posting_consistency_analysis:  "Write 2-4 paragraphs on posting frequency, consistency, and timing.",
-  engagement_assessment:         "Write 2-4 paragraphs on engagement rates and community interaction.",
-  brand_consistency_evaluation:  "Write 2-4 paragraphs on visual identity and voice consistency across platforms.",
-  platform_utilization_review:   "Write 2-4 paragraphs on how effectively each platform is being used.",
-  overall_presence_score:        "Write 2-4 paragraphs summarizing overall presence with a qualitative score and top recommendations.",
+  profile_setup_review:        `Return a JSON object with: summary (string), per-platform keys like instagram/facebook/tiktok each containing { status, handle, followers, bio, profile_photo, highlights[] }, key_takeaways (string[]), action_items (string[]). Only include platforms the business actually uses.`,
+  content_quality_scoring:     `Return a JSON object with: score (0-100 number), dimensions (array of { category, score, notes }), observations (string). Score each dimension: Visual Quality, Caption Quality, Brand Consistency, Call to Action, Content Variety.`,
+  performance_metrics:         `Return a JSON object with: posting: { score, observations[], actions[] }, engagement: { score, observations[], actions[] }, brand: { score, observations[], actions[] }.`,
+  platform_utilization_review: `Return a JSON object with per-platform keys (instagram, facebook, tiktok, etc.) each containing { score, strengths, gaps }, plus a summary string.`,
+  overall_presence_score:      `Return a JSON object with: score (0-100 number), dimensions (array of { category, score } for Profile Setup / Content Quality / Posting Consistency / Engagement / Brand Consistency / Platform Utilization), recommendations (string paragraph).`,
   // Deep Dive
   executive_summary:             "Write 2-3 paragraphs — where they stand, biggest opportunity, most urgent action.",
   business_snapshot:             "Write 3-4 paragraphs describing the business, market context, and competitive position.",

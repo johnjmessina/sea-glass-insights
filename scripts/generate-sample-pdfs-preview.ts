@@ -128,13 +128,105 @@ const MIR_AI_DRAFT = {
 };
 
 const SMA_AI_DRAFT = {
-  profile_setup:          { handle: "@coastalbrewcoffee", platforms: "Instagram (primary), Facebook (inactive)", bio_quality: "Bio communicates location and coffee focus but lacks a clear value prop or call to action. No link-in-bio strategy.", setup_score: 62 },
-  content_quality:        { assessment: "Content skews toward product shots and seasonal specials. Quality is inconsistent — some posts are visually compelling, others are low-effort. No behind-the-scenes roasting content despite this being the shop's clearest differentiator.", score: 58 },
-  posting_consistency:    { frequency: "2–3 posts per week on average, with gaps during busy seasons when it would be most impactful.", consistency_score: 45 },
-  engagement_assessment:  { avg_engagement_rate: "1.2% — below industry average for independent food/bev (~3.5%)", notes: "Low engagement likely reflects content that doesn't invite interaction. No questions posed to audience, no UGC strategy, no story polls or Q&A use." },
-  brand_consistency:      { visual_identity: "Inconsistent. Some posts use a warm coastal palette that aligns with the brand; others feel generic. No defined color palette or typography system for social.", score: 55 },
-  platform_utilization:   { instagram: "Stories underused. Reels not utilized. Grid is the sole focus, missing the higher-reach formats.", facebook: "Page exists but appears dormant. No benefit from maintaining unless actively resourced." },
-  overall_score_recs:     { overall_score: 54, summary: "Social presence is underperforming relative to in-store experience quality. The content opportunity is substantial — the roasting process, staff personalities, and Shore aesthetic are all inherently visual and authentic. A simple, consistent content strategy would dramatically outperform the current ad-hoc approach.", top_recommendations: "1. Define a visual identity system for social (2–3 colors, consistent filter, text overlay style). 2. Commit to 4 posts/week with a content calendar: Monday roasting behind-the-scenes, Wednesday product/drink, Friday community/staff, Sunday seasonal. 3. Activate Instagram Stories for daily connection — polls, questions, 'what's brewing today'. 4. Introduce a UGC prompt at checkout: 'Tag us for a chance to be featured.'" },
+  profile_setup_review: {
+    summary: "Coastal Brew Coffee has an active Instagram presence and a dormant Facebook page. Overall profile setup is functional but underoptimized — bios are generic, no link-in-bio strategy is in place, and the roasting story that defines the brand is absent from every platform header.",
+    instagram: {
+      status: "Active",
+      handle: "@coastalbrewcoffee",
+      followers: "1,412",
+      bio: true,
+      profile_photo: true,
+      highlights: ["Stories highlights exist but are outdated", "No link-in-bio tool in use"],
+    },
+    facebook: {
+      status: "Incomplete",
+      handle: "Coastal Brew Coffee",
+      followers: "348",
+      bio: false,
+      profile_photo: true,
+    },
+    key_takeaways: [
+      "Instagram is the only actively maintained platform",
+      "Facebook page is live but functionally dormant — last post was 4+ months ago",
+      "No link-in-bio strategy means zero web traffic conversion from social",
+    ],
+    action_items: [
+      "Add a Linktree or Beacons link to Instagram bio pointing to the menu, loyalty signup, and online bag store",
+      "Rewrite Instagram bio to lead with the roasting story: 'We roast it. You drink it fresh.'",
+      "Either commit to Facebook with a weekly post or remove the page to avoid looking abandoned",
+    ],
+  },
+  content_quality_scoring: {
+    score: 58,
+    dimensions: [
+      { category: "Visual Quality",     score: 72, notes: "Best posts are strong — product-forward photography with good light. Inconsistent overall." },
+      { category: "Caption Quality",    score: 48, notes: "Captions are short and transactional. No storytelling, no questions to the audience." },
+      { category: "Brand Consistency",  score: 55, notes: "Some posts use a warm coastal palette; others feel generic. No defined visual system." },
+      { category: "Call to Action",     score: 38, notes: "Almost no CTAs. Posts announce but do not invite response or action." },
+      { category: "Content Variety",    score: 60, notes: "Mostly product shots. No behind-the-scenes roasting content, no staff features, no UGC." },
+    ],
+    observations: "The content quality ceiling is visible — the best posts show a real eye for the product. But consistency and intentionality are missing. The roasting story, which is the brand's clearest differentiator, has never appeared in any post we observed. That is the single biggest content gap.",
+  },
+  performance_metrics: {
+    posting: {
+      score: 45,
+      observations: [
+        "2-3 posts per week on average — inconsistent, with notable gaps during peak summer season",
+        "No posting schedule or content calendar evident from pattern analysis",
+      ],
+      actions: [
+        "Establish a 4-post weekly rhythm: roasting Monday, product Wednesday, community Friday, seasonal Sunday",
+        "Schedule posts in advance using Later or Buffer to maintain consistency during busy weeks",
+      ],
+    },
+    engagement: {
+      score: 40,
+      observations: [
+        "Average engagement rate 1.2% — well below the 3-4% benchmark for independent food and beverage",
+        "No story polls, Q&As, or interactive elements found in recent 90-day content review",
+      ],
+      actions: [
+        "Add one question or prompt to every caption to invite response",
+        "Use Instagram Stories 3-4 times per week with interactive stickers (polls, questions, countdowns)",
+      ],
+    },
+    brand: {
+      score: 55,
+      observations: [
+        "No defined color palette or typography system for social — posts vary widely in visual tone",
+        "Voice is inconsistent: some captions are warm and local, others are generic product announcements",
+      ],
+      actions: [
+        "Define a 3-color social palette and a consistent photo editing style (Lightroom preset or VSCO filter)",
+        "Write a one-page brand voice guide: 3 words that describe the tone, 3 words to avoid",
+      ],
+    },
+  },
+  platform_utilization_review: {
+    instagram: {
+      score: 62,
+      strengths: "Grid is maintained with regular product photography. Some strong individual posts show real visual capability.",
+      gaps: "Reels not used at all. Stories are sporadic and non-interactive. Highlights are outdated. Zero link-in-bio strategy.",
+    },
+    facebook: {
+      score: 28,
+      strengths: "Page exists and has a modest follower base from earlier active period.",
+      gaps: "Effectively dormant. No posts in 4+ months. No events, check-ins, or customer interaction. Creating an impression of a closed or neglected business.",
+    },
+    summary: "Instagram is the right primary platform for this business and audience — but it is being used at roughly 40% of its potential. Facebook is a liability in its current state. A focused Instagram-first strategy will deliver significantly more return than spreading effort across two underperforming platforms.",
+  },
+  overall_presence_score: {
+    score: 54,
+    dimensions: [
+      { category: "Profile Setup",        score: 62 },
+      { category: "Content Quality",      score: 58 },
+      { category: "Posting Consistency",  score: 45 },
+      { category: "Engagement",           score: 40 },
+      { category: "Brand Consistency",    score: 55 },
+      { category: "Platform Utilization", score: 62 },
+    ],
+    recommendations: "The social media opportunity here is larger than the current numbers suggest — because the raw material is excellent. The in-house roasting process, staff personalities, and Shore setting are all inherently visual and authentic. The four highest-leverage moves: define a visual identity system for social (3 colors, one consistent editing style), commit to a 4-post weekly content calendar with roasting behind-the-scenes as the anchor content type, activate Instagram Stories 3-4 times per week with interactive elements, and replace the Facebook page with a focused Instagram strategy until there is bandwidth to do both well.",
+  },
 };
 
 const SSR_AI_DRAFT = {
