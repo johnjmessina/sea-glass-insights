@@ -101,18 +101,27 @@ function narrativeSection(content: unknown): string {
   }).join("");
 }
 
+// Scores are 1–10 throughout. Rubric bands:
 function scoreBand(score: number): string {
-  if (score >= 90) return "Excellent";
-  if (score >= 75) return "Good";
-  if (score >= 60) return "Fair";
-  if (score >= 45) return "Needs Work";
+  if (score >= 9)   return "Excellent";
+  if (score >= 7.5) return "Good";
+  if (score >= 6)   return "Fair";
+  if (score >= 4.5) return "Needs Work";
   return "Critical";
 }
 
 function bandColor(score: number): string {
-  if (score >= 75) return "#059669";
-  if (score >= 60) return "#8FADC8";
-  return "#DC6B6B";
+  if (score >= 7.5) return "#059669";  // green — Good / Excellent
+  if (score >= 6)   return "#8FADC8";  // blue-gray — Fair
+  return "#DC6B6B";                    // red — Needs Work / Critical
+}
+
+// Normalize any incoming score to 1–10 range.
+// If a score > 10 it's assumed to be on a 100-point scale and divided by 10.
+function toTen(raw: number): number {
+  const n = raw > 10 ? raw / 10 : raw;
+  // Round to 1 decimal
+  return Math.round(Math.min(10, Math.max(0, n)) * 10) / 10;
 }
 
 function extractScore(content: unknown): number | null {
@@ -123,7 +132,7 @@ function extractScore(content: unknown): number | null {
   ];
   for (const v of candidates) {
     const n = Number(v);
-    if (!isNaN(n) && n >= 0) return Math.min(100, n <= 10 ? n * 10 : n);
+    if (!isNaN(n) && n >= 0) return toTen(n);
   }
   return null;
 }
@@ -131,19 +140,21 @@ function extractScore(content: unknown): number | null {
 function scoreHero(score: number, label: string): string {
   const band  = scoreBand(score);
   const color = bandColor(score);
+  const pct   = (score / 10) * 100;
+  const disp  = Number.isInteger(score) ? score.toString() : score.toFixed(1);
   return `
   <div class="sma-score-hero">
     <div class="sma-score-left">
       <div class="sma-score-label">${esc(label)}</div>
-      <div class="sma-score-number" style="color:${color}">${score}</div>
-      <div class="sma-score-denom">/100</div>
+      <div class="sma-score-number" style="color:${color}">${disp}</div>
+      <div class="sma-score-denom">/10</div>
       <div class="sma-score-band" style="background:${color}">${esc(band)}</div>
     </div>
     <div class="sma-score-bar-wrap">
       <div class="sma-score-bar-track">
-        <div class="sma-score-bar-fill" style="width:${score}%;background:${color}"></div>
+        <div class="sma-score-bar-fill" style="width:${pct}%;background:${color}"></div>
       </div>
-      <div class="sma-score-scale">0 &nbsp;&mdash;&nbsp; Needs Work &nbsp;&mdash;&nbsp; Fair &nbsp;&mdash;&nbsp; Good &nbsp;&mdash;&nbsp; 100</div>
+      <div class="sma-score-scale">0 &nbsp;&mdash;&nbsp; Needs Work &nbsp;&mdash;&nbsp; Fair &nbsp;&mdash;&nbsp; Good &nbsp;&mdash;&nbsp; 10</div>
     </div>
   </div>`;
 }
@@ -360,15 +371,13 @@ function contentQualitySection(content: unknown): string {
     dims.forEach((d, i) => {
       const g = obj(d);
       const n = String(g.category ?? g.dimension ?? g.name ?? g.criterion ?? `Dimension ${i + 1}`);
-      const s = Math.min(100, Number(g.score ?? g.value ?? g.rating ?? 0) <= 10
-        ? Number(g.score ?? g.value ?? g.rating ?? 0) * 10
-        : Number(g.score ?? g.value ?? g.rating ?? 0));
+      const s = toTen(Number(g.score ?? g.value ?? g.rating ?? 0));
       const notes = String(g.notes ?? g.description ?? g.comment ?? "");
       allDims.push({ name: n, score: s, notes: notes || undefined });
     });
   } else if (scoreCriteriaKeys.length) {
     scoreCriteriaKeys.forEach(k => {
-      const s = Math.min(100, Number(c[k]) <= 10 ? Number(c[k]) * 10 : Number(c[k]));
+      const s = toTen(Number(c[k]));
       allDims.push({ name: k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()), score: s });
     });
   }
@@ -383,13 +392,15 @@ function contentQualitySection(content: unknown): string {
       </div>
       ${allDims.map((d, i) => {
         const color = bandColor(d.score);
+        const disp  = Number.isInteger(d.score) ? d.score.toString() : d.score.toFixed(1);
+        const pct   = (d.score / 10) * 100;
         return `<div class="scorecard-row ${i % 2 ? "even" : ""}">
           <div class="scorecard-criterion">
             <span class="scorecard-name">${esc(d.name)}</span>
             ${d.notes ? `<span class="scorecard-notes">${esc(d.notes)}</span>` : ""}
           </div>
-          <div class="scorecard-score" style="color:${color}"><strong>${d.score}</strong><span class="scorecard-denom">/100</span></div>
-          <div class="scorecard-bar-wrap"><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:${d.score}%;background:${color}"></div></div></div>
+          <div class="scorecard-score" style="color:${color}"><strong>${disp}</strong><span class="scorecard-denom">/10</span></div>
+          <div class="scorecard-bar-wrap"><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
           <div class="scorecard-rating"><span class="band-badge" style="background:${color}20;color:${color};border:1pt solid ${color}40">${scoreBand(d.score)}</span></div>
         </div>`;
       }).join("")}
@@ -446,13 +457,18 @@ function performanceMetricsSection(content: unknown): string {
       const obs  = arr(m.data.observations ?? m.data.highlights ?? m.data.key_points ?? []);
       const acts = arr(m.data.actions ?? m.data.recommendations ?? m.data.improvements ?? []);
 
+      const dispScore = score !== null
+        ? (Number.isInteger(score) ? score.toString() : score.toFixed(1))
+        : null;
+      const pct = score !== null ? (score / 10) * 100 : 0;
+
       return `<div class="metric-card" style="border-top:3pt solid ${color}">
         <div class="metric-card-header">
           <span class="metric-card-icon">${m.icon}</span>
           <span class="metric-card-title" style="color:${color}">${esc(m.label)}</span>
-          ${score !== null ? `<span class="metric-score" style="color:${color}">${score}<span class="metric-denom">/100</span></span>` : ""}
+          ${dispScore !== null ? `<span class="metric-score" style="color:${color}">${dispScore}<span class="metric-denom">/10</span></span>` : ""}
         </div>
-        ${score !== null ? `<div class="metric-bar-track"><div class="metric-bar-fill" style="width:${score}%;background:${color}"></div></div>
+        ${score !== null ? `<div class="metric-bar-track"><div class="metric-bar-fill" style="width:${pct}%;background:${color}"></div></div>
           <div class="metric-band"><span class="band-badge" style="background:${color}20;color:${color};border:1pt solid ${color}40">${scoreBand(score)}</span></div>` : ""}
         ${obs.length ? `<ul class="metric-obs">${obs.map(o => `<li>${text(o)}</li>`).join("")}</ul>` : ""}
         ${acts.length ? `<div class="metric-actions-label">Actions</div><ol class="metric-acts">${acts.map(a => `<li>${text(a)}</li>`).join("")}</ol>` : ""}
@@ -489,13 +505,14 @@ function overallPresenceSection(content: unknown): string {
       <tbody>${dims.map((d, i) => {
         const g     = obj(d);
         const dName = String(g.category ?? g.dimension ?? g.name ?? g.label ?? `Category ${i + 1}`);
-        const dScore = Math.min(100, Number(g.score ?? g.value ?? 0) <= 10 ? Number(g.score ?? g.value ?? 0) * 10 : Number(g.score ?? g.value ?? 0));
+        const dScore = toTen(Number(g.score ?? g.value ?? 0));
         const color  = bandColor(dScore);
+        const dispScore = Number.isInteger(dScore) ? dScore.toString() : dScore.toFixed(1);
         return `<tr class="${i % 2 ? "even" : ""}">
           <th scope="row">${esc(dName)}</th>
-          <td style="text-align:center"><strong style="color:${color}">${dScore}</strong></td>
+          <td style="text-align:center"><strong style="color:${color}">${dispScore}/10</strong></td>
           <td><span class="band-badge" style="background:${color}20;color:${color};border:1pt solid ${color}40">${esc(scoreBand(dScore))}</span></td>
-          <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${dScore}%;background:${color}"></div></div></td>
+          <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(dScore / 10) * 100}%;background:${color}"></div></div></td>
         </tr>`;
       }).join("")}</tbody>
     </table>` : "";
@@ -528,8 +545,8 @@ function platformSection(content: unknown): string {
           ${logo}
           <div class="platform-name" style="color:${color}">${esc(k.charAt(0).toUpperCase() + k.slice(1))}</div>
         </div>
-        ${score !== null ? `<div class="platform-score" style="color:${color}">${score}<span class="platform-denom">/100</span></div>
-          <div class="bar-track" style="margin:4pt 0 8pt"><div class="bar-fill" style="width:${score}%;background:${color}"></div></div>` : ""}
+        ${score !== null ? `<div class="platform-score" style="color:${color}">${Number.isInteger(score) ? score : score.toFixed(1)}<span class="platform-denom">/10</span></div>
+          <div class="bar-track" style="margin:4pt 0 8pt"><div class="bar-fill" style="width:${(score / 10) * 100}%;background:${color}"></div></div>` : ""}
         ${Object.keys(p).filter(pk => !["score","rating"].includes(pk)).map(pk => {
           const label = pk.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
           return `<div class="platform-field"><span class="platform-field-label">${esc(label)}</span>${text(p[pk])}</div>`;

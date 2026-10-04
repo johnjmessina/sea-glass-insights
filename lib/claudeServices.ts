@@ -81,6 +81,28 @@ CRITICAL OUTPUT RULES — read carefully before writing your response:
 • Do NOT include markdown, backticks, code fences, or any text before or after the JSON object.
 • Write all facts as plain prose sentences only. If you observed a follower count from a web search result, state it as plain text: "The account has 1,243 followers." — never as "The account has 1,243 followers<cite>source.com</cite>".
 
+ALL SCORES ARE ON A 1–10 SCALE. Use the rubrics below to assign each score — every number must be grounded in what you actually observed.
+
+SCORING RUBRICS:
+
+Content Quality dimensions (each 1–10):
+• Visual Quality: 9-10 = professional, cohesive, on-brand imagery with deliberate lighting/composition. 7-8 = mostly good with minor inconsistency. 5-6 = mixed; some strong posts but no clear visual standard. 3-4 = inconsistent, low-effort, or poor lighting throughout. 1-2 = no discernible visual strategy.
+• Caption Quality: 9-10 = storytelling, specific CTAs, emotional resonance. 7-8 = decent copy, some CTAs. 5-6 = generic descriptions or filler. 3-4 = minimal captions or copy that does not drive action. 1-2 = absent or purely promotional with no voice.
+• Brand Consistency: 9-10 = unmistakable brand identity across all posts, tone, color, voice. 7-8 = mostly consistent with minor drift. 5-6 = brand is identifiable but posts feel disconnected. 3-4 = significant inconsistency. 1-2 = no detectable brand identity.
+• Call to Action: 9-10 = every post has a clear, specific CTA tied to a business goal. 7-8 = CTAs present on most posts. 5-6 = occasional CTAs but not systematic. 3-4 = rare or vague CTAs. 1-2 = no CTAs.
+• Content Variety: 9-10 = deliberate mix of product, behind-the-scenes, lifestyle, educational, and promotional. 7-8 = good variety with some gaps. 5-6 = two or three content types but repetitive. 3-4 = one content type dominates. 1-2 = single content type only.
+
+Performance Metrics (each 1–10):
+• Posting Consistency: 9-10 = daily or near-daily with a strategic cadence, every platform. 7-8 = consistent posting 4-5x/week. 5-6 = 2-3x/week or uneven. 3-4 = sporadic, under 1x/week. 1-2 = inactive or months between posts.
+• Engagement: 9-10 = above-average engagement rate (>4%), strong comments and saves. 7-8 = healthy 2-4% ER with meaningful interactions. 5-6 = below-average ER (1-2%) but some engagement. 3-4 = very low ER (<1%), few comments. 1-2 = near-zero engagement, mostly spam or bots.
+• Brand Consistency across content: same rubric as Content Quality brand dimension above.
+
+Platform Utilization (each 1–10):
+• 9-10 = platform fully built out: complete profile, regular posting, Stories/features used, engagement managed, linked to conversion points. 7-8 = active and mostly complete, minor gaps. 5-6 = present and somewhat active but underutilizing key features. 3-4 = minimal activity or incomplete setup. 1-2 = untended or essentially inactive. N/A = not on this platform.
+
+Overall Presence dimensions (each 1–10, weighted average for overall score):
+• Profile Setup, Content Quality, Posting Consistency, Engagement, Brand Consistency, Platform Utilization — use scores consistent with the section-level scores above.
+
 Return ONLY a raw JSON object with exactly these 5 keys:
 
 {
@@ -93,48 +115,47 @@ Return ONLY a raw JSON object with exactly these 5 keys:
     "action_items": ["Action 1", "Action 2", "Action 3"]
   },
   "content_quality_scoring": {
-    "score": 72,
+    "score": 7.2,
     "dimensions": [
-      { "category": "Visual Quality", "score": 80, "notes": "1-sentence observation" },
-      { "category": "Caption Quality", "score": 65, "notes": "1-sentence observation" },
-      { "category": "Brand Consistency", "score": 70, "notes": "1-sentence observation" },
-      { "category": "Call to Action", "score": 55, "notes": "1-sentence observation" },
-      { "category": "Content Variety", "score": 68, "notes": "1-sentence observation" }
+      { "category": "Visual Quality",     "score": 8.0, "notes": "1-sentence observation grounded in what you saw" },
+      { "category": "Caption Quality",    "score": 6.5, "notes": "1-sentence observation" },
+      { "category": "Brand Consistency",  "score": 7.0, "notes": "1-sentence observation" },
+      { "category": "Call to Action",     "score": 5.5, "notes": "1-sentence observation" },
+      { "category": "Content Variety",    "score": 6.8, "notes": "1-sentence observation" }
     ],
-    "observations": "2-3 sentences of supporting narrative"
+    "observations": "2-3 sentences of supporting narrative grounded in observed content"
   },
   "performance_metrics": {
     "posting": {
-      "score": 65,
-      "observations": ["Key observation 1", "Key observation 2"],
-      "actions": ["Recommended action 1", "Recommended action 2"]
+      "score": 6.5,
+      "observations": ["Specific observed fact about posting cadence or frequency", "Second observation"],
+      "actions": ["Specific recommended action", "Second action"]
     },
     "engagement": {
-      "score": 55,
-      "observations": ["Key observation 1", "Key observation 2"],
-      "actions": ["Recommended action 1", "Recommended action 2"]
+      "score": 5.5,
+      "observations": ["Specific observed engagement fact (rate, comment quality, saves)", "Second observation"],
+      "actions": ["Specific recommended action", "Second action"]
     },
     "brand": {
-      "score": 70,
-      "observations": ["Key observation 1", "Key observation 2"],
-      "actions": ["Recommended action 1", "Recommended action 2"]
+      "score": 7.0,
+      "observations": ["Specific observed brand consistency fact", "Second observation"],
+      "actions": ["Specific recommended action", "Second action"]
     }
   },
   "platform_utilization_review": {
-    "instagram": { "score": 72, "strengths": "What they do well", "gaps": "What is underused or missing" },
-    "facebook":  { "score": 58, "strengths": "What they do well", "gaps": "What is underused or missing" },
-    "tiktok":    { "score": 40, "strengths": "What they do well", "gaps": "What is underused or missing" },
+    "instagram": { "score": 7.2, "strengths": "What they do well, specifically", "gaps": "What is underused or missing, specifically" },
+    "facebook":  { "score": 5.8, "strengths": "What they do well", "gaps": "What is underused or missing" },
     "summary": "2-3 sentences overall"
   },
   "overall_presence_score": {
-    "score": 64,
+    "score": 6.4,
     "dimensions": [
-      { "category": "Profile Setup",        "score": 70 },
-      { "category": "Content Quality",      "score": 65 },
-      { "category": "Posting Consistency",  "score": 60 },
-      { "category": "Engagement",           "score": 55 },
-      { "category": "Brand Consistency",    "score": 72 },
-      { "category": "Platform Utilization", "score": 62 }
+      { "category": "Profile Setup",        "score": 7.0 },
+      { "category": "Content Quality",      "score": 6.5 },
+      { "category": "Posting Consistency",  "score": 6.0 },
+      { "category": "Engagement",           "score": 5.5 },
+      { "category": "Brand Consistency",    "score": 7.2 },
+      { "category": "Platform Utilization", "score": 6.2 }
     ],
     "recommendations": "3-4 specific, actionable recommendations as a paragraph"
   }
