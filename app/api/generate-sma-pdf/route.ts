@@ -4,7 +4,7 @@ import { renderSmaReportPdf } from "@/lib/smaPdf/render";
 
 export async function POST(req: NextRequest) {
   try {
-    const { orderId, analystNote: passedNote } = await req.json();
+    const { orderId, analystNote: passedNote, aiDraft: passedDraft } = await req.json();
     if (!orderId)
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
 
@@ -20,7 +20,9 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
 
-    if (!order.ai_draft)
+    const finalDraft = passedDraft ?? order.ai_draft;
+
+    if (!finalDraft)
       return NextResponse.json({ error: "No AI draft found." }, { status: 400 });
 
     // Use note passed from dashboard (reflects unsaved edits); fall back to stored value
@@ -28,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     const pdfBuffer = await renderSmaReportPdf(
       order,
-      order.ai_draft as Record<string, unknown>,
+      finalDraft as Record<string, unknown>,
       analystNote,
     );
 

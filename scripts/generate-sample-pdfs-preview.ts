@@ -158,12 +158,49 @@ const DDR_AI_DRAFT = {
   expanded_analyst_interpretation:{ strategic_framing: "The core tension in this business is between a genuinely exceptional in-store experience and an almost complete absence of mechanisms to extend that experience beyond the physical visit. Every gap identified — no loyalty follow-through, no digital conversion, no tourist retention — is a version of the same problem: the shop is excellent at creating the moment and poor at capturing it.", competitive_read: "Playa Coffee is not winning on quality. It is winning on habit and convenience for a specific use case (the rushed weekday afternoon). Coastal Brew should not try to compete on that dimension — it will lose. The response is to deepen loyalty among customers who already value what Coastal Brew does, and to reach the tourist segment before they form a Playa habit.", long_term_view: "The second location question should be answered by data, not ambition. The mobile cart generates that data at 10% of the cost and risk. If beach event revenue is strong and the Coastal Brew brand travels well outside the Asbury Park block, Long Branch becomes an obvious next step. If it doesn't travel, that's critical information worth $20K to learn." },
 };
 
-const VOC_AI_DRAFT = {
-  survey_design:         { methodology: "Phase 2 open-response customer interviews (8 respondents). Mix of regular customers, occasional visitors, and one tourist. Age range 28–52. Gender-diverse sample.", questions_covered: "Brand loyalty drivers, competitive awareness, digital engagement, subscription interest, WiFi/dwell experience." },
-  quant_summary:         { questions: [{ question: "Overall satisfaction with Coastal Brew Coffee", segments: [{ label: "Regular", t2b: 94, mean: 4.7 }, { label: "Occasional", t2b: 71, mean: 3.9 }, { label: "Tourist", t2b: 88, mean: 4.4 }] }, { question: "Likelihood to recommend to a friend", segments: [{ label: "Regular", t2b: 91, mean: 4.6 }, { label: "Occasional", t2b: 65, mean: 3.7 }, { label: "Tourist", t2b: 85, mean: 4.3 }] }, { question: "Value for price paid", segments: [{ label: "Regular", t2b: 82, mean: 4.2 }, { label: "Occasional", t2b: 58, mean: 3.5 }, { label: "Tourist", t2b: 79, mean: 4.1 }] }] },
-  thematic_analysis:     { themes: [{ title: "Staff Recognition as the Core Loyalty Driver", body: "The most consistent theme across regular customers is the experience of being known — staff remembering names and orders creates a feeling of belonging that respondents explicitly contrast against chain experiences. This is the shop's primary competitive moat." }, { title: "Digital Presence Underdelivering", body: "Multiple respondents discovered the shop through Instagram but noted the feed doesn't reflect the richness of the in-store experience. The roasting process and staff personalities — the most compelling content assets — are largely absent from the social feed." }, { title: "Convenience Friction Creates Playa Vulnerability", body: "Respondents who occasionally choose Playa Coffee consistently cite time as the driver, not preference. The battle for these customers is not quality — it's reducing the perceived time cost of choosing Coastal Brew." }, { title: "Subscription Interest is Real but Format-Sensitive", body: "Subscription resonates with regulars when framed around customization and flexibility. Rigid weekly pickup is the most cited deterrent. An in-store discount component significantly increases appeal across all segments." }] },
-  visual_findings_summary: { themes: [{ title: "Top Loyalty Driver: Staff Recognition", body: "7 of 8 respondents cited staff warmth and personalization as the primary reason they return or recommend." }, { title: "Competitive Awareness is High", body: "All respondents were aware of Playa Coffee's opening. 3 of 8 had tried it. Quality verdict was consistent: Coastal Brew wins on product, Playa wins on speed." }, { title: "Content Gap is Visible to Customers", body: "4 respondents expressed interest in behind-the-scenes roasting content. None had seen it on the shop's social channels." }] },
-  analyst_interpretation: { key_recommendation_1: "Formalize what's already working: the staff recognition culture is the brand's most defensible asset. Build a simple onboarding practice that makes name-and-order memory a standard for new hires, not just a personality trait of current staff.", key_recommendation_2: "Close the digital gap with the one story customers actually want: the roasting process. Three short-form videos per week showing the roast, the grind, and the pour would outperform months of generic product shots.", key_recommendation_3: "Test a flexible subscription format: 'any 4 pickups per month' rather than weekly, with the in-store discount as the headline. Pilot with 20 regulars before any app investment." },
+const VOC_AI_DRAFT: Record<string, string> = {
+  survey_design:
+    "Phase 2 open-response customer interviews (8 respondents). Mix of regular customers, occasional visitors, and one tourist. Age range 28–52. Gender-diverse sample. Questions covered: brand loyalty drivers, competitive awareness, digital engagement, subscription interest, and WiFi/dwell experience.",
+
+  quant_summary:
+    "Satisfaction scores are strongest among Regular customers (94% T2B, mean 4.7) and Tourists (88% T2B, mean 4.4), with Occasional visitors trailing at 71% T2B and mean 3.9 — a segment worth examining for friction points. Likelihood to recommend follows a similar pattern: Regulars at 91% T2B vs. Occasional visitors at 65%. Value-for-price scores reveal a mild gap for Occasional customers (58% T2B, mean 3.5) that may reflect infrequent exposure to the product's quality story relative to pricing.",
+
+  thematic_analysis:
+    `## Staff Recognition as the Core Loyalty Driver
+
+The most consistent theme across regular customers is the experience of being known — staff remembering names and orders creates a feeling of belonging that respondents explicitly contrast against chain experiences. This is the shop's primary competitive moat.
+
+## Digital Presence Underdelivering
+
+Multiple respondents discovered the shop through Instagram but noted the feed doesn't reflect the richness of the in-store experience. The roasting process and staff personalities — the most compelling content assets — are largely absent from the social feed.
+
+## Convenience Friction Creates Playa Vulnerability
+
+Respondents who occasionally choose Playa Coffee consistently cite time as the driver, not preference. The battle for these customers is not quality — it's reducing the perceived time cost of choosing Coastal Brew.
+
+## Subscription Interest is Real but Format-Sensitive
+
+Subscription resonates with regulars when framed around customization and flexibility. Rigid weekly pickup is the most cited deterrent. An in-store discount component significantly increases appeal across all segments.`,
+
+  visual_findings_summary:
+    `## Top Loyalty Driver: Staff Recognition
+
+7 of 8 respondents cited staff warmth and personalization as the primary reason they return or recommend.
+
+## Competitive Awareness is High
+
+All respondents were aware of Playa Coffee's opening. 3 of 8 had tried it. Quality verdict was consistent: Coastal Brew wins on product, Playa wins on speed.
+
+## Content Gap is Visible to Customers
+
+4 respondents expressed interest in behind-the-scenes roasting content. None had seen it on the shop's social channels.`,
+
+  analyst_interpretation:
+    `Formalize what's already working: the staff recognition culture is the brand's most defensible asset. Build a simple onboarding practice that makes name-and-order memory a standard for new hires, not just a personality trait of current staff.
+
+Close the digital gap with the one story customers actually want: the roasting process. Three short-form videos per week showing the roast, the grind, and the pour would outperform months of generic product shots.
+
+Test a flexible subscription format: 'any 4 pickups per month' rather than weekly, with the in-store discount as the headline. Pilot with 20 regulars before any app investment.`,
 };
 
 const AISK_AI_DRAFT = {
