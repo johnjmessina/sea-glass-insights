@@ -809,20 +809,20 @@ table { border-collapse: collapse; width: 100%; }
 
 /* Performance Metric Cards — table layout for reliable Puppeteer print rendering */
 .metric-cards-table { /* outer table — styles inline */ }
-.metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; }
-.metric-card-header { display: flex; align-items: flex-start; gap: 6pt; margin-bottom: 8pt; }
-.metric-card-icon { font-size: 16pt; }
-.metric-card-title { font-size: 11pt; font-weight: 700; flex: 1; }
-.metric-score { font-size: 22pt; font-weight: 700; line-height: 1; }
-.metric-denom { font-size: 10pt; color: ${GRAY}; }
-.metric-bar-track { height: 7pt; background: #E0E0E0; border-radius: 4pt; overflow: hidden; margin-bottom: 4pt; }
-.metric-bar-fill { height: 100%; border-radius: 4pt; }
-.metric-band { margin-bottom: 8pt; }
-.metric-obs { margin: 8pt 0 0; padding-left: 14pt; font-size: 9.5pt; color: ${INK}; }
-.metric-obs li { margin-bottom: 3pt; }
-.metric-actions-label { font-size: 8pt; font-weight: 700; color: ${NAVY}; text-transform: uppercase; letter-spacing: 1pt; margin-top: 8pt; margin-bottom: 4pt; }
-.metric-acts { margin: 0; padding-left: 14pt; font-size: 9.5pt; color: ${INK}; }
-.metric-acts li { margin-bottom: 3pt; }
+.metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 10pt 12pt; }
+.metric-card-header { display: flex; align-items: flex-start; gap: 5pt; margin-bottom: 6pt; flex-wrap: nowrap; }
+.metric-card-icon { font-size: 14pt; flex-shrink: 0; }
+.metric-card-title { font-size: 9.5pt; font-weight: 700; flex: 1; line-height: 1.3; }
+.metric-score { font-size: 20pt; font-weight: 700; line-height: 1; white-space: nowrap; flex-shrink: 0; }
+.metric-denom { font-size: 9pt; color: ${GRAY}; }
+.metric-bar-track { height: 6pt; background: #E0E0E0; border-radius: 3pt; overflow: hidden; margin-bottom: 3pt; }
+.metric-bar-fill { height: 100%; border-radius: 3pt; }
+.metric-band { margin-bottom: 6pt; }
+.metric-obs { margin: 6pt 0 0; padding-left: 12pt; font-size: 8.5pt; color: ${INK}; line-height: 1.35; }
+.metric-obs li { margin-bottom: 2pt; }
+.metric-actions-label { font-size: 7pt; font-weight: 700; color: ${NAVY}; text-transform: uppercase; letter-spacing: 1pt; margin-top: 6pt; margin-bottom: 3pt; }
+.metric-acts { margin: 0; padding-left: 12pt; font-size: 8.5pt; color: ${INK}; line-height: 1.35; }
+.metric-acts li { margin-bottom: 2pt; }
 
 /* Platform Grid (Utilization) */
 .platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; margin-bottom: 16pt; }
