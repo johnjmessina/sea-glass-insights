@@ -347,7 +347,7 @@ function pageRules(): string {
     }`;
   return [
     `@page { size: Letter; margin: 1in; }`,
-    `@page cover { }`,
+    `@page cover { margin: 1in 1in 0 1in; }`,
     `@page contents { ${chrome("Contents")} }`,
     ...VOC_SECTIONS.map(s => `@page ${s.id} { ${chrome(s.title)} }`),
   ].join("\n");
@@ -376,7 +376,7 @@ section.contents { page: contents; }
 }
 
 /* Cover */
-.cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.cover-inner { height: 10in; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .cover-logo { width: 2.8in; margin-top: 0.7in; }
 .cover-type { font-size: 9pt; font-weight: 700; color: ${TEAL}; letter-spacing: 3pt; text-transform: uppercase; margin: 0.65in 0 0; }
 .cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }

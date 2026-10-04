@@ -324,7 +324,7 @@ function pageRules(): string {
     }`;
   return [
     `@page { size: Letter; margin: 1in; }`,
-    `@page cover { }`,
+    `@page cover { margin: 1in 1in 0 1in; }`,
     `@page contents { ${chrome("Contents")} }`,
     ...REPORT_SECTIONS.map(s => `@page ${s.id} { ${chrome(s.title)} }`),
   ].join("\n");
@@ -354,7 +354,7 @@ section.contents { page: contents; }
 }
 
 /* Cover */
-.cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.cover-inner { height: 10in; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .cover-logo { width: 2.8in; margin-top: 0.7in; }
 .cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }
 .cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
