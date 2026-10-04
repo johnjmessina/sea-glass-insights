@@ -515,7 +515,9 @@ function performanceMetricsSection(content: unknown): string {
   let html = "";
 
   if (hasStructuredSubs) {
-    html += `<div class="metric-cards">${metricCards.map(m => {
+    // Use a table layout for the three metric cards — tables are more reliable than
+    // CSS grid/flex in Puppeteer's print renderer and honour vertical-align:top.
+    html += `<table class="metric-cards-table" style="width:100%;border-collapse:separate;border-spacing:10pt 0;margin-bottom:16pt;table-layout:fixed"><tr>${metricCards.map(m => {
       const score  = extractScore(m.data);
       const color  = score !== null ? bandColor(score) : NAVY;
       const fields = Object.keys(m.data).filter(k => !["score","overall_score","rating"].includes(k));
@@ -529,11 +531,11 @@ function performanceMetricsSection(content: unknown): string {
         : null;
       const pct = score !== null ? (score / 10) * 100 : 0;
 
-      return `<div class="metric-card" style="border-top:3pt solid ${color}">
+      return `<td class="metric-card" style="border-top:3pt solid ${color};width:33%;vertical-align:top">
         <div class="metric-card-header">
           <span class="metric-card-icon">${m.icon}</span>
           <span class="metric-card-title" style="color:${color}">${esc(m.label)}</span>
-          ${dispScore !== null ? `<span class="metric-score" style="color:${color}">${dispScore}<span class="metric-denom">/10</span></span>` : ""}
+          ${dispScore !== null ? `<span class="metric-score" style="color:${color};white-space:nowrap">${dispScore}<span class="metric-denom">/10</span></span>` : ""}
         </div>
         ${score !== null ? `<div class="metric-bar-track"><div class="metric-bar-fill" style="width:${pct}%;background:${color}"></div></div>
           <div class="metric-band"><span class="band-badge" style="background:${color}20;color:${color};border:1pt solid ${color}40">${scoreBand(score)}</span></div>` : ""}
@@ -543,8 +545,8 @@ function performanceMetricsSection(content: unknown): string {
           const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
           return `<div class="profile-field"><span class="profile-field-label">${esc(label)}</span><span class="profile-field-value">${text(m.data[k])}</span></div>`;
         }).join("") : ""}
-      </div>`;
-    }).join("")}</div>`;
+      </td>`;
+    }).join("")}</tr></table>`;
   } else {
     // Fallback: scoreHero + narrative per sub-key, or plain narrative
     const topScore = extractScore(content);
@@ -805,11 +807,10 @@ table { border-collapse: collapse; width: 100%; }
 .scorecard-bar-fill { height: 100%; border-radius: 4pt; }
 .scorecard-rating { }
 
-/* Performance Metric Cards */
-/* Use flex-wrap instead of CSS grid so cards can flow across page breaks cleanly */
-.metric-cards { display: flex; flex-wrap: wrap; gap: 12pt; margin-bottom: 16pt; }
-.metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; break-inside: avoid; page-break-inside: avoid; flex: 1 1 calc(33% - 8pt); min-width: 140pt; }
-.metric-card-header { display: flex; align-items: center; gap: 6pt; margin-bottom: 8pt; }
+/* Performance Metric Cards — table layout for reliable Puppeteer print rendering */
+.metric-cards-table { /* outer table — styles inline */ }
+.metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; }
+.metric-card-header { display: flex; align-items: flex-start; gap: 6pt; margin-bottom: 8pt; }
 .metric-card-icon { font-size: 16pt; }
 .metric-card-title { font-size: 11pt; font-weight: 700; flex: 1; }
 .metric-score { font-size: 22pt; font-weight: 700; line-height: 1; }
