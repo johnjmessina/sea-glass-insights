@@ -415,7 +415,7 @@ function pageRules(): string {
     }`;
   return [
     `@page { size: Letter; margin: 1in; }`,
-    `@page cover { margin: 1in 1in 0 1in; }`,
+    `@page cover { margin: 1in; }`,
     `@page contents { ${chrome("Contents")} }`,
     ...DDR_SECTIONS.map(s => `@page ${s.id} { ${chrome(s.title)} }`),
   ].join("\n");
@@ -444,15 +444,13 @@ section.contents { page: contents; }
 }
 
 /* Cover */
-.cover-inner { height: 10in; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.cover-logo { width: 2.8in; margin-top: 0.7in; }
+.cover-inner { height: 9in; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.cover-logo { width: 5in; margin-top: 1.5in; }
 .cover-type { font-size: 9pt; font-weight: 700; color: ${TEAL}; letter-spacing: 3pt; text-transform: uppercase; margin: 0.65in 0 0; }
-.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 16pt auto; }
+.cover-rule { width: 1.2in; height: 3pt; background: ${TEAL}; margin: 20pt auto; }
 .cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
 .cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 12pt; }
-.cover-footer { margin-top: auto; width: calc(100% + 2in); margin-left: -1in; margin-right: -1in; background: ${NAVY}; padding: 22pt 1in; text-align: left; }
-.cover-footer-biz { font-size: 13pt; font-weight: 700; color: ${WHITE}; margin-bottom: 4pt; }
-.cover-footer-meta { font-size: 9pt; color: rgba(255,255,255,0.65); font-style: italic; }
+.cover-confidential { margin-top: auto; font-size: 8pt; color: ${GRAY}; font-style: italic; }
 
 /* Contents */
 .toc { list-style: none; margin: 8pt 0 0; padding: 0; }
@@ -629,10 +627,7 @@ export function buildDdrReportHtml(
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)}${order.location ? ` &nbsp;|&nbsp; ${esc(order.location)}` : ""} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
-          <div class="cover-footer">
-            <div class="cover-footer-biz">${esc(order.business_name)}</div>
-            <div class="cover-footer-meta">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
-          </div>
+          <div class="cover-confidential">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
         </div>
       </section>`;
     const contents = `
