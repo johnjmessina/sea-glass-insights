@@ -1,7 +1,7 @@
 "use client";
 
 // All imports must precede any executable code — SWC/ESModules requirement.
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import type { Order } from "@/lib/supabase";
 import {
   SERVICE_DISPLAY_NAMES, SERVICE_TAG_COLORS,
@@ -220,6 +220,106 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
     }
   }
 
+  // ── Structured content preview ─────────────────────────────────────────────
+  // For SMA sections, draft values may be JSON-stringified objects.
+  // This renders a human-readable summary instead of raw JSON.
+  function renderContentPreview(content: string) {
+    // Try to detect & parse JSON objects
+    const trimmed = content.trim();
+    if (!trimmed.startsWith("{")) {
+      return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>;
+    }
+    let parsed: Record<string, unknown>;
+    try { parsed = JSON.parse(trimmed); } catch {
+      return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>;
+    }
+
+    const lines: React.ReactNode[] = [];
+
+    // Summary field
+    if (typeof parsed.summary === "string") {
+      lines.push(<p key="summary" className="text-sm text-gray-700 leading-relaxed mb-2">{parsed.summary}</p>);
+    }
+
+    // Score field
+    if (parsed.score !== undefined) {
+      lines.push(
+        <p key="score" className="text-sm font-semibold text-navy mb-2">
+          Overall Score: {String(parsed.score)}/10
+        </p>
+      );
+    }
+
+    // Key takeaways / observations / recommendations as bullets
+    const bulletKeys = ["key_takeaways", "observations", "recommendations", "action_items"];
+    for (const bk of bulletKeys) {
+      const arr = parsed[bk];
+      if (Array.isArray(arr) && arr.length > 0) {
+        lines.push(
+          <div key={bk} className="mb-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+              {bk.replace(/_/g, " ")}
+            </p>
+            <ul className="list-disc list-inside space-y-0.5">
+              {arr.slice(0, 4).map((item, i) => (
+                <li key={i} className="text-sm text-gray-700">{String(item)}</li>
+              ))}
+              {arr.length > 4 && (
+                <li className="text-xs text-gray-400 italic">+{arr.length - 4} more…</li>
+              )}
+            </ul>
+          </div>
+        );
+      }
+    }
+
+    // Per-platform entries (objects keyed by platform name)
+    const platformKeys = ["instagram", "facebook", "tiktok", "twitter", "pinterest", "youtube", "linkedin", "yelp"];
+    const foundPlatforms = platformKeys.filter(pk => parsed[pk] && typeof parsed[pk] === "object");
+    if (foundPlatforms.length > 0) {
+      lines.push(
+        <div key="platforms" className="flex flex-wrap gap-2 mt-1">
+          {foundPlatforms.map(pk => {
+            const p = parsed[pk] as Record<string, unknown>;
+            const status = p.status ?? p.score ?? "—";
+            return (
+              <span key={pk} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                {pk}: {String(status)}
+              </span>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Posting / engagement / brand sub-objects (performance_metrics)
+    const metricKeys = ["posting", "engagement", "brand"];
+    const foundMetrics = metricKeys.filter(mk => parsed[mk] && typeof parsed[mk] === "object");
+    if (foundMetrics.length > 0 && foundPlatforms.length === 0) {
+      lines.push(
+        <div key="metrics" className="flex flex-wrap gap-2 mt-1">
+          {foundMetrics.map(mk => {
+            const m2 = parsed[mk] as Record<string, unknown>;
+            return (
+              <span key={mk} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                {mk}: {m2.score !== undefined ? `${m2.score}/10` : "—"}
+              </span>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (lines.length === 0) {
+      // Fallback: show first string value found
+      const firstStr = Object.values(parsed).find(v => typeof v === "string");
+      if (firstStr) return <p className="text-sm text-gray-700 leading-relaxed">{firstStr as string}</p>;
+      return <p className="text-sm text-gray-400 italic">Structured data — preview in PDF.</p>;
+    }
+
+    return <div>{lines}</div>;
+  }
+
   // ── Section renderer ───────────────────────────────────────────────────────
 
   function renderSection(section: ServiceSection) {
@@ -295,7 +395,7 @@ export default function GenericServiceDetail({ order: initialOrder, onBack }: Pr
             </div>
           </div>
         ) : content ? (
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+          renderContentPreview(content)
         ) : hasDraft ? (
           <p className="text-sm text-gray-300 italic">No content yet for this section.</p>
         ) : null}
