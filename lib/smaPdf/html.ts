@@ -282,8 +282,19 @@ function profileSetupSection(content: unknown): string {
       const statusBg   = isActive ? "#ECFDF5" : isWarning ? "#FFFBEB" : "#F9FAFB";
       const statusIcon = isActive ? "✓" : isWarning ? "⚠" : "–";
 
-      const renderField = (label: string, val: unknown) => {
+      const renderField = (label: string, val: unknown, isBool = false) => {
         if (val === null || val === undefined || String(val).trim() === "") return "";
+        if (isBool || typeof val === "boolean") {
+          const isPos = val === true || /complete|present|yes|active|verified/i.test(String(val));
+          const badgeColor = isPos ? "#059669" : "#D97706";
+          const badgeBg    = isPos ? "#ECFDF5"  : "#FFFBEB";
+          const badgeIcon  = isPos ? "✓" : "⚠";
+          const badgeText  = typeof val === "boolean" ? (val ? "Complete" : "Incomplete") : String(val);
+          return `<div class="profile-field">
+            <span class="profile-field-label">${esc(label)}</span>
+            <span class="profile-bool-badge" style="display:inline-block;padding:1pt 5pt;border-radius:3pt;font-size:7pt;font-weight:600;color:${badgeColor};background:${badgeBg};border:1pt solid ${badgeColor}40">${badgeIcon} ${esc(badgeText)}</span>
+          </div>`;
+        }
         return `<div class="profile-field">
           <span class="profile-field-label">${esc(label)}</span>
           <span class="profile-field-value">${text(val)}</span>
@@ -307,10 +318,10 @@ function profileSetupSection(content: unknown): string {
         </div>
         ${handle ? renderField("Handle", handle) : ""}
         ${followers !== null ? renderField("Followers", followers) : ""}
-        ${bio !== null ? renderField("Bio", typeof bio === "boolean" ? (bio ? "Complete" : "Incomplete") : bio) : ""}
-        ${photo !== null ? renderField("Profile Photo", typeof photo === "boolean" ? (photo ? "Present" : "Missing") : photo) : ""}
-        ${verified !== null ? renderField("Verified", typeof verified === "boolean" ? (verified ? "Yes" : "No") : verified) : ""}
-        ${pinned !== null ? renderField("Pinned Post", typeof pinned === "boolean" ? (pinned ? "Yes" : "None") : pinned) : ""}
+        ${bio !== null ? renderField("Bio", typeof bio === "boolean" ? bio : bio, typeof bio === "boolean") : ""}
+        ${photo !== null ? renderField("Profile Photo", typeof photo === "boolean" ? photo : photo, typeof photo === "boolean") : ""}
+        ${verified !== null ? renderField("Verified", typeof verified === "boolean" ? verified : verified, typeof verified === "boolean") : ""}
+        ${pinned !== null ? renderField("Pinned Post", typeof pinned === "boolean" ? pinned : pinned, typeof pinned === "boolean") : ""}
         ${extraKeys.map(pk => renderField(pk.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()), p[pk])).join("")}
         ${highlights.length ? `<ul class="profile-card-notes">${highlights.map(h => `<li>${text(h)}</li>`).join("")}</ul>` : ""}
       </div>`;
@@ -573,15 +584,25 @@ function overallPresenceSection(content: unknown): string {
       }).join("")}</tbody>
     </table>` : "";
 
+  // Recommendations rendered as a teal-bordered action callout, not plain prose
+  const recsRaw = c.recommendations ?? c.recommendation ?? c.next_steps ?? c.action_plan ?? null;
+  const recsHtml = recsRaw
+    ? `<div class="recs-callout" style="margin-top:16pt;border-left:4pt solid ${TEAL};background:${TEAL}12;padding:10pt 14pt;border-radius:2pt">
+        <div class="recs-callout-label" style="font-size:7pt;font-weight:700;letter-spacing:1.5pt;text-transform:uppercase;color:${TEAL};margin-bottom:6pt">Recommendations</div>
+        ${paragraphs(recsRaw)}
+      </div>`
+    : "";
+
   const remainingKeys = Object.keys(c).filter(k =>
-    !["score","overall_score","total_score","rating","overall_rating","dimensions","scores","category_scores"].includes(k)
+    !["score","overall_score","total_score","rating","overall_rating","dimensions","scores","category_scores",
+      "recommendations","recommendation","next_steps","action_plan"].includes(k)
   );
   const prose = remainingKeys.length ? remainingKeys.map(k => {
     const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
     return `<div class="subsection"><h3 class="subsection-head">${esc(label)}</h3>${paragraphs(c[k])}</div>`;
   }).join("") : (score === null ? narrativeSection(content) : "");
 
-  return hero + dimTable + (dimTable ? `<div style="margin-top:16pt">${prose}</div>` : prose);
+  return hero + dimTable + recsHtml + (prose ? `<div style="margin-top:16pt">${prose}</div>` : "");
 }
 
 // Platform Utilization Review
@@ -603,10 +624,23 @@ function platformSection(content: unknown): string {
         </div>
         ${score !== null ? `<div class="platform-score" style="color:${color}">${Number.isInteger(score) ? score : score.toFixed(1)}<span class="platform-denom">/10</span></div>
           <div class="bar-track" style="margin:4pt 0 8pt"><div class="bar-fill" style="width:${(score / 10) * 100}%;background:${color}"></div></div>` : ""}
-        ${Object.keys(p).filter(pk => !["score","rating"].includes(pk)).map(pk => {
-          const label = pk.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-          return `<div class="platform-field"><span class="platform-field-label">${esc(label)}</span>${text(p[pk])}</div>`;
-        }).join("")}
+        ${(() => {
+          const strengths = arr(p.strengths ?? p.strength ?? []);
+          const gaps      = arr(p.gaps ?? p.gap ?? p.weaknesses ?? p.areas_for_improvement ?? []);
+          const otherKeys = Object.keys(p).filter(pk =>
+            !["score","rating","strengths","strength","gaps","gap","weaknesses","areas_for_improvement"].includes(pk)
+          );
+          return [
+            strengths.length ? `<div class="platform-insight-label" style="font-size:6.5pt;font-weight:700;letter-spacing:1pt;text-transform:uppercase;color:#059669;margin:6pt 0 3pt">Strengths</div>
+              <ul class="platform-insight-list" style="margin:0;padding-left:10pt;list-style:none">${strengths.map(s => `<li style="font-size:8pt;margin-bottom:2pt;padding-left:8pt;position:relative"><span style="position:absolute;left:0;color:#059669">✓</span>${text(s)}</li>`).join("")}</ul>` : "",
+            gaps.length ? `<div class="platform-insight-label" style="font-size:6.5pt;font-weight:700;letter-spacing:1pt;text-transform:uppercase;color:#D97706;margin:6pt 0 3pt">Gaps</div>
+              <ul class="platform-insight-list" style="margin:0;padding-left:10pt;list-style:none">${gaps.map(g => `<li style="font-size:8pt;margin-bottom:2pt;padding-left:8pt;position:relative"><span style="position:absolute;left:0;color:#D97706">→</span>${text(g)}</li>`).join("")}</ul>` : "",
+            otherKeys.map(pk => {
+              const label = pk.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+              return `<div class="platform-field"><span class="platform-field-label">${esc(label)}</span>${text(p[pk])}</div>`;
+            }).join(""),
+          ].join("");
+        })()}
       </div>`;
     }).join("")}</div>` + (c.summary || c.overall_summary ? `<div style="margin-top:14pt">${paragraphs(c.summary ?? c.overall_summary)}</div>` : "");
   }
