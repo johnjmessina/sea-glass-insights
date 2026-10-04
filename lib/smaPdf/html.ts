@@ -345,11 +345,33 @@ function contentQualitySection(content: unknown): string {
   const score = extractScore(content);
 
   // Find per-dimension scores
-  const dims: unknown[] = Array.isArray(c.dimensions) ? c.dimensions
+  let dims: unknown[] = Array.isArray(c.dimensions) ? c.dimensions
     : Array.isArray(c.criteria) ? c.criteria
     : Array.isArray(c.categories) ? c.categories
     : Array.isArray(c.scores) ? c.scores
     : [];
+
+  // Fallback: parse inline "Label | Score: N text..." lines from raw string sections
+  if (!dims.length) {
+    const raw = typeof content === "string" ? content
+      : typeof c.scored_dimensions === "string" ? c.scored_dimensions
+      : "";
+    if (raw) {
+      // Match "Label | Score: N text" or "Label — N/100 text" or "Label Score: N text"
+      const lineMatches = raw.match(/([A-Za-z][^|\n]{2,40}?)\s*[|—–]\s*Score:\s*(\d+(?:\.\d+)?)[^\n]*/gi)
+        ?? raw.match(/([A-Za-z][^|\n]{2,40}?)\s*[|—–]\s*(\d+(?:\.\d+)?)\/\d+[^\n]*/gi)
+        ?? [];
+      if (lineMatches.length) {
+        dims = lineMatches.map(line => {
+          const m = line.match(/^(.*?)\s*[|—–]\s*(?:Score:\s*)?(\d+(?:\.\d+)?)/i);
+          if (!m) return null;
+          // Grab the notes after the score number
+          const notes = line.replace(m[0], "").trim().replace(/^[.,:\s]+/, "");
+          return { category: m[1].trim(), score: Number(m[2]), notes };
+        }).filter(Boolean);
+      }
+    }
+  }
 
   // Individual criteria that may be in flat keys
   const scoreCriteriaKeys = Object.keys(c).filter(k =>
@@ -429,11 +451,45 @@ function performanceMetricsSection(content: unknown): string {
   const c = obj(content);
 
   // Support new structured format { posting: {...}, engagement: {...}, brand: {...} }
-  // OR legacy separate section objects merged together
+  // OR legacy separate section objects merged together.
+  // Also handle raw string blobs: "posting: { score: 6, ... }, engagement: { ... }"
+  let cResolved = c;
+  if (!c.posting && !c.engagement && !c.brand) {
+    const raw = typeof content === "string" ? content : "";
+    if (raw && /posting\s*:/i.test(raw)) {
+      // Try to parse as JSON by wrapping in braces
+      try {
+        cResolved = JSON.parse(`{${raw.replace(/([a-zA-Z_]+)\s*:/g, (_, k) => `"${k}":`)
+          .replace(/'/g, '"').replace(/,\s*}/g, "}").replace(/,\s*]/g, "]")}}`);
+      } catch {
+        // Extract each metric block with a simple regex
+        const metricPattern = /(posting|engagement|brand)\s*:\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/gi;
+        let m: RegExpExecArray | null;
+        const built: Obj = {};
+        while ((m = metricPattern.exec(raw)) !== null) {
+          try {
+            built[m[1]] = JSON.parse(`{${m[2].replace(/([a-zA-Z_]+)\s*:/g, (_, k) => `"${k}":`)
+              .replace(/'/g, '"').replace(/,\s*}/g, "}").replace(/,\s*]/g, "]")}}`);
+          } catch {
+            // Extract score at minimum
+            const scoreM = m[2].match(/score\s*:\s*(\d+(?:\.\d+)?)/i);
+            const obsM   = m[2].match(/observations\s*:\s*\[([^\]]*)\]/i);
+            const actM   = m[2].match(/actions\s*:\s*\[([^\]]*)\]/i);
+            built[m[1]] = {
+              score: scoreM ? Number(scoreM[1]) : undefined,
+              observations: obsM ? obsM[1].match(/"([^"]+)"/g)?.map(s => s.replace(/"/g, "")) ?? [] : [],
+              actions:      actM ? actM[1].match(/"([^"]+)"/g)?.map(s => s.replace(/"/g, "")) ?? [] : [],
+            };
+          }
+        }
+        if (Object.keys(built).length) cResolved = built;
+      }
+    }
+  }
   const sub = {
-    posting:    obj(c.posting    ?? c.posting_consistency ?? c.posting_consistency_analysis ?? {}),
-    engagement: obj(c.engagement ?? c.engagement_assessment ?? {}),
-    brand:      obj(c.brand      ?? c.brand_consistency ?? c.brand_consistency_evaluation ?? {}),
+    posting:    obj(cResolved.posting    ?? cResolved.posting_consistency ?? cResolved.posting_consistency_analysis ?? {}),
+    engagement: obj(cResolved.engagement ?? cResolved.engagement_assessment ?? {}),
+    brand:      obj(cResolved.brand      ?? cResolved.brand_consistency ?? cResolved.brand_consistency_evaluation ?? {}),
   };
 
   const metricCards = [
@@ -764,12 +820,14 @@ export function buildSmaReportHtml(
   // Parse any JSON-stringified values back to objects so section renderers
   // receive the structured data they expect. The dashboard normalizes objects
   // to strings for display; we reverse that here before building the PDF.
+  // Also strips ```json ... ``` code fences that AI sometimes wraps output in.
   const parsedDraft: Obj = {};
   for (const [k, v] of Object.entries(draft)) {
     if (typeof v === "string") {
-      const trimmed = v.trim();
-      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-        try { parsedDraft[k] = JSON.parse(trimmed); continue; } catch { /* fall through */ }
+      // Strip markdown code fences (```json ... ``` or ``` ... ```)
+      const stripped = v.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+      if (stripped.startsWith("{") || stripped.startsWith("[")) {
+        try { parsedDraft[k] = JSON.parse(stripped); continue; } catch { /* fall through */ }
       }
     }
     parsedDraft[k] = v;
