@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
   const { data: order, error } = await supabase
     .from("orders")
-    .select("id, analyst_note, status, business_name")
+    .select("id, analyst_note, status, business_name, intake_token")
     .eq("stripe_session_id", sessionId)
     .single();
 

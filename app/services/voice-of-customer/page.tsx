@@ -5,14 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
-import ServiceFormField from "@/components/ServiceFormField";
-import {
-  SelectWithOther,
-  PillGroupWithOther,
-  YesNoReveal,
-  BUSINESS_TYPES,
-  VOC_COLLECTION_METHODS,
-} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -29,17 +21,15 @@ const CHECKLIST = [
   "Analyst Interpretation and recommendations",
 ];
 const HIW = [
-  { num: "1", title: "Tell Us Your Goals", body: "Fill out the short intake form below with your business context and what you most want to learn from your customers." },
+  { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "Pay and Upload Your List", body: "After payment, you'll receive a secure upload link. Send us your customer contact list as a CSV, XLS, or XLSX file." },
   { num: "3", title: "We Design and Send the Survey", body: "We design a custom survey based on your goals and distribute it to your customers on your behalf." },
   { num: "4", title: "Your Report Arrives", body: "A complete findings report with themes, key highlights, and analyst interpretation delivered within 1-2 weeks." },
 ];
 
-const CONTACT_SIZES = ["Under 50", "50–100", "100–250", "250–500", "500–1,000", "1,000+"];
-
-type FormData = { customerName: string; email: string; businessName: string; q1: string; q2: string; q3: string; q4: string; q5: string; q6: string; q7: string; };
-const EMPTY: FormData = { customerName: "", email: "", businessName: "", q1: "", q2: "", q3: "", q4: "", q5: "", q6: "", q7: "" };
-const REQUIRED: (keyof FormData)[] = ["customerName", "email", "businessName", "q1", "q2", "q3", "q4", "q5", "q7"];
+type FormData = { customerName: string; email: string; businessName: string; };
+const EMPTY: FormData = { customerName: "", email: "", businessName: "" };
+const REQUIRED: (keyof FormData)[] = ["customerName", "businessName", "email"];
 
 const inputBase = "w-full rounded-lg border px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-seafoam transition";
 const inputOk = "border-gray-300 bg-white"; const inputErr = "border-red-400 bg-red-50";
@@ -49,7 +39,6 @@ export default function VoiceOfCustomerPage() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
-  const [yesQ6, setYesQ6] = useState<boolean | null>(null);
 
   function set(f: keyof FormData, v: string) { setForm(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: undefined })); }
   function validate() {
@@ -61,15 +50,7 @@ export default function VoiceOfCustomerPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault(); setSubmitted(true);
     if (!validate()) { document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    const q6combined =
-      yesQ6 === false
-        ? "No"
-        : form.q6.trim()
-        ? "Yes — " + form.q6.trim()
-        : yesQ6 === true
-        ? "Yes"
-        : "";
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "voice-of-customer", ...form, q6: q6combined }));
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "voice-of-customer", customerName: form.customerName, businessName: form.businessName, email: form.email }));
     router.push("/checkout");
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
@@ -130,62 +111,23 @@ export default function VoiceOfCustomerPage() {
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>Tell us about your goals below. After payment you&rsquo;ll receive a secure link to upload your customer contact list.</p>
           <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
+              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Get Your Voice of Customer Report</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <ServiceFormField label="Your Name" required placeholder="Jane Smith"  value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
-                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com"  value={form.email} error={errors.email} onChange={v => set("email", v)} />
-                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co."  value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
-              </div>
-            </div>
-            <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business and Customers</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <ServiceFormField label="1. What do you sell or offer?" required placeholder="e.g. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ."  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
-                <SelectWithOther
-                  label="2. Industry / business type"
-                  options={BUSINESS_TYPES}
-                  onChange={v => set("q2", v)}
-                  error={errors.q2}
-                  required
-                />
-                <SelectWithOther
-                  label="3. Approximately how many customer contacts do you have?"
-                  hint="An estimate is fine. This helps us understand response rate expectations."
-                  options={CONTACT_SIZES}
-                  onChange={v => set("q3", v)}
-                  error={errors.q3}
-                  required
-                />
-                <PillGroupWithOther
-                  label="4. How were these contacts collected?"
-                  options={VOC_COLLECTION_METHODS}
-                  onChange={v => set("q4", v)}
-                  error={errors.q4}
-                  required
-                />
-                <ServiceFormField label="5. What do you most want to learn from your customers?" required hint="Be as specific as possible — this drives the survey question design." placeholder="e.g. Why they choose us over competitors, what would make them come more often, and whether they'd value a monthly coffee subscription." rows={4}  value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
-                <YesNoReveal
-                  label="6. Have you surveyed your customers before?"
-                  onToggle={yes => {
-                    setYesQ6(yes);
-                    if (!yes) {
-                      set("q6", "No");
-                    } else {
-                      set("q6", "");
-                    }
-                  }}
-                  error={errors.q6}
-                >
-                  <textarea
-                    rows={3}
-                    placeholder="e.g. We ran a short Google Form 2 years ago. Customers loved the atmosphere but mentioned wanting faster service during morning rush."
-                    value={form.q6}
-                    onChange={e => set("q6", e.target.value)}
-                    className={`${inputBase} ${inputOk} resize-y w-full`}
-                    style={{ fontFamily: MT }}
-                  />
-                </YesNoReveal>
-                <ServiceFormField label="7. What decision will this research inform?" required placeholder="e.g. Whether to expand our hours, add a subscription model, or open a second location. We want to understand our customers before committing." rows={3}  value={form.q7} error={errors.q7} onChange={v => set("q7", v)} />
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Your Name *</label>
+                  <input value={form.customerName} onChange={e => set("customerName", e.target.value)} placeholder="Jane Smith" className={cls("customerName")} data-error={errors.customerName ? "" : undefined} />
+                  {errors.customerName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.customerName}</p>}
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Business Name *</label>
+                  <input value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="Coastal Brew Coffee" className={cls("businessName")} data-error={errors.businessName ? "" : undefined} />
+                  {errors.businessName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.businessName}</p>}
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Email Address *</label>
+                  <input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="jane@coastalbrew.com" className={cls("email")} data-error={errors.email ? "" : undefined} />
+                  {errors.email && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.email}</p>}
+                </div>
               </div>
             </div>
             <div style={{ textAlign: "center" }}>

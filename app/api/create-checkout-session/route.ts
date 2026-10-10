@@ -144,10 +144,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY" }, { status: 500 });
     }
 
-    const svc     = SERVICE_CONFIG[service ?? DEFAULT_SERVICE] ?? SERVICE_CONFIG[DEFAULT_SERVICE];
-    const qSlots  = buildQSlots(service ?? DEFAULT_SERVICE, body);
+    const svc = SERVICE_CONFIG[service ?? DEFAULT_SERVICE] ?? SERVICE_CONFIG[DEFAULT_SERVICE];
 
     // 1. Save order to Supabase first (status: pending_payment)
+    // Intake questions (q1-q10) are collected after payment via the intake form link.
     const { data: order, error: dbError } = await supabase
       .from("orders")
       .insert({
@@ -156,7 +156,6 @@ export async function POST(req: NextRequest) {
         email,
         status: "pending_payment",
         analyst_note: service ?? DEFAULT_SERVICE,
-        ...qSlots,
       })
       .select()
       .single();

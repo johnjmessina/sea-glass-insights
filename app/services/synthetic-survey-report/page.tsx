@@ -5,34 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
-import ServiceFormField from "@/components/ServiceFormField";
-import {
-  SelectWithOther,
-  AgeIncomeCheckboxes,
-  CompetitorFields,
-  PillGroupWithOther,
-  BUSINESS_TYPES,
-  DURATION_OPTIONS,
-  MARKETING_CHANNELS,
-} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
 const NAVY = "#0A2F61"; const TEAL = "#00CED1"; const SAND = "#F4EADA";
 const GRAY = "#6B7280"; const LGRAY = "#9CA3AF"; const WHITE = "#FFFFFF";
-
-const SURVEY_TOPICS = [
-  "Pricing sensitivity",
-  "Product or service quality",
-  "Brand awareness",
-  "Customer loyalty",
-  "Purchase decision factors",
-  "Competitor preference",
-  "Online vs. in-person behavior",
-  "Seasonal patterns",
-  "Demographics",
-  "Other",
-];
 
 const CHECKLIST = [
   "Custom Research Questions",
@@ -44,14 +21,14 @@ const CHECKLIST = [
   "Honest Limitations Statement",
 ];
 const HIW = [
-  { num: "1", title: "Tell Us What You Want to Know", body: "Fill out the form below with your business context, your assumptions, and the specific questions you want answered. The clearer you are about what you're testing, the more targeted the personas will be." },
+  { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "Personas Are Built and Surveyed", body: "We design 3-5 customer personas based on your context and run your research questions through them — capturing reactions, objections, and preferences across each customer type." },
   { num: "3", title: "Your Report Arrives", body: "Your report brings your customer personas to life. Behavioral patterns, preferences, and recommendations you can act on. Delivered in 48-72 hours." },
 ];
 
-type FormData = { customerName: string; email: string; businessName: string; q1: string; q2: string; q3: string; q4: string; q5: string; q6: string; q8: string; q9: string; };
-const EMPTY: FormData = { customerName: "", email: "", businessName: "", q1: "", q2: "", q3: "", q4: "", q5: "", q6: "", q8: "", q9: "" };
-const REQUIRED: (keyof FormData)[] = ["customerName", "email", "businessName", "q1", "q2", "q3", "q4", "q5", "q6", "q8"];
+type FormData = { customerName: string; email: string; businessName: string; };
+const EMPTY: FormData = { customerName: "", email: "", businessName: "" };
+const REQUIRED: (keyof FormData)[] = ["customerName", "businessName", "email"];
 
 const inputBase = "w-full rounded-lg border px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-seafoam transition";
 const inputOk = "border-gray-300 bg-white";
@@ -61,11 +38,9 @@ export default function SyntheticSurveyReportPage() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
-  const [bizType, setBizType] = useState("");
-  const [duration, setDuration] = useState("");
-  const [q6extra, setQ6extra] = useState("");
 
   function set(f: keyof FormData, v: string) { setForm(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: undefined })); }
+  const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? "border-red-400 bg-red-50" : inputOk}`;
   function validate() {
     const e: Partial<Record<keyof FormData, string>> = {};
     REQUIRED.forEach(k => { if (!form[k].trim()) e[k] = "This field is required."; });
@@ -75,10 +50,7 @@ export default function SyntheticSurveyReportPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault(); setSubmitted(true);
     if (!validate()) { document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    const q1combined = form.q1 + (bizType ? "\n\nBusiness type: " + bizType : "");
-    const q2combined = [duration, form.q2.trim()].filter(Boolean).join(". ");
-    const q6combined = [form.q6, q6extra.trim() ? "Additional: " + q6extra.trim() : ""].filter(Boolean).join("\n\n");
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "synthetic-survey-report", ...form, q1: q1combined, q2: q2combined, q6: q6combined }));
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "synthetic-survey-report", customerName: form.customerName, businessName: form.businessName, email: form.email }));
     router.push("/checkout");
   }
 
@@ -137,88 +109,28 @@ export default function SyntheticSurveyReportPage() {
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>The more specific your answers, the more targeted the personas and the more useful the findings. After submitting you&rsquo;ll be directed to a secure payment page.</p>
           <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
+              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Get Your Synthetic Customer Profiles</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <ServiceFormField label="Your Name" required placeholder="Jane Smith" value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
-                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com" value={form.email} error={errors.email} onChange={v => set("email", v)} />
-                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co." value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
-              </div>
-            </div>
-            <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "8px" }}>Your Business and Research Goals</h3>
-              <p style={{ fontFamily: MT, fontSize: "0.82rem", color: LGRAY, marginBottom: "24px" }}>Question 5 is the most important. The more precise your assumptions, the sharper the persona responses will be.</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                {/* Q1 */}
                 <div>
-                  <ServiceFormField label="1. What do you sell or offer?" required placeholder="e.g. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={3} value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
-                  <div style={{ marginTop: "12px" }}>
-                    <SelectWithOther label="Business type" options={BUSINESS_TYPES} onChange={v => setBizType(v)} />
-                  </div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Your Name *</label>
+                  <input value={form.customerName} onChange={e => set("customerName", e.target.value)} placeholder="Jane Smith" className={cls("customerName")} data-error={errors.customerName ? "" : undefined} />
+                  {errors.customerName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.customerName}</p>}
                 </div>
-                {/* Q2 */}
                 <div>
-                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.875rem", color: "#374151", marginBottom: "4px", fontWeight: 600 }}>
-                    2. How long have you been in business, and where are you located?
-                    <span style={{ color: "#EF4444", marginLeft: "4px" }}>*</span>
-                  </label>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <SelectWithOther label="" options={DURATION_OPTIONS} placeholder="How long in business…" onChange={v => setDuration(v)} error={errors.q2} />
-                    <input type="text" value={form.q2} onChange={e => set("q2", e.target.value)} placeholder="e.g. Bradley Beach, NJ — launching a second location in Asbury Park this spring." className={`${inputBase} ${inputOk}`} style={{ fontFamily: MT }} />
-                  </div>
-                  {errors.q2 && <p style={{ color: "#EF4444", fontSize: "0.75rem", marginTop: "4px" }}>{errors.q2}</p>}
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Business Name *</label>
+                  <input value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="Coastal Brew Coffee" className={cls("businessName")} data-error={errors.businessName ? "" : undefined} />
+                  {errors.businessName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.businessName}</p>}
                 </div>
-                {/* Q3 */}
-                <AgeIncomeCheckboxes label="3. Who is your ideal customer?" hint="Age, income, lifestyle, and what they need from a business like yours." onChange={v => set("q3", v)} error={errors.q3} required />
-                {/* Q4 */}
-                <CompetitorFields label="4. Who are your top 2–3 competitors?" hint="Names, or describe them if you don't know exact names." onChange={v => set("q4", v)} error={errors.q4} />
-                {/* Q5 */}
-                <ServiceFormField label="5. What assumptions about your customers do you want to test?" required hint="What do you believe to be true about your customers that you haven't confirmed?" placeholder="e.g. We assume our customers primarily value atmosphere over price. We assume people who buy our retail beans are different from our cafe customers." rows={4} value={form.q5} error={errors.q5} onChange={v => set("q5", v)} />
-                {/* Q6 — topic pill selector */}
-                <div data-error={errors.q6 ? true : undefined}>
-                  <PillGroupWithOther
-                    label="6. What do you most want to understand about your customers? Select all that apply."
-                    options={SURVEY_TOPICS}
-                    required
-                    onChange={v => set("q6", v)}
-                    error={errors.q6}
-                  />
-                  <div style={{ marginTop: "12px" }}>
-                    <label style={{ display: "block", fontFamily: MT, fontSize: "0.82rem", color: GRAY, marginBottom: "6px" }}>
-                      Anything else you want the personas to explore? <span style={{ color: LGRAY }}>(optional)</span>
-                    </label>
-                    <textarea
-                      value={q6extra}
-                      onChange={e => setQ6extra(e.target.value)}
-                      placeholder="e.g. We'd like the personas to react to our brand name and logo description if possible."
-                      rows={3}
-                      className={`${inputBase} ${inputOk}`}
-                      style={{ fontFamily: MT, resize: "vertical" }}
-                    />
-                  </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Email Address *</label>
+                  <input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="jane@coastalbrew.com" className={cls("email")} data-error={errors.email ? "" : undefined} />
+                  {errors.email && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.email}</p>}
                 </div>
-                {/* Q7 — Marketing */}
-                <PillGroupWithOther
-                  label="7. What marketing are you currently doing, if any?"
-                  options={MARKETING_CHANNELS}
-                  required
-                  onChange={v => set("q8", v)}
-                  error={errors.q8}
-                />
-                {/* Q8 — Combined open-ended */}
-                <ServiceFormField
-                  label="8. Is there anything specific you want the report to focus on or address? What do you wish you knew about your market, your customers, or your competition that you don't know today? Use this space to share anything else that feels relevant."
-                  placeholder=""
-                  rows={5}
-                  value={form.q9}
-                  error={errors.q9}
-                  onChange={v => set("q9", v)}
-                />
               </div>
             </div>
             <div style={{ textAlign: "center" }}>
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $399</button>
               <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Report delivered within 48-72 hours.</p>
-              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "6px" }}>Please only share what you are comfortable sharing. Your responses are used solely to produce your report. Results will be clearly labeled as directional insight from AI-generated personas.</p>
             </div>
           </form>
         </div>

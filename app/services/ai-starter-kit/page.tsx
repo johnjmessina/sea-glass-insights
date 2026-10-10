@@ -2,11 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter       from "@/components/SiteFooter";
-import ServiceFormField from "@/components/ServiceFormField";
-import { CheckboxGroupWithOther, PillGroupWithOther, AI_TOOLS, AI_TASKS, AI_TONES } from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -23,14 +20,14 @@ const CHECKLIST = [
   "Every prompt is written specifically for your business type, your tone, and your real use cases — not generic templates you could find anywhere online.",
 ];
 const HIW = [
-  { num: "1", title: "Tell Us About Your Business", body: "Fill out the short form below. Tell us your business type, your brand voice, what AI tool you're using, and the tasks where you most need help." },
+  { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "We Write Your Prompts", body: "We study your business and write 5-6 prompts built specifically for your situation — not generic templates pulled from a library." },
   { num: "3", title: "Use Them Immediately", body: "Your kit arrives within 48 hours with instructions for each prompt. Copy, paste, and start saving time the same day." },
 ];
 
-type FormData = { customerName: string; email: string; businessName: string; q1: string; q2: string; q3: string; q4: string; q5: string; q6: string; };
-const EMPTY: FormData = { customerName: "", email: "", businessName: "", q1: "", q2: "", q3: "", q4: "", q5: "", q6: "" };
-const REQUIRED: (keyof FormData)[] = ["customerName", "email", "businessName", "q1", "q2", "q3", "q4", "q5"];
+type FormData = { customerName: string; email: string; businessName: string; };
+const EMPTY: FormData = { customerName: "", email: "", businessName: "" };
+const REQUIRED: (keyof FormData)[] = ["customerName", "businessName", "email"];
 
 const inputBase = "w-full rounded-lg border px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-seafoam transition";
 const inputOk = "border-gray-300 bg-white"; const inputErr = "border-red-400 bg-red-50";
@@ -51,7 +48,8 @@ export default function AIStarterKitPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault(); setSubmitted(true);
     if (!validate()) { document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "ai-starter-kit", ...form })); router.push("/checkout");
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "ai-starter-kit", customerName: form.customerName, businessName: form.businessName, email: form.email }));
+    router.push("/checkout");
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
 
@@ -105,46 +103,23 @@ export default function AIStarterKitPage() {
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>Answer a few questions about your business and we&rsquo;ll write prompts that actually fit how you work. Delivered in 48 hours.</p>
           <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
+              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Get Your AI Starter Kit</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <ServiceFormField label="Your Name" required placeholder="Jane Smith"  value={form.customerName} error={errors.customerName} onChange={v => set("customerName", v)} />
-                <ServiceFormField label="Email Address" required placeholder="jane@yourbusiness.com"  value={form.email} error={errors.email} onChange={v => set("email", v)} />
-                <ServiceFormField label="Business Name" required placeholder="Acme Coffee Co."  value={form.businessName} error={errors.businessName} onChange={v => set("businessName", v)} />
-              </div>
-            </div>
-            <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>About Your Business</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <ServiceFormField label="1. What do you sell or offer?" required placeholder="e.g. We run a specialty coffee shop and retail roastery in Bradley Beach, NJ." rows={2}  value={form.q1} error={errors.q1} onChange={v => set("q1", v)} />
-                <ServiceFormField label="2. Where are you located and who are your customers?" required placeholder="e.g. Bradley Beach, NJ. Our customers are mostly locals, 25-50, who value quality and community. Tourists in summer." rows={2}  value={form.q2} error={errors.q2} onChange={v => set("q2", v)} />
-                <PillGroupWithOther
-                  label="3. What AI tool are you planning to use?"
-                  hint="Select all that apply. If you're not sure yet, that's fine too."
-                  options={AI_TOOLS}
-                  onChange={v => set("q3", v)}
-                  required={true}
-                  error={errors.q3}
-                  otherPlaceholder="Which other AI tool?"
-                />
-                <PillGroupWithOther
-                  label="4. What are the top tasks you want AI to help you with?"
-                  hint="Select all that apply."
-                  options={AI_TASKS}
-                  onChange={v => set("q4", v)}
-                  required={true}
-                  error={errors.q4}
-                  otherPlaceholder="Describe another task…"
-                />
-                <CheckboxGroupWithOther
-                  label="5. What is the tone of your brand?"
-                  hint="Select all that apply."
-                  options={AI_TONES}
-                  onChange={v => set("q5", v)}
-                  required={true}
-                  error={errors.q5}
-                  otherPlaceholder="Describe your brand tone…"
-                />
-                <ServiceFormField label="6. Anything specific about your business or customers we should know when writing your prompts?" hint="Seasonal business? Specific sensitivities? Things you never want to say? Anything that would help us get the tone exactly right." placeholder="e.g. We're very community-focused and never do aggressive sales language. We also have a lot of dog owners as customers — that's a big part of our identity." rows={3}  value={form.q6} error={errors.q6} onChange={v => set("q6", v)} />
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Your Name *</label>
+                  <input value={form.customerName} onChange={e => set("customerName", e.target.value)} placeholder="Jane Smith" className={cls("customerName")} data-error={errors.customerName ? "" : undefined} />
+                  {errors.customerName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.customerName}</p>}
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Business Name *</label>
+                  <input value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="Coastal Brew Coffee" className={cls("businessName")} data-error={errors.businessName ? "" : undefined} />
+                  {errors.businessName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.businessName}</p>}
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Email Address *</label>
+                  <input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="jane@coastalbrew.com" className={cls("email")} data-error={errors.email ? "" : undefined} />
+                  {errors.email && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.email}</p>}
+                </div>
               </div>
             </div>
             <div style={{ textAlign: "center" }}>

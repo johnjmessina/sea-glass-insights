@@ -115,16 +115,18 @@ function ConfirmationContent() {
   const searchParams = useSearchParams();
   const sessionId    = searchParams.get("session_id");
 
-  const [orderId,  setOrderId]  = useState<string | null>(null);
-  const [service,  setService]  = useState<string | null>(null);
-  const [timeline, setTimeline] = useState("Within 48–72 hours");
+  const [orderId,     setOrderId]     = useState<string | null>(null);
+  const [service,     setService]     = useState<string | null>(null);
+  const [intakeToken, setIntakeToken] = useState<string | null>(null);
+  const [timeline,    setTimeline]    = useState("Within 48–72 hours");
 
   useEffect(() => {
     if (!sessionId) return;
     fetch(`/api/order-by-session?sessionId=${encodeURIComponent(sessionId)}`)
       .then(r => r.json())
-      .then((data: { id?: string; analyst_note?: string }) => {
+      .then((data: { id?: string; analyst_note?: string; intake_token?: string }) => {
         if (data.id) setOrderId(data.id);
+        if (data.intake_token) setIntakeToken(data.intake_token);
         if (data.analyst_note) {
           const svc = data.analyst_note.split("|")[0].trim();
           setService(svc);
@@ -159,13 +161,36 @@ function ConfirmationContent() {
           </div>
 
           <h1 className="text-navy text-3xl font-bold mb-3 text-center" style={{ fontFamily: "Georgia, serif" }}>
-            {isVoC ? "Payment confirmed." : "You're all set."}
+            Payment confirmed.
           </h1>
           <p className="text-gray-600 text-base mb-6 leading-relaxed text-center">
-            {isVoC
-              ? "Your Voice of Customer Survey order is confirmed. Upload your contact list below to get started."
-              : "Your payment was received and your order is confirmed. John Messina will review your intake and get to work on your report."}
+            Your order is confirmed. Complete the short intake form below so we can get to work.
           </p>
+
+          {/* Intake form CTA — primary action */}
+          {intakeToken && (
+            <div className="rounded-xl p-6 mb-6 text-center" style={{ backgroundColor: NAVY }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ fontFamily: MT, color: TEAL, letterSpacing: "0.15em" }}>
+                Next Step
+              </p>
+              <p className="font-bold text-lg mb-1 text-white" style={{ fontFamily: "Georgia, serif" }}>
+                Complete Your Intake Form
+              </p>
+              <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.75)" }}>
+                Tell us about your business so we can build something specifically for you. Takes about 10 minutes.
+              </p>
+              <Link
+                href={`/intake/${intakeToken}`}
+                className="inline-block rounded-full font-semibold text-navy text-sm px-8 py-3 transition-opacity hover:opacity-90"
+                style={{ backgroundColor: TEAL, fontFamily: MT }}
+              >
+                Complete Intake Form →
+              </Link>
+              <p className="text-xs mt-4" style={{ color: "rgba(255,255,255,0.5)" }}>
+                A link was also emailed to you — it never expires.
+              </p>
+            </div>
+          )}
 
           {/* Contact list upload — VoC only */}
           {isVoC && orderId && (
@@ -179,7 +204,7 @@ function ConfirmationContent() {
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 rounded-full bg-seafoam mt-2 shrink-0" />
               <p className="text-sm text-gray-600">
-                <span className="font-semibold text-navy">Right now</span> — A confirmation email is on its way to your inbox.
+                <span className="font-semibold text-navy">Right now</span> — Your intake link was emailed to you. Complete it above to get started.
               </p>
             </div>
             {isVoC && (

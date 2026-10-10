@@ -2,16 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import SiteNav    from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
-import {
-  PlatformCheckboxesWithHandles,
-  PillGroupWithOther,
-  SelectWithOther,
-  BUSINESS_TYPES,
-  SMA_CHALLENGES,
-} from "@/components/StructuredFormInputs";
 
 const CG = "'Cormorant Garamond', Georgia, serif";
 const MT = "'Montserrat', system-ui, sans-serif";
@@ -33,18 +25,14 @@ const CHECKLIST = [
 ];
 
 const HIW = [
-  { num: "1", title: "Tell Us About Your Business", body: "Fill out the short form below with your business info and social handles. It takes about 5 minutes. The more context you share, the sharper the audit will be." },
+  { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "A Real Analyst Gets to Work", body: "We personally review your profiles, evaluate them across all seven dimensions, and deliver specific findings and actionable recommendations tailored to your business." },
   { num: "3", title: "Your Audit Arrives", body: "A professionally written scored report lands in your inbox within 48-72 hours. Specific findings and actionable recommendations you can implement immediately." },
 ];
 
-type FormData = {
-  customerName: string; email: string; businessName: string;
-  location: string; industry: string; facebook: string;
-  instagram: string; otherPlatforms: string; challenge: string;
-};
-const EMPTY: FormData = { customerName: "", email: "", businessName: "", location: "", industry: "", facebook: "", instagram: "", otherPlatforms: "", challenge: "" };
-const REQUIRED: (keyof FormData)[] = ["customerName", "email", "businessName", "location", "industry", "challenge"];
+type FormData = { customerName: string; email: string; businessName: string; };
+const EMPTY: FormData = { customerName: "", email: "", businessName: "" };
+const REQUIRED: (keyof FormData)[] = ["customerName", "businessName", "email"];
 
 const inputBase = "w-full rounded-lg border px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-seafoam transition";
 const inputOk   = "border-gray-300 bg-white";
@@ -61,13 +49,12 @@ export default function SocialMediaAuditPage() {
     const e: Partial<Record<keyof FormData, string>> = {};
     REQUIRED.forEach(k => { if (!form[k].trim()) e[k] = "This field is required."; });
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Please enter a valid email address.";
-    if (!form.facebook.trim()) e.facebook = "Please select at least one social media platform.";
     setErrors(e); return Object.keys(e).length === 0;
   }
   function handleSubmit(e: FormEvent) {
     e.preventDefault(); setSubmitted(true);
     if (!validate()) { document.querySelector("[data-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "social-media-audit", ...form }));
+    sessionStorage.setItem("sgi_intake", JSON.stringify({ service: "social-media-audit", customerName: form.customerName, businessName: form.businessName, email: form.email }));
     router.push("/checkout");
   }
   const cls = (f: keyof FormData) => `${inputBase} ${errors[f] ? inputErr : inputOk}`;
@@ -137,61 +124,22 @@ export default function SocialMediaAuditPage() {
           </p>
           <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Contact Information</h3>
+              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Get Your Social Media Audit</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "6px" }}>Your Name <span style={{ color: "#EF4444" }}>*</span></label>
-                  <input type="text" placeholder="Jane Smith" value={form.customerName} onChange={e => set("customerName", e.target.value)} className={cls("customerName")} style={{ fontFamily: MT }} data-error={errors.customerName ? true : undefined} />
-                  {errors.customerName && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.customerName}</p>}
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Your Name *</label>
+                  <input value={form.customerName} onChange={e => set("customerName", e.target.value)} placeholder="Jane Smith" className={cls("customerName")} data-error={errors.customerName ? "" : undefined} />
+                  {errors.customerName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.customerName}</p>}
                 </div>
                 <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "6px" }}>Email Address <span style={{ color: "#EF4444" }}>*</span></label>
-                  <input type="email" placeholder="jane@yourbusiness.com" value={form.email} onChange={e => set("email", e.target.value)} className={cls("email")} style={{ fontFamily: MT }} />
-                  {errors.email && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.email}</p>}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
-              <h3 style={{ fontFamily: CG, color: NAVY, fontSize: "1.3rem", fontWeight: 700, marginBottom: "20px" }}>Your Business and Social Presence</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "6px" }}>Business Name <span style={{ color: "#EF4444" }}>*</span></label>
-                  <input type="text" placeholder="Acme Coffee Co." value={form.businessName} onChange={e => set("businessName", e.target.value)} className={cls("businessName")} style={{ fontFamily: MT }} />
-                  {errors.businessName && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.businessName}</p>}
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Business Name *</label>
+                  <input value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="Coastal Brew Coffee" className={cls("businessName")} data-error={errors.businessName ? "" : undefined} />
+                  {errors.businessName && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.businessName}</p>}
                 </div>
                 <div>
-                  <label style={{ fontFamily: MT, fontSize: "0.82rem", fontWeight: 600, color: NAVY, display: "block", marginBottom: "6px" }}>Business Location <span style={{ color: "#EF4444" }}>*</span></label>
-                  <input type="text" placeholder="Bradley Beach, NJ" value={form.location} onChange={e => set("location", e.target.value)} className={cls("location")} style={{ fontFamily: MT }} />
-                  {errors.location && <p style={{ fontFamily: MT, color: "#EF4444", fontSize: "0.78rem", marginTop: "4px" }}>{errors.location}</p>}
-                </div>
-                <div>
-                  <SelectWithOther
-                    label="Industry / Business Type"
-                    options={BUSINESS_TYPES}
-                    required
-                    onChange={v => set("industry", v)}
-                    error={errors.industry}
-                  />
-                </div>
-                <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: "20px" }} data-error={errors.facebook ? true : undefined}>
-                  <PlatformCheckboxesWithHandles
-                    label="Your Social Media Platforms"
-                    hint="Select each platform you are active on. Add a handle or URL for each one — it helps us find your profiles faster."
-                    required
-                    onChange={v => set("facebook", v)}
-                    error={errors.facebook}
-                  />
-                </div>
-                <div>
-                  <PillGroupWithOther
-                    label="Biggest Social Media Challenge Right Now"
-                    hint="Select all that apply."
-                    options={SMA_CHALLENGES}
-                    required
-                    onChange={v => set("challenge", v)}
-                    error={errors.challenge}
-                  />
+                  <label style={{ display: "block", fontFamily: MT, fontSize: "0.8rem", fontWeight: 600, color: NAVY, marginBottom: "6px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Email Address *</label>
+                  <input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="jane@coastalbrew.com" className={cls("email")} data-error={errors.email ? "" : undefined} />
+                  {errors.email && <p style={{ color: "#DC2626", fontSize: "0.75rem", marginTop: "4px" }}>{errors.email}</p>}
                 </div>
               </div>
             </div>
@@ -200,7 +148,7 @@ export default function SocialMediaAuditPage() {
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                 Proceed to Payment — $199
               </button>
-              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "12px" }}>Please only share what you are comfortable sharing publicly. Your responses are used solely to produce your audit.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Delivered within 48-72 hours.</p>
             </div>
           </form>
         </div>
