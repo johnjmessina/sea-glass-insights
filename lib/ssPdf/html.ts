@@ -196,6 +196,7 @@ function scorecardSection(sc: Record<string, boolean | number | unknown>): strin
   }).join("");
 
   return `
+    <div style="break-inside:avoid;page-break-inside:avoid">
     <div class="score-callout-hero">
       <div class="score-hero-left">
         <div class="score-hero-label">Overall Experience Score</div>
@@ -245,22 +246,21 @@ function scorecardSection(sc: Record<string, boolean | number | unknown>): strin
           </td>
         </tr>
       </tbody>
-    </table>`;
+    </table>
+    </div>`;
 }
 
 function analystObservationsSection(obs: Record<string, unknown>): string {
-  const cards: { label: string; val: unknown; accent: string; icon: string }[] = [
-    { label: "Best Moment",                val: obs.best_moment,             accent: "#059669", icon: "&#9650;" },
-    { label: "Biggest Missed Opportunity", val: obs.biggest_miss,            accent: "#DC6B6B", icon: "&#9660;" },
-    { label: "Immediate Fix",              val: obs.immediate_fix,           accent: "#8FADC8", icon: "&#9654;" },
-    { label: "Additional Observations",    val: obs.additional_observations, accent: NAVY,      icon: "&#9632;" },
+  const cards: { label: string; val: unknown; accent: string }[] = [
+    { label: "Best Moment",                val: obs.best_moment,             accent: "#059669" },
+    { label: "Biggest Missed Opportunity", val: obs.biggest_miss,            accent: "#DC6B6B" },
+    { label: "Immediate Fix",              val: obs.immediate_fix,           accent: "#8FADC8" },
+    { label: "Additional Observations",    val: obs.additional_observations, accent: NAVY      },
   ];
   return `<div class="obs-cards">${
-    cards.filter(({ val }) => String(val ?? "").trim()).map(({ label, val, accent, icon }) => `
+    cards.filter(({ val }) => String(val ?? "").trim()).map(({ label, val, accent }) => `
     <div class="obs-card" style="border-left:4pt solid ${accent}">
-      <div class="obs-card-head" style="color:${accent}">
-        <span class="obs-icon">${icon}</span> ${esc(label)}
-      </div>
+      <div class="obs-card-head" style="color:${accent}">${esc(label)}</div>
       <div class="obs-card-body">${paragraphs(val)}</div>
     </div>`).join("")
   }</div>`;
@@ -269,12 +269,27 @@ function analystObservationsSection(obs: Record<string, unknown>): string {
 const NARRATIVE_ACCENTS = [TEAL, NAVY, "#059669", "#8FADC8", "#DC6B6B", "#059669", TEAL];
 
 function narrativeNotesSection(aiDraft: Record<string, unknown>): string {
+  // Prose → bullet points: split on sentence boundaries, keep first 3 meaningful sentences
+  function toBullets(v: unknown): string {
+    const raw = String(v ?? "").trim();
+    if (!raw) return "";
+    // Split on sentence-ending punctuation followed by a space/newline
+    const sentences = raw
+      .replace(/\n+/g, " ")
+      .split(/(?<=[.!?])\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 20); // skip very short fragments
+    const bullets = sentences.slice(0, 3);
+    if (!bullets.length) return `<p style="font-size:10pt;margin:0">${esc(raw)}</p>`;
+    return `<ul class="narrative-bullets">${bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul>`;
+  }
+
   return NARRATIVE_SECTIONS.map(({ key, label }, i) => {
     const accent = NARRATIVE_ACCENTS[i % NARRATIVE_ACCENTS.length];
     return `
     <div class="narrative-block narrative-card" style="border-left:3pt solid ${accent}">
       <h3 class="narrative-head" style="color:${accent}">${esc(label)}</h3>
-      ${paragraphs(aiDraft[key])}
+      ${toBullets(aiDraft[key])}
     </div>`;
   }).join("");
 }
@@ -305,13 +320,12 @@ function summarySection(
       }
     }
     if (actions.length >= 2) {
-      const ICONS = ["&#9654;", "&#9654;", "&#9654;", "&#9654;", "&#9654;"];
       const COLORS = ["#059669", "#8FADC8", "#8FADC8", "#DC6B6B"];
       actionCards = `<div class="summary-actions">
         <div class="summary-actions-label">Priority Actions</div>
-        <div class="summary-action-grid">${actions.map((a, idx) => `
+        <div class="summary-action-grid">${actions.slice(0, 3).map((a, idx) => `
           <div class="summary-action-card" style="border-left:3pt solid ${COLORS[idx] ?? TEAL}">
-            <div class="summary-action-num" style="color:${COLORS[idx] ?? TEAL}">${ICONS[idx]} ${a.label}</div>
+            <div class="summary-action-num" style="color:${COLORS[idx] ?? TEAL}">${esc(a.label)}</div>
             <div class="summary-action-body">${esc(a.body)}</div>
           </div>`).join("")}
         </div>
@@ -475,6 +489,11 @@ table { border-collapse: collapse; width: 100%; }
 .summary-action-card { padding: 11pt 14pt; background: ${ROW_TINT}; border-radius: 0 4pt 4pt 0; break-inside: avoid; }
 .summary-action-num { font-size: 9pt; font-weight: 700; letter-spacing: 0.5pt; text-transform: uppercase; margin-bottom: 4pt; }
 .summary-action-body { font-size: 10.5pt; color: ${INK}; line-height: 1.5; }
+
+/* Narrative bullets */
+.narrative-bullets { margin: 0; padding-left: 16pt; }
+.narrative-bullets li { font-size: 10.5pt; line-height: 1.5; margin-bottom: 5pt; }
+.narrative-bullets li:last-child { margin-bottom: 0; }
 
 /* Analyst Note */
 .note p { font-style: italic; font-size: 12pt; line-height: 1.6; color: ${INK}; margin-bottom: 12pt; }
