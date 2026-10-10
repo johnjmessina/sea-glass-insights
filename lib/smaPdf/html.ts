@@ -26,7 +26,6 @@ export type SmaSectionId =
   | "profile_setup_review"
   | "content_quality_scoring"
   | "performance_metrics"
-  | "platform_utilization_review"
   | "overall_presence_score"
   | "analyst_note";
 
@@ -41,7 +40,6 @@ export const SMA_SECTIONS: { id: SmaSectionId; title: string }[] = [
   { id: "profile_setup_review",      title: "Profile & Setup Review" },
   { id: "content_quality_scoring",   title: "Content Quality Scoring" },
   { id: "performance_metrics",       title: "Performance Metrics" },
-  { id: "platform_utilization_review", title: "Platform Utilization Review" },
   { id: "overall_presence_score",    title: "Overall Presence Score" },
   { id: "analyst_note",              title: "Analyst Note" },
 ];
@@ -251,11 +249,6 @@ function profileSetupSection(content: unknown): string {
   const summary   = c.summary ?? c.overview ?? c.executive_summary ?? null;
 
   let html = "";
-
-  // Summary blurb
-  if (summary) {
-    html += `<p class="section-summary">${text(summary)}</p>`;
-  }
 
   // Platform status cards
   if (platformKeys.length) {
@@ -606,47 +599,6 @@ function overallPresenceSection(content: unknown): string {
   return hero + dimTable + recsHtml + (prose ? `<div style="margin-top:16pt">${prose}</div>` : "");
 }
 
-// Platform Utilization Review
-function platformSection(content: unknown): string {
-  const c = obj(content);
-  const platformKeys = Object.keys(c).filter(k =>
-    /instagram|facebook|tiktok|twitter|linkedin|pinterest|youtube|yelp/i.test(k)
-  );
-  if (platformKeys.length >= 2) {
-    return `<div class="platform-grid">${platformKeys.map(k => {
-      const p     = obj(c[k]);
-      const score = extractScore(c[k]);
-      const color = score !== null ? bandColor(score) : platformColor(k);
-      const logo  = platformLogo(k, 20);
-      return `<div class="platform-card" style="border-top:3pt solid ${color}">
-        <div class="platform-card-header">
-          ${logo}
-          <div class="platform-name" style="color:${color}">${esc(k.charAt(0).toUpperCase() + k.slice(1))}</div>
-        </div>
-        ${score !== null ? `<div class="platform-score" style="color:${color}">${Number.isInteger(score) ? score : score.toFixed(1)}<span class="platform-denom">/10</span></div>
-          <div class="bar-track" style="margin:4pt 0 8pt"><div class="bar-fill" style="width:${(score / 10) * 100}%;background:${color}"></div></div>` : ""}
-        ${(() => {
-          const strengths = arr(p.strengths ?? p.strength ?? []);
-          const gaps      = arr(p.gaps ?? p.gap ?? p.weaknesses ?? p.areas_for_improvement ?? []);
-          const otherKeys = Object.keys(p).filter(pk =>
-            !["score","rating","strengths","strength","gaps","gap","weaknesses","areas_for_improvement"].includes(pk)
-          );
-          return [
-            strengths.length ? `<div class="platform-insight-label" style="font-size:6.5pt;font-weight:700;letter-spacing:1pt;text-transform:uppercase;color:#059669;margin:6pt 0 3pt">Strengths</div>
-              <ul class="platform-insight-list" style="margin:0;padding-left:14pt;list-style:disc">${strengths.map(s => `<li style="font-size:8pt;margin-bottom:2pt">${text(s)}</li>`).join("")}</ul>` : "",
-            gaps.length ? `<div class="platform-insight-label" style="font-size:6.5pt;font-weight:700;letter-spacing:1pt;text-transform:uppercase;color:#D97706;margin:6pt 0 3pt">Gaps</div>
-              <ul class="platform-insight-list" style="margin:0;padding-left:10pt;list-style:none">${gaps.map(g => `<li style="font-size:8pt;margin-bottom:2pt;padding-left:8pt;position:relative"><span style="position:absolute;left:0;color:#D97706">→</span>${text(g)}</li>`).join("")}</ul>` : "",
-            otherKeys.map(pk => {
-              const label = pk.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-              return `<div class="platform-field"><span class="platform-field-label">${esc(label)}</span>${text(p[pk])}</div>`;
-            }).join(""),
-          ].join("");
-        })()}
-      </div>`;
-    }).join("")}</div>` + (c.summary || c.overall_summary ? `<div style="margin-top:14pt">${paragraphs(c.summary ?? c.overall_summary)}</div>` : "");
-  }
-  return narrativeSection(content);
-}
 
 function analystNote(note: string, icon: string): string {
   return `
@@ -879,7 +831,6 @@ export function buildSmaReportHtml(
     if (id === "profile_setup_review")      return profileSetupSection(content);
     if (id === "content_quality_scoring")   return contentQualitySection(content);
     if (id === "performance_metrics")       return performanceMetricsSection(content);
-    if (id === "platform_utilization_review") return platformSection(content);
     if (id === "overall_presence_score")    return overallPresenceSection(content);
     if (id === "analyst_note")              return analystNote(analystNoteText, logoAssets.iconLogo);
     return narrativeSection(content);
