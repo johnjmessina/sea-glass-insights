@@ -2,6 +2,7 @@
 // Matches the MIR/DDR design system: Georgia/Gelasio font, navy/teal/white
 // palette, named @page sections with navy header bars, cover page, TOC, footer.
 // Adds per-section Analyst Perspective callout boxes (navy left border).
+// Visual upgrade: inline SVG charts, bullet-format cards, reduced prose density.
 
 import { gelasio } from "../mirPdf/fontAssets";
 import logoAssets from "../logoAssets";
@@ -13,6 +14,7 @@ const WHITE     = "#FFFFFF";
 const INK       = "#1C1C1C";
 const GRAY      = "#6B7280";
 const ROW_TINT  = "#E8EDF4";
+const LIGHT_TEAL = "#E0F7F7";
 
 type Obj = Record<string, unknown>;
 
@@ -79,6 +81,38 @@ function paragraphs(v: unknown, cls = ""): string {
     .map(p => `<p${cls ? ` class="${cls}"` : ""}>${text(p)}</p>`).join("");
 }
 
+// Convert a string with bullet-like lines to an HTML list
+function bulletList(v: unknown): string {
+  const s = String(v ?? "").trim();
+  const lines = s.split(/\n/).map(l => l.replace(/^[-•*]\s*/, "").trim()).filter(Boolean);
+  if (lines.length <= 1) return `<p>${text(s)}</p>`;
+  return `<ul class="card-bullets">${lines.map(l => `<li>${text(l)}</li>`).join("")}</ul>`;
+}
+
+// Parse likelihood string into 0–100 numeric score for charting
+function parseLikelihood(raw: string): number | null {
+  const s = raw.toLowerCase();
+  // "high", "very high", "low", numeric, or "X/10", "X%"
+  if (/very\s+high|extremely\s+high/.test(s)) return 88;
+  if (/\bhigh\b/.test(s)) return 75;
+  if (/\bmedium\b|\bmoderate\b/.test(s)) return 50;
+  if (/\blow\b/.test(s)) return 25;
+  if (/very\s+low/.test(s)) return 12;
+  const pct = s.match(/(\d+)\s*%/);
+  if (pct) return Math.min(100, parseInt(pct[1], 10));
+  const outOf10 = s.match(/(\d+(?:\.\d+)?)\s*\/\s*10/);
+  if (outOf10) return Math.round(parseFloat(outOf10[1]) * 10);
+  const outOf5 = s.match(/(\d+(?:\.\d+)?)\s*\/\s*5/);
+  if (outOf5) return Math.round(parseFloat(outOf5[1]) * 20);
+  const digit = s.match(/\b([1-9][0-9]?)\b/);
+  if (digit) {
+    const n = parseInt(digit[1], 10);
+    if (n <= 10) return n * 10;
+    if (n <= 100) return n;
+  }
+  return null;
+}
+
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
 
@@ -91,77 +125,223 @@ function narrativeSection(content: unknown): string {
   if (!keys.length) return "";
   return keys.map(k => {
     const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    const val = (c as Obj)[k];
+    const body = Array.isArray(val)
+      ? `<ul class="card-bullets">${val.map(i => `<li>${text(String(i))}</li>`).join("")}</ul>`
+      : paragraphs(val);
     return `<div class="subsection">
       <h3 class="subsection-head">${esc(label)}</h3>
-      ${paragraphs((c as Obj)[k])}
+      ${body}
     </div>`;
   }).join("");
 }
 
-// Persona cards — if AI returns an array of persona objects, render as cards;
-// otherwise fall back to narrativeSection prose
-function personaCards(content: unknown): string {
+// ── SVG Inline Charts ──────────────────────────────────────────────────────
+
+// Horizontal bar chart for likelihood scores across all personas
+function likelihoodChart(personas: Array<{ name: string; score: number }>): string {
+  if (!personas.length) return "";
+  const BAR_H = 18;
+  const GAP   = 10;
+  const LABEL_W = 110;
+  const BAR_MAX = 260;
+  const PAD = 10;
+  const totalH = personas.length * (BAR_H + GAP) - GAP + PAD * 2;
+  const totalW = LABEL_W + BAR_MAX + 50; // 50 for score label
+
+  const bars = personas.map((p, i) => {
+    const y = PAD + i * (BAR_H + GAP);
+    const barW = Math.round((p.score / 100) * BAR_MAX);
+    const color = p.score >= 70 ? "#059669" : p.score >= 45 ? TEAL : "#DC6B6B";
+    return `
+      <text x="0" y="${y + BAR_H - 4}" font-family="Georgia,serif" font-size="9" fill="${NAVY}" text-anchor="start">${esc(p.name.length > 16 ? p.name.slice(0, 15) + "…" : p.name)}</text>
+      <rect x="${LABEL_W}" y="${y}" width="${barW}" height="${BAR_H}" rx="3" fill="${color}" opacity="0.85"/>
+      <text x="${LABEL_W + barW + 5}" y="${y + BAR_H - 4}" font-family="Georgia,serif" font-size="9" fill="${GRAY}">${p.score}%</text>`;
+  }).join("");
+
+  return `
+    <div class="chart-block">
+      <div class="chart-title">Likelihood to Convert — Overview</div>
+      <svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%">
+        ${bars}
+        <line x1="${LABEL_W}" y1="${PAD}" x2="${LABEL_W}" y2="${totalH - PAD}" stroke="#DDD" stroke-width="1"/>
+      </svg>
+    </div>`;
+}
+
+// Horizontal bar chart for thematic analysis — shows theme count/strength visually
+function themeStrengthChart(themes: Array<{ title: string; strength?: number }>): string {
+  if (!themes.length) return "";
+  const BAR_H = 16;
+  const GAP   = 10;
+  const LABEL_W = 140;
+  const BAR_MAX = 230;
+  const PAD = 10;
+  const totalH = themes.length * (BAR_H + GAP) - GAP + PAD * 2;
+  const totalW = LABEL_W + BAR_MAX + 30;
+
+  // Assign decreasing weights if not provided (first theme = highest)
+  const bars = themes.map((t, i) => {
+    const y = PAD + i * (BAR_H + GAP);
+    const strength = t.strength ?? Math.round(100 - (i * (100 / (themes.length + 1))));
+    const barW = Math.round((strength / 100) * BAR_MAX);
+    const opacity = 0.9 - i * 0.08;
+    return `
+      <text x="0" y="${y + BAR_H - 3}" font-family="Georgia,serif" font-size="9" fill="${NAVY}">${esc(t.title.length > 20 ? t.title.slice(0, 19) + "…" : t.title)}</text>
+      <rect x="${LABEL_W}" y="${y}" width="${barW}" height="${BAR_H}" rx="3" fill="${TEAL}" opacity="${Math.max(0.35, opacity)}"/>`;
+  }).join("");
+
+  return `
+    <div class="chart-block">
+      <div class="chart-title">Theme Signal Strength</div>
+      <svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%">
+        ${bars}
+        <line x1="${LABEL_W}" y1="${PAD}" x2="${LABEL_W}" y2="${totalH - PAD}" stroke="#DDD" stroke-width="1"/>
+      </svg>
+      <div class="chart-note">Relative signal strength — themes listed in order of prominence</div>
+    </div>`;
+}
+
+// Mini donut / gauge for a single likelihood score inside a persona card
+function likelihoodGauge(score: number, color: string): string {
+  const r = 18;
+  const cx = 22, cy = 22;
+  const circ = 2 * Math.PI * r;
+  const dash = (score / 100) * circ;
+  return `<svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E5E7EB" stroke-width="5"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="5"
+      stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"
+      stroke-dashoffset="${(circ * 0.25).toFixed(1)}"
+      stroke-linecap="round"/>
+    <text x="${cx}" y="${cy + 4}" text-anchor="middle" font-family="Georgia,serif" font-size="9" font-weight="bold" fill="${NAVY}">${score}%</text>
+  </svg>`;
+}
+
+// ── Persona Cards ──────────────────────────────────────────────────────────
+
+function personaCards(content: unknown, showLikelihoodChart = false): string {
   if (Array.isArray(content) && content.length) {
     const PERSONA_ACCENTS = [TEAL, NAVY, "#059669", "#8FADC8", "#DC6B6B", "#059669"];
-    return `<div class="persona-grid">${content.map((p, i) => {
+
+    // Collect likelihood data for the overview chart
+    const chartData: Array<{ name: string; score: number }> = [];
+    content.forEach((p) => {
+      const g = obj(p);
+      const name = String(g.name ?? g.persona_name ?? "");
+      const rawLikelihood = String(g.likelihood ?? g.subscription_likelihood ?? g.likelihood_to_subscribe ?? "");
+      const score = parseLikelihood(rawLikelihood);
+      if (name && score !== null) chartData.push({ name, score });
+    });
+
+    const cards = content.map((p, i) => {
       const g = obj(p);
       const accent = PERSONA_ACCENTS[i % PERSONA_ACCENTS.length];
       const name   = String(g.name ?? g.persona_name ?? `Persona ${i + 1}`);
       const desc   = String(g.description ?? g.desc ?? g.profile ?? "");
       const motivation = String(g.motivation ?? g.motivations ?? g.primary_motivation ?? "");
       const concern    = String(g.concern ?? g.concerns ?? g.primary_concern ?? g.objection ?? "");
-      const likelihood = String(g.likelihood ?? g.subscription_likelihood ?? g.likelihood_to_subscribe ?? "");
-      const quote      = String(g.quote ?? g.simulated_response ?? g.representative_response ?? "");
+      const rawLikelihood = String(g.likelihood ?? g.subscription_likelihood ?? g.likelihood_to_subscribe ?? "");
+      const quote   = String(g.quote ?? g.simulated_response ?? g.representative_response ?? "");
+      const score   = parseLikelihood(rawLikelihood);
+      const gaugeColor = score !== null ? (score >= 70 ? "#059669" : score >= 45 ? TEAL : "#DC6B6B") : accent;
+
+      // Extra fields — demographics, behaviors, tags, etc.
+      const SKIP = new Set(["name","persona_name","description","desc","profile","motivation","motivations","primary_motivation","concern","concerns","primary_concern","objection","likelihood","subscription_likelihood","likelihood_to_subscribe","quote","simulated_response","representative_response"]);
+      const extraFields = Object.entries(g)
+        .filter(([k]) => !SKIP.has(k) && g[k])
+        .slice(0, 4);
+
       return `<div class="persona-card" style="border-top:3pt solid ${accent}">
-        <div class="persona-name" style="color:${accent}">${esc(name)}</div>
+        <div class="persona-header">
+          <div class="persona-name" style="color:${accent}">${esc(name)}</div>
+          ${score !== null ? likelihoodGauge(score, gaugeColor) : ""}
+        </div>
         ${desc ? `<p class="persona-desc">${text(desc)}</p>` : ""}
-        ${motivation ? `<div class="persona-field"><span class="persona-field-label">Motivation</span>${text(motivation)}</div>` : ""}
-        ${concern    ? `<div class="persona-field"><span class="persona-field-label">Concern</span>${text(concern)}</div>` : ""}
-        ${likelihood ? `<div class="persona-field"><span class="persona-field-label">Likelihood</span>${text(likelihood)}</div>` : ""}
-        ${quote      ? `<div class="persona-quote">&ldquo;${text(quote)}&rdquo;</div>` : ""}
+        <div class="persona-fields">
+          ${motivation ? `<div class="persona-field"><span class="persona-field-label">Motivation</span><span>${text(motivation)}</span></div>` : ""}
+          ${concern    ? `<div class="persona-field"><span class="persona-field-label">Concern</span><span>${text(concern)}</span></div>` : ""}
+          ${rawLikelihood && score === null ? `<div class="persona-field"><span class="persona-field-label">Likelihood</span><span>${text(rawLikelihood)}</span></div>` : ""}
+          ${extraFields.map(([k, v]) => {
+            const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+            const valStr = Array.isArray(v)
+              ? v.slice(0, 3).map(x => String(x)).join(" · ")
+              : String(v);
+            return `<div class="persona-field"><span class="persona-field-label">${esc(label)}</span><span>${text(valStr)}</span></div>`;
+          }).join("")}
+        </div>
+        ${quote ? `<div class="persona-quote">&ldquo;${text(quote)}&rdquo;</div>` : ""}
       </div>`;
-    }).join("")}</div>`;
+    }).join("");
+
+    return `
+      ${showLikelihoodChart && chartData.length >= 2 ? likelihoodChart(chartData) : ""}
+      <div class="persona-grid">${cards}</div>`;
   }
   return narrativeSection(content);
 }
 
-// Directional recommendations — if AI returns array, render tiered rec cards
-function recommendationCards(content: unknown): string {
-  if (Array.isArray(content) && content.length) {
-    return `<div class="rec-list">${content.map((r, i) => {
-      const g = obj(r);
-      const title    = String(g.title ?? g.recommendation ?? g.action ?? `Recommendation ${i + 1}`);
-      const body     = String(g.body ?? g.description ?? g.rationale ?? "");
-      const rawLabel = String(g.label ?? g.priority ?? "");
-      const p1 = rawLabel === "P1" || rawLabel === "1" || Number(g.priority) === 1;
-      const p2 = rawLabel === "P2" || rawLabel === "2" || Number(g.priority) === 2;
-      const accent   = p1 ? NAVY : p2 ? TEAL : "#6B7280";
-      const label    = p1 ? "Priority 1" : p2 ? "Priority 2" : rawLabel ? `Priority ${rawLabel.replace(/^P/, "")}` : `Rec ${i + 1}`;
-      return `<div class="ssr-rec" style="border-left:4pt solid ${accent}">
-        <div class="ssr-rec-label" style="color:${accent}">${esc(label)}</div>
-        <div class="ssr-rec-title">${text(title)}</div>
-        ${body ? `<p class="ssr-rec-body">${text(body)}</p>` : ""}
-      </div>`;
-    }).join("")}</div>`;
-  }
-  return narrativeSection(content);
-}
+// ── Thematic Analysis ──────────────────────────────────────────────────────
 
-// Thematic analysis — pull out numbered themes if structured, else fallback
 function thematicAnalysis(content: unknown): string {
   if (Array.isArray(content) && content.length) {
-    return `<div class="themes">${content.map((t, i) => {
+    // Build chart data
+    const chartThemes = content.map((t) => {
+      const g = obj(t);
+      const title = String(g.theme ?? g.title ?? g.finding ?? "Theme");
+      const strength = typeof g.strength === "number" ? g.strength as number : undefined;
+      return { title, strength };
+    });
+
+    const cards = content.map((t, i) => {
       const g = obj(t);
       const title   = String(g.theme ?? g.title ?? g.finding ?? `Theme ${i + 1}`);
       const body    = String(g.body ?? g.description ?? g.detail ?? "");
       const support = String(g.evidence ?? g.support ?? "");
+      const implications = arr(g.implications ?? g.action_items ?? []);
+
       return `<div class="theme-card">
         <div class="theme-num">${String(i + 1).padStart(2, "0")}</div>
         <div class="theme-body">
           <div class="theme-title">${text(title)}</div>
           ${body    ? `<p>${text(body)}</p>` : ""}
           ${support ? `<p class="theme-evidence">${text(support)}</p>` : ""}
+          ${implications.length ? `<ul class="card-bullets theme-bullets">${implications.map(x => `<li>${text(String(x))}</li>`).join("")}</ul>` : ""}
         </div>
+      </div>`;
+    }).join("");
+
+    return `
+      ${themeStrengthChart(chartThemes)}
+      <div class="themes">${cards}</div>`;
+  }
+  return narrativeSection(content);
+}
+
+// ── Directional Recommendations ────────────────────────────────────────────
+
+function recommendationCards(content: unknown): string {
+  if (Array.isArray(content) && content.length) {
+    return `<div class="rec-list">${content.map((r, i) => {
+      const g = obj(r);
+      const title    = String(g.title ?? g.recommendation ?? g.action ?? `Recommendation ${i + 1}`);
+      const body     = String(g.body ?? g.description ?? g.rationale ?? "");
+      const steps    = arr(g.steps ?? g.action_items ?? g.next_steps ?? []);
+      const rawLabel = String(g.label ?? g.priority ?? "");
+      const p1 = rawLabel === "P1" || rawLabel === "1" || Number(g.priority) === 1;
+      const p2 = rawLabel === "P2" || rawLabel === "2" || Number(g.priority) === 2;
+      const accent   = p1 ? NAVY : p2 ? TEAL : "#6B7280";
+      const label    = p1 ? "Priority 1" : p2 ? "Priority 2" : rawLabel ? `Priority ${rawLabel.replace(/^P/, "")}` : `Rec ${i + 1}`;
+      return `<div class="ssr-rec" style="border-left:4pt solid ${accent}">
+        <div class="ssr-rec-header">
+          <div>
+            <div class="ssr-rec-label" style="color:${accent}">${esc(label)}</div>
+            <div class="ssr-rec-title">${text(title)}</div>
+          </div>
+          <div class="rec-priority-badge" style="background:${accent}">${esc(label.replace("Priority ", "P"))}</div>
+        </div>
+        ${body  ? `<p class="ssr-rec-body">${text(body)}</p>` : ""}
+        ${steps.length ? `<ul class="card-bullets">${steps.map(s => `<li>${text(String(s))}</li>`).join("")}</ul>` : ""}
       </div>`;
     }).join("")}</div>`;
   }
@@ -251,7 +431,7 @@ body {
   font-family: Georgia, "Gelasio", serif; font-size: 11pt; line-height: 1.5; color: ${INK};
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
-p { margin: 0 0 8pt; }
+p { margin: 0 0 7pt; }
 h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
 .keep, .card, .subsection, .perspective-callout, .perspective-item { break-inside: avoid; page-break-inside: avoid; }
 
@@ -286,42 +466,70 @@ section.contents { page: contents; }
 .subsection { margin-bottom: 14pt; }
 .subsection-head { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid ${TEAL}; }
 
+/* Bullet lists inside cards */
+.card-bullets { margin: 5pt 0 6pt 14pt; padding: 0; }
+.card-bullets li { font-size: 10.5pt; color: ${INK}; margin-bottom: 3pt; line-height: 1.4; }
+.theme-bullets { margin-top: 6pt; }
+.theme-bullets li { font-size: 10pt; color: ${GRAY}; }
+
+/* Chart blocks */
+.chart-block {
+  margin: 0 0 16pt;
+  padding: 12pt 14pt;
+  background: ${ROW_TINT};
+  border-radius: 4pt;
+  border-left: 3pt solid ${TEAL};
+  break-inside: avoid; page-break-inside: avoid;
+}
+.chart-title {
+  font-size: 9.5pt; font-weight: 700; color: ${NAVY}; text-transform: uppercase;
+  letter-spacing: 1pt; margin-bottom: 10pt;
+}
+.chart-note { font-size: 8.5pt; color: ${GRAY}; font-style: italic; margin-top: 6pt; }
+
 /* Persona Cards */
 .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; margin-bottom: 8pt; }
 .persona-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 12pt 14pt; break-inside: avoid; }
-.persona-name { font-size: 13pt; font-weight: 700; margin-bottom: 6pt; }
-.persona-desc { font-size: 11pt; color: ${INK}; margin: 0 0 8pt; }
-.persona-field { font-size: 10pt; margin-bottom: 5pt; color: ${INK}; }
-.persona-field-label { font-weight: 700; color: ${NAVY}; text-transform: uppercase; font-size: 8.5pt; letter-spacing: 1pt; margin-right: 6pt; }
-.persona-quote { margin-top: 8pt; padding: 8pt 10pt; background: ${ROW_TINT}; border-left: 3pt solid ${TEAL}; font-style: italic; font-size: 10.5pt; color: ${INK}; border-radius: 0 3pt 3pt 0; }
+.persona-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6pt; }
+.persona-name { font-size: 13pt; font-weight: 700; flex: 1; padding-right: 8pt; }
+.persona-desc { font-size: 10.5pt; color: ${INK}; margin: 0 0 8pt; line-height: 1.4; }
+.persona-fields { display: flex; flex-direction: column; gap: 4pt; margin-bottom: 6pt; }
+.persona-field { font-size: 10pt; color: ${INK}; display: flex; gap: 5pt; align-items: baseline; }
+.persona-field-label { font-weight: 700; color: ${NAVY}; text-transform: uppercase; font-size: 8pt; letter-spacing: 0.8pt; flex-shrink: 0; }
+.persona-quote { margin-top: 8pt; padding: 7pt 10pt; background: ${LIGHT_TEAL}; border-left: 3pt solid ${TEAL}; font-style: italic; font-size: 10pt; color: ${INK}; border-radius: 0 3pt 3pt 0; line-height: 1.4; }
 
 /* Thematic Analysis */
-.themes { display: flex; flex-direction: column; gap: 12pt; }
-.theme-card { display: flex; gap: 14pt; padding: 12pt 14pt; background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; break-inside: avoid; }
+.themes { display: flex; flex-direction: column; gap: 10pt; }
+.theme-card { display: flex; gap: 14pt; padding: 11pt 14pt; background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; break-inside: avoid; }
 .theme-num { font-size: 22pt; font-weight: 700; color: ${TEAL}; opacity: 0.6; line-height: 1; min-width: 28pt; padding-top: 2pt; }
 .theme-body { flex: 1; }
-.theme-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin-bottom: 5pt; }
-.theme-body p { margin: 0 0 5pt; font-size: 11pt; }
-.theme-evidence { font-style: italic; color: ${GRAY}; font-size: 10.5pt; }
+.theme-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin-bottom: 4pt; }
+.theme-body p { margin: 0 0 4pt; font-size: 10.5pt; }
+.theme-evidence { font-style: italic; color: ${GRAY}; font-size: 10pt; }
 
 /* Directional Recommendations */
 .rec-list { display: flex; flex-direction: column; gap: 10pt; }
 .ssr-rec { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 0 4pt 4pt 0; padding: 12pt 14pt; break-inside: avoid; }
-.ssr-rec-label { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 4pt; }
-.ssr-rec-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; margin-bottom: 5pt; }
-.ssr-rec-body { margin: 0; font-size: 11pt; color: ${INK}; }
+.ssr-rec-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6pt; }
+.ssr-rec-label { font-size: 8pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 3pt; }
+.ssr-rec-title { font-size: 12pt; font-weight: 700; color: ${NAVY}; }
+.ssr-rec-body { margin: 0 0 5pt; font-size: 10.5pt; color: ${INK}; }
+.rec-priority-badge {
+  font-size: 8pt; font-weight: 700; color: ${WHITE}; padding: 3pt 8pt;
+  border-radius: 10pt; white-space: nowrap; flex-shrink: 0; margin-left: 8pt;
+}
 
 /* Analyst Perspective callout */
 .perspective-callout {
   margin: 12pt 0;
-  padding: 12pt 16pt;
+  padding: 11pt 16pt;
   background: ${ROW_TINT};
   border-left: 4pt solid ${NAVY};
   border-radius: 0 4pt 4pt 0;
 }
 .perspective-callout .perspective-label {
   font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase;
-  color: ${NAVY}; margin-bottom: 6pt;
+  color: ${NAVY}; margin-bottom: 5pt;
 }
 .perspective-callout p { margin: 0; font-style: italic; font-size: 11pt; color: ${INK}; }
 
@@ -364,8 +572,8 @@ export function buildSsrReportHtml(
   const LAST_ID = SSR_SECTIONS[SSR_SECTIONS.length - 1].id;
 
   const sectionBody = (id: SsrSectionId, content: unknown): string => {
-    if (id === "customer_personas")           return personaCards(content);
-    if (id === "persona_response_simulation") return personaCards(content);
+    if (id === "customer_personas")           return personaCards(content, false);
+    if (id === "persona_response_simulation") return personaCards(content, true); // chart on simulation page
     if (id === "thematic_analysis")           return thematicAnalysis(content);
     if (id === "directional_recommendations") return recommendationCards(content);
     return narrativeSection(content);

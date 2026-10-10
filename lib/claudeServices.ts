@@ -340,7 +340,7 @@ const SSR_SECTION_CONFIG: Record<string, string> = {
   customer_personas:
     `Build 3-5 distinct customer personas for this business based on the intake. Return a JSON array only — no prose, no markdown, no code fences. Each element must match this schema exactly: {"name": "Persona Name", "description": "Short 1-sentence descriptor", "motivation": "What drives them to engage with this type of business", "concern": "Their main worry or objection", "likelihood": "High, Medium, or Low", "quote": "A representative quote this persona might say"}. Return only the JSON array, nothing else.`,
   persona_response_simulation:
-    "Simulate how each persona responds to the research questions from the intake. Organize by persona. For each: their likely reaction, key objections or enthusiasm points, and what would drive their decision. Prose paragraphs, not lists.",
+    `Simulate how each of the personas from the Customer Personas section responds to the research questions. Return a JSON array only — no prose, no markdown, no code fences. Each element must match this schema exactly: {"name": "Same persona name as above", "description": "Their overall stance in one sentence", "motivation": "What excites or appeals to them about this offering", "concern": "Their main objection or hesitation", "likelihood": "High, Medium, or Low — or a percentage like 70%", "quote": "A representative quote capturing their simulated response"}. Return only the JSON array, nothing else.`,
   thematic_analysis:
     `Identify 4-5 patterns across the persona responses above. Return a JSON array only — no prose, no markdown, no code fences. Each element must match this schema exactly: {"title": "Theme Name", "body": "2-3 sentences explaining this theme and what it means for the business", "evidence": "What from the persona analysis supports this theme"}. Return only the JSON array, nothing else.`,
   directional_recommendations:
@@ -377,7 +377,7 @@ export async function generateSSRSection(
     if (blocks.length > 0) priorContext = "\n\nPRIOR SECTIONS:\n" + blocks.join("\n\n");
   }
 
-  const jsonSections = new Set(["customer_personas", "thematic_analysis", "directional_recommendations"]);
+  const jsonSections = new Set(["customer_personas", "persona_response_simulation", "thematic_analysis", "directional_recommendations"]);
   const isJsonSection = jsonSections.has(sectionKey);
   const system = isJsonSection
     ? `You are a senior research analyst at Sea Glass Insights. For the "${sectionLabel}" section, return ONLY a valid JSON array — no prose, no markdown, no code fences, no explanation. The instructions specify the exact schema to follow.`
