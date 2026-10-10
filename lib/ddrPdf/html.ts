@@ -149,6 +149,7 @@ function executiveSummary(es: unknown): string {
 }
 
 function businessSnapshot(bs: unknown, legacy: unknown): string {
+  if (typeof bs === "string" && bs.trim()) return paragraphs(bs);
   const b = obj(bs);
   if (!Object.keys(b).length) return paragraphs(legacy);
 
@@ -205,7 +206,15 @@ function customerSegments(segs: unknown): string {
 
 function competitiveIntelligence(comps: unknown): string {
   // May come as array of competitor objects OR plain string
-  if (typeof comps === "string") return paragraphs(comps);
+  if (typeof comps === "string") {
+    // Try to parse as JSON array
+    try {
+      const stripped = comps.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+      const parsed = JSON.parse(stripped);
+      if (Array.isArray(parsed)) return competitiveIntelligence(parsed);
+    } catch { /* fall through to prose */ }
+    return paragraphs(comps);
+  }
   const competitors = arr(comps);
   if (!competitors.length) return "";
   return `<table class="compare">
@@ -228,8 +237,13 @@ function narrativeSection(content: unknown): string {
   const c = obj(content);
   const keys = Object.keys(c);
   if (!keys.length) return "";
+  // Skip array-valued keys (handled separately, e.g. key_stats by marketStatCallouts)
+  // Skip decision_focus key (handled by decisionFocusCallout)
+  const SKIP_KEYS = new Set(["key_stats", "market_stats", "statistics", "decision_focus", "decision_question", "research_question"]);
+  const textKeys = keys.filter(k => !SKIP_KEYS.has(k) && !Array.isArray(c[k]));
+  if (!textKeys.length) return "";
   // Try to render as labeled subsections if the object has named keys
-  return keys.map(k => {
+  return textKeys.map(k => {
     const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
     return `<div class="subsection">
       <h3 class="subsection-head">${esc(label)}</h3>
@@ -289,7 +303,20 @@ function decisionAnalysisSection(content: unknown): string {
 }
 
 function extendedRecommendations(recs: unknown): string {
-  if (typeof recs === "string") return paragraphs(recs);
+  if (typeof recs === "string") {
+    // Try to parse as JSON array first (in case pre-parse missed it)
+    try {
+      const parsed = JSON.parse(recs.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim());
+      if (Array.isArray(parsed)) return extendedRecommendations(parsed);
+    } catch { /* fall through to prose */ }
+    return paragraphs(recs);
+  }
+  // If it's an object with a recommendations key, unwrap it
+  if (recs && typeof recs === "object" && !Array.isArray(recs)) {
+    const r = recs as Record<string, unknown>;
+    const inner = r.recommendations ?? r.items ?? r.extended_recommendations;
+    if (Array.isArray(inner)) return extendedRecommendations(inner);
+  }
   const all = arr(recs).map(obj);
   if (!all.length) return "";
 
