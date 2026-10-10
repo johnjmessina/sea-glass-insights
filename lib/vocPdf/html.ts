@@ -151,58 +151,134 @@ function surveyDesignContent(questions: VocQuestion[]): string {
     <p class="q-note">Copy these questions directly into Google Forms or your preferred survey tool.</p>`;
 }
 
+
+// ── SVG Inline Charts ──────────────────────────────────────────────────────
+
+// Horizontal bar chart for frequency/MC questions
+function freqBarChart(
+  entries: Array<[string, number]>,
+  percentages: Record<string, number>,
+  total: number,
+): string {
+  if (!entries.length) return "";
+  const BAR_H   = 18;
+  const GAP     = 8;
+  const LABEL_W = 150;
+  const BAR_MAX = 240;
+  const PAD     = 8;
+  const totalH  = entries.length * (BAR_H + GAP) - GAP + PAD * 2;
+  const totalW  = LABEL_W + BAR_MAX + 50;
+
+  const bars = entries.map(([opt, cnt], i) => {
+    const pct  = percentages[opt] ?? 0;
+    const barW = Math.round((pct / 100) * BAR_MAX);
+    const y    = PAD + i * (BAR_H + GAP);
+    const label = opt.length > 22 ? opt.slice(0, 21) + "…" : opt;
+    const fill  = i === 0 ? NAVY : i === 1 ? TEAL : "#4A90B8";
+    return (
+      `<text x="0" y="${y + BAR_H - 4}" font-family="Georgia,serif" font-size="8.5" fill="${NAVY}">${esc(label)}</text>` +
+      `<rect x="${LABEL_W}" y="${y}" width="${Math.max(barW, 2)}" height="${BAR_H}" rx="3" fill="${fill}" opacity="0.85"/>` +
+      `<text x="${LABEL_W + Math.max(barW, 2) + 5}" y="${y + BAR_H - 4}" font-family="Georgia,serif" font-size="8.5" fill="${GRAY}">${pct}% (${cnt})</text>`
+    );
+  }).join("");
+
+  return (
+    `<div class="chart-block">` +
+    `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%">` +
+    bars +
+    `<line x1="${LABEL_W}" y1="${PAD}" x2="${LABEL_W}" y2="${totalH - PAD}" stroke="#DDD" stroke-width="1"/>` +
+    `</svg>` +
+    `<div class="chart-note">n=${total} respondents</div>` +
+    `</div>`
+  );
+}
+
+// Scale distribution bar chart (1–7)
+function scaleDistChart(
+  dist: Record<string, number>,
+  total: number,
+): string {
+  const vals = [1,2,3,4,5,6,7];
+  const maxCnt = Math.max(...vals.map(n => dist[String(n)] ?? 0), 1);
+  const BAR_W  = 32;
+  const BAR_GAP = 6;
+  const MAX_H  = 60;
+  const totalW = vals.length * (BAR_W + BAR_GAP) - BAR_GAP + 20;
+  const totalH = MAX_H + 36;
+
+  const bars = vals.map((n, i) => {
+    const cnt  = dist[String(n)] ?? 0;
+    const barH = Math.round((cnt / maxCnt) * MAX_H) || 2;
+    const x    = i * (BAR_W + BAR_GAP) + 10;
+    const y    = MAX_H - barH;
+    const fill = n >= 6 ? "#059669" : n <= 2 ? "#DC6B6B" : TEAL;
+    const isBold = n >= 6 || n <= 2;
+    return (
+      `<rect x="${x}" y="${y}" width="${BAR_W}" height="${barH}" rx="3" fill="${fill}" opacity="${isBold ? 1 : 0.6}"/>` +
+      `<text x="${x + BAR_W / 2}" y="${MAX_H + 14}" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="${NAVY}" font-weight="${isBold ? "bold" : "normal"}">${n}</text>` +
+      (cnt > 0 ? `<text x="${x + BAR_W / 2}" y="${y - 3}" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="${GRAY}">${cnt}</text>` : "")
+    );
+  }).join("");
+
+  const lastTwoX = 5 * (BAR_W + BAR_GAP) + BAR_W / 2 + 10;
+  const t2bLabel = `<text x="${lastTwoX}" y="${MAX_H + 28}" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" fill="#059669" font-weight="bold">T2B</text>`;
+
+  return (
+    `<div class="chart-block">` +
+    `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%">` +
+    bars + t2bLabel +
+    `</svg>` +
+    `<div class="chart-note">n=${total} · Green = Top 2 Box (6–7) · Red = Bottom 2 Box (1–2)</div>` +
+    `</div>`
+  );
+}
+
+// ── Quantitative stat tiles + chart renderers ─────────────────────────────
+
+function scaleStatTiles(stat: VocQuantData["questionStats"][string]): string {
+  if (!stat) return "";
+  const tiles: Array<{ label: string; value: string; sub?: string; highlight?: boolean }> = [
+    { label: "Top 2 Box",   value: `${stat.t2b ?? 0}%`,    sub: "Scores 6–7", highlight: true },
+    { label: "Mean Score",  value: String(stat.mean ?? 0), sub: "Out of 7" },
+    { label: "Bottom 2 Box", value: `${stat.b2b ?? 0}%`,  sub: "Scores 1–2" },
+    { label: "Responses",   value: String(stat.totalResponded ?? 0), sub: "n" },
+  ];
+  return (
+    `<div class="stat-tiles">` +
+    tiles.map(t =>
+      `<div class="stat-tile${t.highlight ? " stat-tile-hi" : ""}">` +
+      `<div class="stat-value">${esc(t.value)}</div>` +
+      `<div class="stat-label">${esc(t.label)}</div>` +
+      (t.sub ? `<div class="stat-sub">${esc(t.sub)}</div>` : "") +
+      `</div>`
+    ).join("") +
+    `</div>`
+  );
+}
+
 // ── Quantitative table renderers ──────────────────────────────────────────────
 
 function scaleTable(q: VocQuestion, stat: VocQuantData["questionStats"][string]): string {
   if (!stat) return "";
   const dist    = stat.distribution ?? {};
-  const distStr = [1,2,3,4,5,6,7].map(i => `${i}: ${dist[String(i)] ?? 0}`).join(" ");
-  return `
-    <div class="quant-block keep">
-      <p class="q-block-text">${esc(q.text)}</p>
-      <table class="quant-table">
-        <thead>
-          <tr>
-            <th>T2B (6–7)</th>
-            <th>Mean Score</th>
-            <th>B2B (1–2)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="bold-cell">${stat.t2b ?? 0}%</td>
-            <td>${stat.mean ?? 0}</td>
-            <td>${stat.b2b ?? 0}%</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="dist-note">Distribution (n=${stat.totalResponded ?? 0}): ${esc(distStr)}</p>
-    </div>`;
+  return (
+    `<div class="quant-block keep">` +
+    `<p class="q-block-text">${esc(q.text)}</p>` +
+    scaleStatTiles(stat) +
+    scaleDistChart(dist, stat.totalResponded ?? 0) +
+    `</div>`
+  );
 }
 
 function freqTable(q: VocQuestion, stat: VocQuantData["questionStats"][string]): string {
   if (!stat?.frequencies) return "";
   const entries = Object.entries(stat.frequencies).sort(([,a],[,b]) => b - a);
-  const rows = entries.map(([opt, cnt], i) => `
-    <tr${i % 2 === 1 ? ` class="shade"` : ""}>
-      <td>${esc(opt)}</td>
-      <td>${cnt}</td>
-      <td>${stat.percentages?.[opt] ?? 0}%</td>
-    </tr>`).join("");
-  return `
-    <div class="quant-block keep">
-      <p class="q-block-text">${esc(q.text)} <span class="resp-count">(n=${stat.totalResponded ?? 0})</span></p>
-      <table class="quant-table freq-table">
-        <thead>
-          <tr>
-            <th class="wide-col">Response</th>
-            <th>Count</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
+  return (
+    `<div class="quant-block keep">` +
+    `<p class="q-block-text">${esc(q.text)} <span class="resp-count">(n=${stat.totalResponded ?? 0})</span></p>` +
+    freqBarChart(entries, stat.percentages ?? {}, stat.totalResponded ?? 0) +
+    `</div>`
+  );
 }
 
 function bannerTable(
@@ -472,6 +548,21 @@ section.contents { page: contents; }
 .voc-rec-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 0 4pt 4pt 0; padding: 12pt 14pt; break-inside: avoid; }
 .voc-rec-title { font-size: 12pt; font-weight: 700; margin-bottom: 5pt; }
 .voc-rec-body p { margin: 0 0 5pt; font-size: 11pt; }
+
+/* Stat hero tiles */
+.stat-tiles { display: flex; gap: 8pt; margin: 10pt 0 12pt; flex-wrap: wrap; }
+.stat-tile { flex: 1; min-width: 70pt; text-align: center; padding: 10pt 8pt; background: ${ROW_TINT}; border-radius: 4pt; border: 0.5pt solid #D5D8DC; }
+.stat-tile-hi { background: ${NAVY}; border-color: ${NAVY}; }
+.stat-tile-hi .stat-value { color: ${WHITE}; }
+.stat-tile-hi .stat-label { color: rgba(255,255,255,0.8); }
+.stat-tile-hi .stat-sub { color: ${TEAL}; }
+.stat-value { font-size: 20pt; font-weight: 700; color: ${NAVY}; line-height: 1; margin-bottom: 4pt; }
+.stat-label { font-size: 8pt; font-weight: 700; letter-spacing: 0.5pt; text-transform: uppercase; color: ${GRAY}; }
+.stat-sub { font-size: 7.5pt; color: ${GRAY}; margin-top: 2pt; }
+
+/* SVG Chart block */
+.chart-block { margin: 8pt 0 4pt; }
+.chart-note { font-size: 8pt; color: ${GRAY}; font-style: italic; margin-top: 4pt; }
 `;
 
 // ── Document ───────────────────────────────────────────────────────────────

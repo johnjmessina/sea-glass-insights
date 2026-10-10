@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { Order } from "@/lib/supabase";
 import {
   VOC_PHASE2_SECTIONS,
@@ -21,6 +21,18 @@ import { parseCSV, parseNarrativeResponses, autoMapColumns, calculateStats } fro
 
 type SectionMeta = { notes: string; locked: boolean; callout: string };
 type MetaMap     = Record<string, SectionMeta>;
+
+// VOC has 5 phases: 1=Design, 2=Contacts, 3=Sent/Collecting, 4=Analysis, 5=Draft
+type VocPhase = 1 | 2 | 3 | 4 | 5;
+
+interface SurveyContact {
+  id:           string;
+  name:         string | null;
+  email:        string;
+  token:        string;
+  sent_at:      string | null;
+  completed_at: string | null;
+}
 
 const AI_SECTIONS = VOC_PHASE2_SECTIONS.filter(s => s.aiGenerated);
 
@@ -73,19 +85,28 @@ const Q_TYPE_COLOR: Record<VocQuestionType, string> = {
   open_ended:      "bg-gray-100 text-gray-600",
 };
 
+const PHASE_LABELS: Record<VocPhase, string> = {
+  1: "Survey Design",
+  2: "Contacts",
+  3: "Collecting",
+  4: "Analysis",
+  5: "Draft Report",
+};
+
 // ── Question Card ─────────────────────────────────────────────────────────────
 
 interface QuestionCardProps {
   q: VocQuestion;
   idx: number;
   total: number;
+  isSyndicated?: boolean;
   onChange: (q: VocQuestion) => void;
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
 }
 
-function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown }: QuestionCardProps) {
+function QuestionCard({ q, idx, total, isSyndicated, onChange, onDelete, onMoveUp, onMoveDown }: QuestionCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   function set<K extends keyof VocQuestion>(k: K, v: VocQuestion[K]) {
@@ -108,11 +129,17 @@ function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown 
   function addOption() { set("options", [...q.options, ""]); }
   function removeOption(i: number) { set("options", q.options.filter((_, j) => j !== i)); }
 
-  const hasBanner = q.type === "multiple_choice" || q.type === "select_all";
+  const hasBanner  = q.type === "multiple_choice" || q.type === "select_all";
   const hasOptions = q.type === "multiple_choice" || q.type === "select_all";
 
   return (
-    <div className="border border-gray-100 rounded-xl bg-white p-4">
+    <div className={`border rounded-xl bg-white p-4 ${isSyndicated ? "border-teal-200 bg-teal-50/30" : "border-gray-100"}`}>
+      {isSyndicated && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-xs font-semibold text-teal-700 bg-teal-100 px-2 py-0.5 rounded-full">Syndicated</span>
+          <span className="text-xs text-teal-500">Standard across all VOC surveys</span>
+        </div>
+      )}
       {/* Compact header row */}
       <div className="flex items-start gap-3">
         <span className="text-xs font-bold text-gray-400 mt-2.5 shrink-0 w-5">{idx + 1}</span>
@@ -152,8 +179,6 @@ function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown 
       {/* Expanded settings */}
       {expanded && (
         <div className="mt-3 pt-3 border-t border-gray-100 space-y-4">
-
-          {/* Options (MC / select_all) */}
           {hasOptions && (
             <div>
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Answer Options</label>
@@ -175,45 +200,24 @@ function QuestionCard({ q, idx, total, onChange, onDelete, onMoveUp, onMoveDown 
               </div>
             </div>
           )}
-
-          {/* Banner cut */}
           <div>
             <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={q.bannerCut}
-                onChange={e => set("bannerCut", e.target.checked)}
-                className="rounded"
-              />
-              Use as banner cut variable (question text becomes the banner label)
+              <input type="checkbox" checked={q.bannerCut} onChange={e => set("bannerCut", e.target.checked)} className="rounded" />
+              Use as banner cut variable
             </label>
           </div>
-
-          {/* Scale-specific */}
           {q.type === "scale_1_7" && (
             <div>
               <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={q.t2bB2b}
-                  onChange={e => set("t2bB2b", e.target.checked)}
-                  className="rounded"
-                />
-                Calculate T2B (6-7) and B2B (1-2) in Phase 2 analysis
+                <input type="checkbox" checked={q.t2bB2b} onChange={e => set("t2bB2b", e.target.checked)} className="rounded" />
+                Calculate T2B (6-7) and B2B (1-2) in analysis
               </label>
             </div>
           )}
-
-          {/* MC/SA-specific */}
           {hasBanner && (
             <div>
               <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={q.segmentationVar}
-                  onChange={e => set("segmentationVar", e.target.checked)}
-                  className="rounded"
-                />
+                <input type="checkbox" checked={q.segmentationVar} onChange={e => set("segmentationVar", e.target.checked)} className="rounded" />
                 Use as segmentation variable for cross-tab banner cuts
               </label>
             </div>
@@ -244,12 +248,10 @@ function MappingUI({ questions, csvHeaders, mapping, onMappingChange, onConfirm,
           <h4 className="font-semibold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>
             Column Mapping — {totalRows} Responses Detected
           </h4>
-          <p className="text-xs text-gray-400 mt-0.5">Verify that each question maps to the correct CSV column.</p>
+          <p className="text-xs text-gray-400 mt-0.5">Verify each question maps to the correct CSV column.</p>
         </div>
-        <button
-          onClick={onConfirm}
-          className="bg-teal-500 text-white font-semibold text-sm px-5 py-2 rounded-full hover:bg-teal-600 transition-colors">
-          Confirm Mapping &amp; Calculate Stats
+        <button onClick={onConfirm} className="bg-teal-500 text-white font-semibold text-sm px-5 py-2 rounded-full hover:bg-teal-600 transition-colors">
+          Confirm &amp; Calculate Stats
         </button>
       </div>
       <div className="space-y-2.5">
@@ -257,9 +259,7 @@ function MappingUI({ questions, csvHeaders, mapping, onMappingChange, onConfirm,
           <div key={q.id} className="flex items-center gap-3 flex-wrap">
             <div className="flex-1 min-w-0">
               <p className="text-xs text-navy font-medium truncate">{q.text || "(no question text)"}</p>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${Q_TYPE_COLOR[q.type]}`}>
-                {VOC_QUESTION_TYPE_LABELS[q.type]}
-              </span>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${Q_TYPE_COLOR[q.type]}`}>{VOC_QUESTION_TYPE_LABELS[q.type]}</span>
             </div>
             <div className="shrink-0">
               <select
@@ -273,11 +273,7 @@ function MappingUI({ questions, csvHeaders, mapping, onMappingChange, onConfirm,
           </div>
         ))}
       </div>
-      {!allMapped && (
-        <p className="text-xs text-amber-500 font-medium mt-3">
-          Some questions are not mapped — their stats will be skipped.
-        </p>
-      )}
+      {!allMapped && <p className="text-xs text-amber-500 font-medium mt-3">Some questions unmapped — their stats will be skipped.</p>}
     </div>
   );
 }
@@ -290,9 +286,7 @@ function StatsSummary({ quant, questions }: { quant: VocQuantData; questions: Vo
   const oeQs    = questions.filter(q => q.type === "open_ended" && quant.questionStats[q.id]);
   return (
     <div className="bg-teal-50 border border-teal-200 rounded-xl p-5 mt-4">
-      <p className="text-sm font-semibold text-navy mb-3">
-        {quant.totalResponses} responses processed
-      </p>
+      <p className="text-sm font-semibold text-navy mb-3">{quant.totalResponses} responses processed</p>
       {scaleQs.length > 0 && (
         <div className="mb-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Rating Scales</p>
@@ -340,13 +334,11 @@ function StatsSummary({ quant, questions }: { quant: VocQuantData; questions: Vo
         </div>
       )}
       {Object.keys(quant.bannerCuts).length > 0 && (
-        <p className="text-xs text-teal-700 font-medium">
-          Banner cut tables calculated for {Object.keys(quant.bannerCuts).length} segmentation variable(s).
-        </p>
+        <p className="text-xs text-teal-700 font-medium">Banner cuts for {Object.keys(quant.bannerCuts).length} segmentation variable(s).</p>
       )}
       {oeQs.length > 0 && (
         <p className="text-xs text-gray-500 mt-1">
-          {oeQs.reduce((n, q) => n + (quant.questionStats[q.id]?.totalResponded ?? 0), 0)} open-ended responses captured for thematic analysis.
+          {oeQs.reduce((n, q) => n + (quant.questionStats[q.id]?.totalResponded ?? 0), 0)} open-ended responses for thematic analysis.
         </p>
       )}
     </div>
@@ -358,21 +350,22 @@ function StatsSummary({ quant, questions }: { quant: VocQuantData; questions: Vo
 interface Props { order: Order; onBack: () => void; }
 
 export default function VoCDetail({ order: initialOrder, onBack }: Props) {
-  const sd          = (initialOrder.service_data ?? {}) as Record<string, unknown>;
-  const rawNote     = initialOrder.analyst_note ?? "";
-  const hasUpload   = rawNote.includes("contact-list:");
-  const contactPath = hasUpload ? rawNote.split("contact-list:")[1]?.trim() ?? null : null;
-  const contactFile = contactPath ? contactPath.split("/").slice(1).join("/") : null;
+  const sd = (initialOrder.service_data ?? {}) as Record<string, unknown>;
+
+  // Derive stored phase — map old 1/2 values to new 5-phase scale
+  function getStoredPhase(): VocPhase {
+    const raw = sd.voc_phase as number | undefined;
+    if (!raw) return 1;
+    // Old system: 1=design, 2=analysis. New: 1=design, 2=contacts, 3=collecting, 4=analysis, 5=draft
+    if (raw === 2) return 5; // old Phase 2 maps to Phase 5 (draft report)
+    return Math.min(Math.max(raw, 1), 5) as VocPhase;
+  }
 
   const [order,    setOrder]  = useState(initialOrder);
-  const [phase,    setPhase]  = useState<1 | 2>((sd.voc_phase as 1 | 2) ?? 1);
+  const [phase,    setPhase]  = useState<VocPhase>(getStoredPhase());
   const [questions,setQs]     = useState<VocQuestion[]>((sd.voc_question_map as VocQuestion[]) ?? []);
-  const [draft,    setDraft]  = useState<Record<string, string>>(
-    (initialOrder.ai_draft as Record<string, string>) ?? {}
-  );
-  const [meta,     setMeta]   = useState<MetaMap>(() =>
-    initMeta(initialOrder.analyst_commentary as Record<string, unknown> | null)
-  );
+  const [draft,    setDraft]  = useState<Record<string, string>>((initialOrder.ai_draft as Record<string, string>) ?? {});
+  const [meta,     setMeta]   = useState<MetaMap>(() => initMeta(initialOrder.analyst_commentary as Record<string, unknown> | null));
   const [note,     setNote]   = useState((sd.voc_closing_note as string) ?? "");
   const [quant,    setQuant]  = useState<VocQuantData | null>((sd.voc_quant_data as VocQuantData) ?? null);
   const [mapping,  setMapping]= useState<ColumnMapping>((sd.voc_column_mapping as ColumnMapping) ?? {});
@@ -382,9 +375,24 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
   const [uploadMode,   setUploadMode]   = useState<"upload" | "paste">("upload");
   const [pasteText,    setPasteText]    = useState("");
 
+  // Phase 2/3: contacts
+  const [contacts,       setContacts]       = useState<SurveyContact[]>([]);
+  const [contactsLoaded, setContactsLoaded] = useState(false);
+  const [csvContactText, setCsvContactText] = useState("");
+  const [csvContactMode, setCsvContactMode] = useState<"upload" | "paste">("upload");
+  const [uploadingCsv,   setUploadingCsv]   = useState(false);
+  const [uploadErr,      setUploadErr]       = useState<string | null>(null);
+  const [sendingEmails,  setSendingEmails]   = useState(false);
+  const [sendResult,     setSendResult]      = useState<{ sent: number; failed: string[] } | null>(null);
+  const [sendErr,        setSendErr]         = useState<string | null>(null);
+
+  // Phase 4: load responses from DB
+  const [loadingResponses, setLoadingResponses] = useState(false);
+  const [loadResErr,       setLoadResErr]        = useState<string | null>(null);
+
   const [genQs,      setGenQs]     = useState(false);
   const [genQsErr,   setGenQsErr]  = useState<string | null>(null);
-  const [genPhase2,  setGenP2]     = useState(false);
+  const [genPhase5,  setGenP5]     = useState(false);
   const [genIdx,     setGenIdx]    = useState(-1);
   const [genFailed,  setGenFailed] = useState<Record<string, string>>({});
   const [retrying,   setRetrying]  = useState<Record<string, boolean>>({});
@@ -396,8 +404,6 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
   const [saveMsg,    setSaveMsg]   = useState<string | null>(null);
   const [autoSaved,  setAutoSaved] = useState(false);
   const [dlDocx,     setDlDocx]    = useState(false);
-  const [dlLink,     setDlLink]    = useState<string | null>(null);
-  const [dlLinkLoad, setDlLinkLoad]= useState(false);
 
   const metaTimer = useRef<NodeJS.Timeout | null>(null);
   const noteTimer = useRef<NodeJS.Timeout | null>(null);
@@ -477,41 +483,95 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     } finally { setGenQs(false); }
   }
 
-  async function markPhase1Complete() {
-    if (!confirm("Mark Phase 1 complete and unlock Phase 2 — Analysis?")) return;
-    const newPhase = 2;
-    setPhase(2);
-    await persist({
-      service_data: { ...sd, voc_phase: newPhase, voc_question_map: questions },
-    });
+  async function advanceTo(nextPhase: VocPhase) {
+    setPhase(nextPhase);
+    await persist({ service_data: { ...sd, voc_phase: nextPhase, voc_question_map: questions } });
   }
 
-  // Calculate stats from a parsed dataset + mapping, update state, and persist.
-  function applyStats(parsed: ParsedCSV, map: ColumnMapping) {
-    const calculated = calculateStats(parsed, questions, map);
-    setQuant(calculated);
-    setStatsReady(true);
-    setMappingReady(false);
-    persist({
-      service_data: {
-        ...sd, voc_quant_data: calculated, voc_column_mapping: map,
-        voc_phase: phase, voc_question_map: questions,
-      },
-    });
+  // ── Phase 2: load contacts from Supabase ─────────────────────────────────
+
+  async function loadContacts() {
+    if (contactsLoaded) return;
+    try {
+      const res  = await fetch(`/api/voc/survey-status?orderId=${order.id}`);
+      const data = await res.json();
+      if (res.ok) setContacts(data.contacts ?? []);
+    } catch { /* ignore */ }
+    setContactsLoaded(true);
   }
 
-  // File upload always uses parseCSV and shows the mapping confirmation UI.
-  // Paste auto-detects format: "Label: value" lines (colon before any comma) → narrative parser,
-  // which skips the mapping UI and goes straight to stats. CSV paste → mapping UI as normal.
+  useEffect(() => {
+    if (phase >= 2) loadContacts();
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleContactCsvUpload(csvText: string) {
+    setUploadingCsv(true); setUploadErr(null);
+    try {
+      const res  = await fetch("/api/voc/upload-contacts", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, csvText }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      setContacts(data.contacts ?? []);
+      setCsvContactText("");
+    } catch (e) { setUploadErr(e instanceof Error ? e.message : "Upload failed"); }
+    finally { setUploadingCsv(false); }
+  }
+
+  function handleContactFileUpload(file: File) {
+    const reader = new FileReader();
+    reader.onload = e => handleContactCsvUpload(e.target?.result as string);
+    reader.readAsText(file);
+  }
+
+  async function sendSurveyEmails() {
+    if (!confirm(`Send survey emails to ${contacts.filter(c => !c.sent_at).length} contacts?`)) return;
+    setSendingEmails(true); setSendErr(null); setSendResult(null);
+    try {
+      const res  = await fetch("/api/voc/send-survey", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, questions }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Send failed");
+      setSendResult({ sent: data.sent, failed: data.failed ?? [] });
+      // Refresh contacts
+      const sr  = await fetch(`/api/voc/survey-status?orderId=${order.id}`);
+      const sd2 = await sr.json();
+      if (sr.ok) setContacts(sd2.contacts ?? []);
+      // Advance to Phase 3
+      await advanceTo(3);
+    } catch (e) { setSendErr(e instanceof Error ? e.message : "Send failed"); }
+    finally { setSendingEmails(false); }
+  }
+
+  // ── Phase 4: load responses from DB ──────────────────────────────────────
+
+  async function loadResponsesFromDB() {
+    if (!questions.length) { setLoadResErr("No questions found — design your survey first."); return; }
+    setLoadingResponses(true); setLoadResErr(null);
+    try {
+      const res  = await fetch("/api/voc/load-responses", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, questions }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      const q = data.quant as VocQuantData;
+      setQuant(q); setStatsReady(true);
+      persist({ service_data: { ...sd, voc_quant_data: q, voc_phase: phase, voc_question_map: questions } });
+    } catch (e) { setLoadResErr(e instanceof Error ? e.message : "Failed to load responses"); }
+    finally { setLoadingResponses(false); }
+  }
+
+  // Manual CSV fallback (Phase 4)
   function processCSVText(text: string, forceCSV = false) {
     if (forceCSV) {
       const parsed = parseCSV(text);
       if (parsed.headers.length === 0) return;
       const autoMap = autoMapColumns(questions, parsed.headers);
-      setParsed(parsed);
-      setMapping(autoMap);
-      setMappingReady(true);
-      setStatsReady(false);
+      setParsed(parsed); setMapping(autoMap); setMappingReady(true); setStatsReady(false);
       return;
     }
     const firstLine   = text.trimStart().split("\n")[0]?.trim() ?? "";
@@ -521,15 +581,16 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     if (parsed.headers.length === 0) return;
     const autoMap = autoMapColumns(questions, parsed.headers);
     if (isNarrative) {
-      // Narrative: mapping is already resolved — go straight to stats.
       applyStats(parsed, autoMap);
     } else {
-      // CSV paste: show the mapping confirmation UI.
-      setParsed(parsed);
-      setMapping(autoMap);
-      setMappingReady(true);
-      setStatsReady(false);
+      setParsed(parsed); setMapping(autoMap); setMappingReady(true); setStatsReady(false);
     }
+  }
+
+  function applyStats(parsed: ParsedCSV, map: ColumnMapping) {
+    const calculated = calculateStats(parsed, questions, map);
+    setQuant(calculated); setStatsReady(true); setMappingReady(false);
+    persist({ service_data: { ...sd, voc_quant_data: calculated, voc_column_mapping: map, voc_phase: phase, voc_question_map: questions } });
   }
 
   function handleCSVUpload(file: File) {
@@ -543,9 +604,11 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     applyStats(parsedCSV, mapping);
   }
 
-  async function generatePhase2() {
-    if (!quant) { alert("Upload and process the CSV first."); return; }
-    setGenP2(true); setGenIdx(-1);
+  // ── Phase 5: AI section generation ───────────────────────────────────────
+
+  async function generatePhase5() {
+    if (!quant) { alert("Load response data first."); return; }
+    setGenP5(true); setGenIdx(-1);
     for (let i = 0; i < AI_SECTIONS.length; i++) {
       const s = AI_SECTIONS[i];
       setGenIdx(i);
@@ -553,9 +616,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
       try {
         const res = await fetch("/api/generate-voc-section", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: order.id, sectionKey: s.key, quantData: quant, questionMap: questions,
-          }),
+          body: JSON.stringify({ orderId: order.id, sectionKey: s.key, quantData: quant, questionMap: questions }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Failed");
@@ -564,7 +625,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
         setGenFailed(prev => ({ ...prev, [s.key]: e instanceof Error ? e.message : "Failed" }));
       }
     }
-    setGenP2(false); setGenIdx(-1);
+    setGenP5(false); setGenIdx(-1);
   }
 
   async function retrySection(key: string) {
@@ -589,10 +650,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     try {
       const res = await fetch("/api/generate-voc-section", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id, sectionKey: key,
-          quantData: quant, questionMap: questions,
-        }),
+        body: JSON.stringify({ orderId: order.id, sectionKey: key, quantData: quant, questionMap: questions }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed");
@@ -645,18 +703,7 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     finally { setDlDocx(false); }
   }
 
-  async function fetchDlLink() {
-    if (!contactPath || dlLink) return;
-    setDlLinkLoad(true);
-    try {
-      const res  = await fetch(`/api/get-contact-list-url?path=${encodeURIComponent(contactPath)}`);
-      const data = await res.json();
-      if (res.ok && data.url) setDlLink(data.url as string);
-    } catch { /* non-blocking */ }
-    finally { setDlLinkLoad(false); }
-  }
-
-  // ── Renders an AI section ───────────────────────────────────────────────────
+  // ── Renders an AI section (Phase 5) ────────────────────────────────────────
   function renderAISection(key: string, label: string, sectionNum: number) {
     const m         = meta[key] ?? { notes: "", locked: false, callout: "" };
     const content   = draft[key] ?? "";
@@ -668,31 +715,21 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
     return (
       <div key={key} className="border-t border-gray-100 py-5 first:border-0 first:pt-0">
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full shrink-0">
-            Section {sectionNum}
-          </span>
+          <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full shrink-0">Section {sectionNum}</span>
           <h5 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>{label}</h5>
           {m.locked && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Locked</span>}
         </div>
-
         <div className="flex items-center gap-2 mb-3 justify-end">
           {!m.locked && !isEditing && content && !isFailed && !isRetrying && (
-            <button onClick={() => { setEditBuf(content); setEditingKey(key); }}
-              className="text-xs text-seafoam hover:text-navy border border-seafoam/40 rounded-full px-3 py-1 transition-colors font-medium">
-              Edit
-            </button>
+            <button onClick={() => { setEditBuf(content); setEditingKey(key); }} className="text-xs text-seafoam hover:text-navy border border-seafoam/40 rounded-full px-3 py-1 transition-colors font-medium">Edit</button>
           )}
           {m.locked
             ? <button onClick={() => unlockSection(key)} className="text-xs text-gray-400 hover:text-orange-500 transition-colors">Unlock</button>
             : content && !isFailed && !isRetrying && (
-                <button onClick={() => lockSection(key)}
-                  className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">
-                  Lock Section
-                </button>
+                <button onClick={() => lockSection(key)} className="text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-full px-3 py-1.5 transition-colors font-semibold">Lock Section</button>
               )
           }
         </div>
-
         {isRetrying ? (
           <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
             <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
@@ -701,23 +738,15 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
         ) : isFailed ? (
           <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-red-600 mb-3">{genFailed[key]}</p>
-            <button onClick={() => retrySection(key)}
-              className="text-xs bg-red-100 text-red-700 hover:bg-red-200 font-semibold px-4 py-2 rounded-full transition-colors">
-              ↺ Retry this section
-            </button>
+            <button onClick={() => retrySection(key)} className="text-xs bg-red-100 text-red-700 hover:bg-red-200 font-semibold px-4 py-2 rounded-full transition-colors">↺ Retry</button>
           </div>
         ) : isEditing ? (
           <div className="mb-3">
             <textarea rows={12} value={editBuf} onChange={e => setEditBuf(e.target.value)}
-              className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed"
-              autoFocus />
+              className="w-full border border-seafoam rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-seafoam resize-y leading-relaxed" autoFocus />
             <div className="flex gap-2 mt-2">
-              <button onClick={() => {
-                const u = { ...draft, [key]: editBuf };
-                setDraft(u); setEditingKey(null); persist({ ai_draft: u });
-              }} className="text-xs bg-seafoam text-navy font-semibold px-4 py-1.5 rounded-full hover:opacity-90 transition-colors">
-                Apply
-              </button>
+              <button onClick={() => { const u = { ...draft, [key]: editBuf }; setDraft(u); setEditingKey(null); persist({ ai_draft: u }); }}
+                className="text-xs bg-seafoam text-navy font-semibold px-4 py-1.5 rounded-full hover:opacity-90 transition-colors">Apply</button>
               <button onClick={() => setEditingKey(null)} className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5">Cancel</button>
             </div>
           </div>
@@ -727,7 +756,6 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
           <p className="text-sm text-gray-300 italic mb-3">Generate analysis to populate this section.</p>
         )}
 
-        {/* Analyst Perspective callout */}
         <div className="mb-3 border-l-4 border-navy/60 pl-4 py-3 bg-slate-50 rounded-r-lg">
           <label className="block mb-2" style={{ fontFamily: "'Montserrat', system-ui, sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", color: "#0A2F61", textTransform: "uppercase" }}>
             Analyst Perspective
@@ -741,7 +769,6 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
           <p className="text-xs text-gray-400 mt-1">Optional — appears in report with navy accent if filled.</p>
         </div>
 
-        {/* Analyst notes + regen */}
         {!m.locked && (
           <div className="pt-2 border-t border-gray-50 space-y-2">
             <textarea rows={2} value={m.notes}
@@ -762,6 +789,10 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   const intakeAnswers = [order.q1, order.q2, order.q3, order.q4, order.q5, order.q6, order.q7];
+  const sentCount      = contacts.filter(c => c.sent_at).length;
+  const completedCount = contacts.filter(c => c.completed_at).length;
+
+  const phases: VocPhase[] = [1, 2, 3, 4, 5];
 
   return (
     <div>
@@ -775,18 +806,15 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
         {autoSaved && <span className="text-xs text-green-500 font-medium ml-auto">✓ Auto-saved</span>}
       </div>
 
-      {/* Phase indicator */}
+      {/* Phase indicator — 5 phases */}
       <div className="flex items-center mb-6 bg-white rounded-xl border border-gray-100 overflow-hidden">
-        {([1, 2] as const).map(p => (
-          <div key={p} className={`flex-1 flex items-center gap-2 px-5 py-3.5 ${phase === p ? "bg-teal-50 border-b-2 border-teal-400" : "bg-white"} ${p === 2 ? "border-l border-gray-100" : ""}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${phase > p ? "bg-green-400 text-white" : phase === p ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>
+        {phases.map((p, i) => (
+          <div key={p} className={`flex-1 flex items-center gap-2 px-3 py-3.5 ${phase === p ? "bg-teal-50 border-b-2 border-teal-400" : "bg-white"} ${i > 0 ? "border-l border-gray-100" : ""}`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${phase > p ? "bg-green-400 text-white" : phase === p ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>
               {phase > p ? "✓" : p}
             </span>
-            <div>
-              <p className={`text-xs font-semibold ${phase >= p ? "text-navy" : "text-gray-400"}`}>Phase {p}</p>
-              <p className={`text-xs ${phase >= p ? "text-gray-500" : "text-gray-300"}`}>
-                {p === 1 ? "Survey Design" : `Analysis${phase < 2 ? " — locked" : ""}`}
-              </p>
+            <div className="min-w-0">
+              <p className={`text-xs font-semibold leading-tight ${phase >= p ? "text-navy" : "text-gray-400"}`}>{PHASE_LABELS[p]}</p>
             </div>
           </div>
         ))}
@@ -799,25 +827,6 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
         <div><span className="text-gray-400">Submitted</span><p className="font-semibold text-navy mt-0.5">{new Date(order.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p></div>
         <div><span className="text-gray-400">Order ID</span><p className="font-mono text-xs text-gray-400 mt-0.5">{order.id.slice(0, 8)}…</p></div>
       </div>
-
-      {/* Contact list */}
-      {contactPath && (
-        <div className="bg-white rounded-xl border border-teal-200 px-6 py-4 mb-6">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Contact List Uploaded</p>
-              <p className="text-sm text-navy font-medium truncate">{contactFile ?? contactPath}</p>
-            </div>
-            {dlLink
-              ? <a href={dlLink} target="_blank" rel="noopener noreferrer" className="text-xs bg-teal-50 text-teal-700 border border-teal-200 font-semibold px-4 py-1.5 rounded-full hover:bg-teal-100 transition-colors shrink-0">⬇ Download</a>
-              : <button onClick={fetchDlLink} disabled={dlLinkLoad} className="text-xs bg-teal-50 text-teal-700 border border-teal-200 font-semibold px-4 py-1.5 rounded-full hover:bg-teal-100 transition-colors shrink-0 disabled:opacity-50">
-                  {dlLinkLoad ? "Loading…" : "Get Download Link"}
-                </button>
-            }
-          </div>
-        </div>
-      )}
 
       {/* Intake answers */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
@@ -836,8 +845,8 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
         </div>
       </div>
 
-      {/* ── PHASE 1 ─────────────────────────────────────────── */}
-      <div className={`bg-white rounded-xl border mb-6 p-6 ${phase === 1 ? "border-teal-200" : "border-gray-100"}`}>
+      {/* ── PHASE 1: Survey Design ───────────────────────────────────────── */}
+      <div className={`bg-white rounded-xl border mb-6 p-6 ${phase === 1 ? "border-teal-200" : "border-gray-100"} ${phase > 1 ? "opacity-75" : ""}`}>
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${phase > 1 ? "bg-green-400 text-white" : "bg-teal-400 text-white"}`}>
@@ -845,31 +854,48 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
             </span>
             <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Phase 1 — Survey Design</h3>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <button onClick={generateQuestions} disabled={genQs}
-              className="bg-navy text-white font-semibold text-sm px-4 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50">
-              {genQs ? "Drafting questions…" : questions.length ? "Re-draft Questions" : "AI Draft Questions"}
-            </button>
-            <button onClick={addQuestion}
-              className="bg-seafoam text-navy font-semibold text-sm px-4 py-2 rounded-full hover:opacity-90 transition-colors">
-              + Add Question
-            </button>
-          </div>
+          {phase === 1 && (
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={generateQuestions} disabled={genQs}
+                className="bg-navy text-white font-semibold text-sm px-4 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50">
+                {genQs ? "Drafting…" : questions.length ? "Re-draft Questions" : "AI Draft Questions"}
+              </button>
+              <button onClick={addQuestion}
+                className="bg-seafoam text-navy font-semibold text-sm px-4 py-2 rounded-full hover:opacity-90 transition-colors">
+                + Add Question
+              </button>
+            </div>
+          )}
         </div>
 
-        {genQs && (
+        {phase === 1 && genQs && (
           <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
             <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin" />
             Analyzing intake and drafting survey questions…
           </div>
         )}
-        {genQsErr && <p className="text-red-500 text-sm mb-4">{genQsErr}</p>}
+        {phase === 1 && genQsErr && <p className="text-red-500 text-sm mb-4">{genQsErr}</p>}
+
+        {/* Syndicated vs business-specific indicator */}
+        {questions.length > 0 && (
+          <div className="mb-3 flex items-center gap-3 text-xs text-gray-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-teal-400 shrink-0" />
+              First 3 = syndicated (standard across all VOC surveys)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-gray-300 shrink-0" />
+              Remaining = business-specific
+            </span>
+          </div>
+        )}
 
         {questions.length > 0 ? (
           <div className="space-y-3">
             {questions.map((q, i) => (
               <QuestionCard
                 key={q.id} q={q} idx={i} total={questions.length}
+                isSyndicated={i < 3}
                 onChange={nq => updateQuestion(i, nq)}
                 onDelete={() => deleteQuestion(i)}
                 onMoveUp={() => moveQuestion(i, -1)}
@@ -877,16 +903,16 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
               />
             ))}
           </div>
-        ) : !genQs && (
+        ) : !genQs && phase === 1 && (
           <p className="text-sm text-gray-400 italic py-4">
-            Click "AI Draft Questions" to generate an initial set, or "Add Question" to build manually.
+            Click "AI Draft Questions" to generate an initial set (3 syndicated + 2 business-specific), or add manually.
           </p>
         )}
 
-        {questions.length > 0 && (
+        {phase === 1 && questions.length > 0 && (
           <div className="mt-5 pt-4 border-t border-gray-100">
             <p className="text-xs text-gray-400 mb-3 font-medium">
-              Google Forms preview — {questions.length} question{questions.length !== 1 ? "s" : ""}
+              Survey preview — {questions.length} question{questions.length !== 1 ? "s" : ""}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 text-xs text-gray-500 font-mono whitespace-pre-wrap leading-relaxed mb-4 max-h-60 overflow-y-auto">
               {questions.map((q, i) => {
@@ -897,107 +923,294 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
                 return out;
               }).join("\n\n")}
             </div>
-            {phase === 1 && (
-              <button onClick={markPhase1Complete}
-                className="bg-teal-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-teal-600 transition-colors">
-                ✓ Phase 1 Complete — Unlock Phase 2 Analysis
-              </button>
-            )}
+            <button onClick={() => advanceTo(2)}
+              className="bg-teal-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-teal-600 transition-colors">
+              ✓ Finalize Questions — Upload Contacts →
+            </button>
           </div>
+        )}
+
+        {phase > 1 && questions.length > 0 && (
+          <p className="text-sm text-gray-400 mt-2">{questions.length} questions finalized.</p>
         )}
       </div>
 
-      {/* ── PHASE 2 ─────────────────────────────────────────── */}
-      <div className={`bg-white rounded-xl border mb-6 p-6 transition-opacity ${phase === 1 ? "border-gray-100 opacity-40 pointer-events-none" : "border-teal-200"}`}>
+      {/* ── PHASE 2: Contact List ────────────────────────────────────────── */}
+      <div className={`bg-white rounded-xl border mb-6 p-6 transition-opacity ${phase < 2 ? "border-gray-100 opacity-40 pointer-events-none" : phase === 2 ? "border-teal-200" : "border-gray-100 opacity-75"}`}>
+        <div className="flex items-center gap-2 mb-5">
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${phase > 2 ? "bg-green-400 text-white" : phase === 2 ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>
+            {phase > 2 ? "✓" : "2"}
+          </span>
+          <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Phase 2 — Contact List</h3>
+        </div>
+
+        {phase >= 2 && (
+          <>
+            <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+              Upload a CSV of respondents (needs a column with "email" in the header; a "name" column is optional). Each contact will receive a unique survey link.
+            </p>
+
+            {/* Upload mode toggle */}
+            <div className="inline-flex rounded-full border border-gray-200 p-0.5 mb-4 bg-gray-50">
+              <button onClick={() => setCsvContactMode("upload")}
+                className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${csvContactMode === "upload" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                Upload CSV
+              </button>
+              <button onClick={() => setCsvContactMode("paste")}
+                className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${csvContactMode === "paste" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                Paste CSV
+              </button>
+            </div>
+
+            {csvContactMode === "upload" ? (
+              <div>
+                <label className="inline-flex items-center gap-2 cursor-pointer bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors">
+                  <span>{uploadingCsv ? "Uploading…" : contacts.length ? "Re-upload CSV" : "Upload Contact CSV"}</span>
+                  <input type="file" accept=".csv" className="hidden" disabled={uploadingCsv} onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f) handleContactFileUpload(f);
+                    e.target.value = "";
+                  }} />
+                </label>
+              </div>
+            ) : (
+              <div>
+                <textarea rows={5} value={csvContactText} onChange={e => setCsvContactText(e.target.value)}
+                  placeholder={"name,email\nJane Smith,jane@example.com\nJohn Doe,john@example.com"}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-seafoam resize-y mb-3 placeholder-gray-300" />
+                <button onClick={() => { handleContactCsvUpload(csvContactText); }} disabled={uploadingCsv || !csvContactText.trim()}
+                  className="bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-40">
+                  {uploadingCsv ? "Uploading…" : "Upload Contacts"}
+                </button>
+              </div>
+            )}
+
+            {uploadErr && <p className="text-red-500 text-sm mt-3">{uploadErr}</p>}
+
+            {/* Contact list preview */}
+            {contacts.length > 0 && (
+              <div className="mt-5 border border-teal-200 rounded-xl overflow-hidden">
+                <div className="bg-teal-50 px-4 py-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-navy">{contacts.length} contact{contacts.length !== 1 ? "s" : ""} ready</p>
+                  <div className="flex gap-3 text-xs text-gray-500">
+                    <span>{sentCount} sent</span>
+                    <span>{completedCount} completed</span>
+                  </div>
+                </div>
+                <div className="max-h-48 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="text-left px-4 py-2 text-gray-400 font-semibold">Name</th>
+                        <th className="text-left px-4 py-2 text-gray-400 font-semibold">Email</th>
+                        <th className="text-left px-4 py-2 text-gray-400 font-semibold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {contacts.map(c => (
+                        <tr key={c.id} className="border-t border-gray-100">
+                          <td className="px-4 py-2 text-gray-600">{c.name ?? "—"}</td>
+                          <td className="px-4 py-2 text-gray-600">{c.email}</td>
+                          <td className="px-4 py-2">
+                            {c.completed_at
+                              ? <span className="text-green-600 font-semibold">Completed</span>
+                              : c.sent_at
+                                ? <span className="text-teal-600">Sent</span>
+                                : <span className="text-gray-400">Pending</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {contacts.length > 0 && phase === 2 && (
+              <div className="mt-4">
+                <button onClick={sendSurveyEmails} disabled={sendingEmails}
+                  className="bg-teal-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-teal-600 transition-colors disabled:opacity-50">
+                  {sendingEmails ? "Sending emails…" : `Send Survey to ${contacts.filter(c => !c.sent_at).length} Contact${contacts.filter(c => !c.sent_at).length !== 1 ? "s" : ""} →`}
+                </button>
+                {sendErr && <p className="text-red-500 text-sm mt-2">{sendErr}</p>}
+                {sendResult && (
+                  <p className="text-sm text-green-600 font-medium mt-2">
+                    ✓ Sent to {sendResult.sent} contact{sendResult.sent !== 1 ? "s" : ""}.
+                    {sendResult.failed.length > 0 && ` ${sendResult.failed.length} failed: ${sendResult.failed.join(", ")}`}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {phase === 3 && contacts.length > 0 && (
+              <p className="text-sm text-teal-700 font-medium mt-4">
+                ✓ Survey sent. Responses are being collected automatically.
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ── PHASE 3: Collecting Responses ───────────────────────────────── */}
+      <div className={`bg-white rounded-xl border mb-6 p-6 transition-opacity ${phase < 3 ? "border-gray-100 opacity-40 pointer-events-none" : phase === 3 ? "border-teal-200" : "border-gray-100 opacity-75"}`}>
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${phase === 2 ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>2</span>
-            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
-              Phase 2 — Analysis{phase === 1 ? " (Locked)" : ""}
-            </h3>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${phase > 3 ? "bg-green-400 text-white" : phase === 3 ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>
+              {phase > 3 ? "✓" : "3"}
+            </span>
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Phase 3 — Collecting Responses</h3>
           </div>
-          {phase === 2 && (
-            <button onClick={generatePhase2} disabled={genPhase2 || !statsReady}
-              className="bg-seafoam text-navy font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title={!statsReady ? "Process CSV data first" : ""}>
-              {genPhase2 ? "Generating…" : "Generate All Sections"}
+          {phase === 3 && (
+            <button onClick={async () => { await loadContacts(); }}
+              className="text-xs bg-teal-50 text-teal-700 border border-teal-200 font-semibold px-4 py-1.5 rounded-full hover:bg-teal-100 transition-colors">
+              ↻ Refresh
             </button>
           )}
         </div>
 
-        {phase === 2 && (
+        {phase >= 3 && (
           <>
-            {/* Section 1 — Data Upload */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full shrink-0">Section 1</span>
-                <h5 className="font-bold text-navy text-sm" style={{ fontFamily: "Georgia, serif" }}>Response Data</h5>
-                {statsReady && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Processed</span>}
+            {/* Response counter */}
+            <div className="grid grid-cols-3 gap-4 mb-5">
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-navy" style={{ fontFamily: "Georgia, serif" }}>{contacts.length}</p>
+                <p className="text-xs text-gray-400 mt-1">Total Sent</p>
               </div>
-
-              {/* Mode toggle */}
-              <div className="inline-flex rounded-full border border-gray-200 p-0.5 mb-4 bg-gray-50">
-                <button
-                  onClick={() => setUploadMode("upload")}
-                  className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${uploadMode === "upload" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
-                  Upload CSV
-                </button>
-                <button
-                  onClick={() => setUploadMode("paste")}
-                  className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${uploadMode === "paste" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
-                  Paste Responses
-                </button>
+              <div className="bg-teal-50 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-teal-700" style={{ fontFamily: "Georgia, serif" }}>{completedCount}</p>
+                <p className="text-xs text-gray-400 mt-1">Completed</p>
               </div>
-
-              {uploadMode === "upload" ? (
-                <div>
-                  <p className="text-xs text-gray-400 mb-3">Upload the Google Forms CSV export. Columns will be auto-mapped to your survey questions.</p>
-                  <label className="inline-flex items-center gap-2 cursor-pointer bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors">
-                    <span>{statsReady ? "Re-upload CSV" : "Upload CSV"}</span>
-                    <input type="file" accept=".csv" className="hidden" onChange={e => {
-                      const f = e.target.files?.[0];
-                      if (f) handleCSVUpload(f);
-                      e.target.value = "";
-                    }} />
-                  </label>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-xs text-gray-400 mb-3">Paste CSV text directly — e.g. copied from a Google Forms export or a spreadsheet. The first row must be column headers. Columns will be auto-mapped to your survey questions.</p>
-                  <textarea
-                    rows={6}
-                    value={pasteText}
-                    onChange={e => setPasteText(e.target.value)}
-                    placeholder={"Timestamp,How satisfied were you overall?,How likely are you to recommend us?,…\n5/1/2025 10:22:34,6,7,Great service…"}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-seafoam resize-y placeholder-gray-300 mb-3"
-                  />
-                  <button
-                    onClick={() => { processCSVText(pasteText); setPasteText(""); }}
-                    disabled={pasteText.trim().length === 0}
-                    className="bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-40">
-                    Process Responses
-                  </button>
-                </div>
-              )}
-
-              {mappingReady && parsedCSV && (
-                <MappingUI
-                  questions={questions}
-                  csvHeaders={parsedCSV.headers}
-                  mapping={mapping}
-                  onMappingChange={setMapping}
-                  onConfirm={confirmMapping}
-                  totalRows={parsedCSV.rows.length}
-                />
-              )}
-
-              {statsReady && quant && (
-                <StatsSummary quant={quant} questions={questions} />
-              )}
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-gray-500" style={{ fontFamily: "Georgia, serif" }}>
+                  {contacts.length > 0 ? Math.round((completedCount / contacts.length) * 100) : 0}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Response Rate</p>
+              </div>
             </div>
 
+            {completedCount > 0 && phase === 3 && (
+              <button onClick={() => advanceTo(4)}
+                className="bg-teal-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-teal-600 transition-colors">
+                Trigger Analysis with {completedCount} Response{completedCount !== 1 ? "s" : ""} →
+              </button>
+            )}
+            {completedCount === 0 && (
+              <p className="text-sm text-gray-400 italic">Waiting for respondents to complete the survey…</p>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ── PHASE 4: Analysis / Load Data ───────────────────────────────── */}
+      <div className={`bg-white rounded-xl border mb-6 p-6 transition-opacity ${phase < 4 ? "border-gray-100 opacity-40 pointer-events-none" : phase === 4 ? "border-teal-200" : "border-gray-100 opacity-75"}`}>
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${phase > 4 ? "bg-green-400 text-white" : phase === 4 ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>
+              {phase > 4 ? "✓" : "4"}
+            </span>
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>Phase 4 — Compute Statistics</h3>
+          </div>
+        </div>
+
+        {phase >= 4 && (
+          <>
+            <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+              Load the collected responses from the database and compute quantitative statistics. You can also import an external CSV if you collected responses elsewhere.
+            </p>
+
+            <div className="flex gap-3 flex-wrap mb-4">
+              <button onClick={loadResponsesFromDB} disabled={loadingResponses}
+                className="bg-teal-500 text-white font-semibold text-sm px-5 py-2 rounded-full hover:bg-teal-600 transition-colors disabled:opacity-50">
+                {loadingResponses ? "Loading…" : `Load ${completedCount > 0 ? completedCount + " " : ""}Responses from Database`}
+              </button>
+            </div>
+
+            {loadResErr && <p className="text-red-500 text-sm mb-3">{loadResErr}</p>}
+
+            {/* CSV fallback */}
+            <details className="mb-4">
+              <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 font-medium">Import external CSV instead</summary>
+              <div className="mt-3 pl-4 border-l-2 border-gray-100">
+                <div className="inline-flex rounded-full border border-gray-200 p-0.5 mb-3 bg-gray-50">
+                  <button onClick={() => setUploadMode("upload")}
+                    className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${uploadMode === "upload" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                    Upload CSV
+                  </button>
+                  <button onClick={() => setUploadMode("paste")}
+                    className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${uploadMode === "paste" ? "bg-white text-navy shadow-sm" : "text-gray-400 hover:text-gray-600"}`}>
+                    Paste Responses
+                  </button>
+                </div>
+                {uploadMode === "upload" ? (
+                  <div>
+                    <label className="inline-flex items-center gap-2 cursor-pointer bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors">
+                      <span>{statsReady ? "Re-upload CSV" : "Upload CSV"}</span>
+                      <input type="file" accept=".csv" className="hidden" onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (f) handleCSVUpload(f);
+                        e.target.value = "";
+                      }} />
+                    </label>
+                  </div>
+                ) : (
+                  <div>
+                    <textarea rows={5} value={pasteText} onChange={e => setPasteText(e.target.value)}
+                      placeholder={"Timestamp,How satisfied were you overall?,How likely are you to recommend us?\n5/1/2025 10:22:34,6,7"}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-seafoam resize-y placeholder-gray-300 mb-3" />
+                    <button onClick={() => { processCSVText(pasteText); setPasteText(""); }}
+                      disabled={pasteText.trim().length === 0}
+                      className="bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-40">
+                      Process Responses
+                    </button>
+                  </div>
+                )}
+
+                {mappingReady && parsedCSV && (
+                  <MappingUI
+                    questions={questions}
+                    csvHeaders={parsedCSV.headers}
+                    mapping={mapping}
+                    onMappingChange={setMapping}
+                    onConfirm={confirmMapping}
+                    totalRows={parsedCSV.rows.length}
+                  />
+                )}
+              </div>
+            </details>
+
+            {statsReady && quant && <StatsSummary quant={quant} questions={questions} />}
+
+            {statsReady && phase === 4 && (
+              <button onClick={() => advanceTo(5)} className="mt-4 bg-teal-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-teal-600 transition-colors">
+                Generate Report Draft →
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ── PHASE 5: Draft Report ────────────────────────────────────────── */}
+      <div className={`bg-white rounded-xl border mb-6 p-6 transition-opacity ${phase < 5 ? "border-gray-100 opacity-40 pointer-events-none" : "border-teal-200"}`}>
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${phase === 5 ? "bg-teal-400 text-white" : "bg-gray-200 text-gray-400"}`}>5</span>
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
+              Phase 5 — Report Draft{phase < 5 ? " (Locked)" : ""}
+            </h3>
+          </div>
+          {phase === 5 && (
+            <button onClick={generatePhase5} disabled={genPhase5 || !statsReady}
+              className="bg-seafoam text-navy font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title={!statsReady ? "Load response data first" : ""}>
+              {genPhase5 ? "Generating…" : "Generate All Sections"}
+            </button>
+          )}
+        </div>
+
+        {phase === 5 && (
+          <>
             {/* Generation progress */}
-            {genPhase2 && (
+            {genPhase5 && (
               <div className="py-3 space-y-1.5 mb-4 bg-gray-50 rounded-xl px-4">
                 {AI_SECTIONS.map((s, i) => {
                   const isDone   = !!draft[s.key] && i < genIdx;
@@ -1005,25 +1218,23 @@ export default function VoCDetail({ order: initialOrder, onBack }: Props) {
                   const isPend   = !isDone && !isActive;
                   return (
                     <div key={s.key} className="flex items-center gap-2.5">
-                      {isDone    && <span className="text-green-500 text-xs shrink-0">✓</span>}
-                      {isActive  && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
-                      {isPend    && <span className="text-gray-200 text-xs shrink-0">○</span>}
-                      <span className={`text-sm ${isDone ? "text-gray-400" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>
-                        {s.label}
-                      </span>
+                      {isDone   && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                      {isActive && <div className="w-3 h-3 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />}
+                      {isPend   && <span className="text-gray-200 text-xs shrink-0">○</span>}
+                      <span className={`text-sm ${isDone ? "text-gray-400" : isActive ? "text-navy font-medium" : "text-gray-300"}`}>{s.label}</span>
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* AI Sections 2-5 */}
-            {AI_SECTIONS.map((s, i) => renderAISection(s.key, s.label, i + 2))}
+            {/* AI Sections */}
+            {AI_SECTIONS.map((s, i) => renderAISection(s.key, s.label, i + 1))}
 
             {/* Analyst Note */}
             <div className="border-t-2 border-dashed border-teal-200 pt-5 mt-4">
               <label className="block text-xs font-semibold text-navy uppercase tracking-wide mb-1">
-                Section {AI_SECTIONS.length + 2} — Analyst Note
+                Analyst Note
               </label>
               <p className="text-xs text-gray-400 mb-2 leading-relaxed">Personal closing paragraph in your own voice. Auto-saved as you type.</p>
               <textarea rows={5} value={note}
