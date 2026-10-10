@@ -280,7 +280,6 @@ function profileSetupSection(content: unknown): string {
       const isWarning  = /partial|incomplete|missing|needs|improve/i.test(statusVal);
       const statusColor = isActive ? "#059669" : isWarning ? "#D97706" : GRAY;
       const statusBg   = isActive ? "#ECFDF5" : isWarning ? "#FFFBEB" : "#F9FAFB";
-      const statusIcon = isActive ? "✓" : isWarning ? "⚠" : "–";
 
       const renderField = (label: string, val: unknown, isBool = false) => {
         if (val === null || val === undefined || String(val).trim() === "") return "";
@@ -288,11 +287,10 @@ function profileSetupSection(content: unknown): string {
           const isPos = val === true || /complete|present|yes|active|verified/i.test(String(val));
           const badgeColor = isPos ? "#059669" : "#D97706";
           const badgeBg    = isPos ? "#ECFDF5"  : "#FFFBEB";
-          const badgeIcon  = isPos ? "✓" : "⚠";
           const badgeText  = typeof val === "boolean" ? (val ? "Complete" : "Incomplete") : String(val);
           return `<div class="profile-field">
             <span class="profile-field-label">${esc(label)}</span>
-            <span class="profile-bool-badge" style="display:inline-block;padding:1pt 5pt;border-radius:3pt;font-size:7pt;font-weight:600;color:${badgeColor};background:${badgeBg};border:1pt solid ${badgeColor}40">${badgeIcon} ${esc(badgeText)}</span>
+            <span class="profile-bool-badge" style="display:inline-block;padding:1pt 5pt;border-radius:3pt;font-size:7pt;font-weight:600;color:${badgeColor};background:${badgeBg};border:1pt solid ${badgeColor}40">${esc(badgeText)}</span>
           </div>`;
         }
         return `<div class="profile-field">
@@ -313,7 +311,7 @@ function profileSetupSection(content: unknown): string {
           ${logo}
           <div class="profile-card-name" style="color:${color}">${esc(name)}</div>
           ${status ? `<div class="profile-status-badge" style="color:${statusColor};background:${statusBg};border:1pt solid ${statusColor}40">
-            ${statusIcon} ${text(status)}
+            ${text(status)}
           </div>` : ""}
         </div>
         ${handle ? renderField("Handle", handle) : ""}
@@ -504,9 +502,9 @@ function performanceMetricsSection(content: unknown): string {
   };
 
   const metricCards = [
-    { key: "posting",    label: "Posting Consistency", icon: "📅", data: sub.posting },
-    { key: "engagement", label: "Engagement",          icon: "💬", data: sub.engagement },
-    { key: "brand",      label: "Brand Consistency",   icon: "🎨", data: sub.brand },
+    { key: "posting",    label: "Posting Consistency", data: sub.posting },
+    { key: "engagement", label: "Engagement",          data: sub.engagement },
+    { key: "brand",      label: "Brand Consistency",   data: sub.brand },
   ];
 
   // Check if we have any actual structured data in the subs
@@ -535,7 +533,6 @@ function performanceMetricsSection(content: unknown): string {
 
       return `<td class="metric-card" style="border-top:3pt solid ${color};width:33%;vertical-align:top">
         <div class="metric-card-header">
-          <span class="metric-card-icon">${m.icon}</span>
           <span class="metric-card-title" style="color:${color}">${esc(m.label)}</span>
           ${dispScore !== null ? `<span class="metric-score" style="color:${color};white-space:nowrap">${dispScore}<span class="metric-denom">/10</span></span>` : ""}
         </div>
@@ -636,7 +633,7 @@ function platformSection(content: unknown): string {
           );
           return [
             strengths.length ? `<div class="platform-insight-label" style="font-size:6.5pt;font-weight:700;letter-spacing:1pt;text-transform:uppercase;color:#059669;margin:6pt 0 3pt">Strengths</div>
-              <ul class="platform-insight-list" style="margin:0;padding-left:10pt;list-style:none">${strengths.map(s => `<li style="font-size:8pt;margin-bottom:2pt;padding-left:8pt;position:relative"><span style="position:absolute;left:0;color:#059669">✓</span>${text(s)}</li>`).join("")}</ul>` : "",
+              <ul class="platform-insight-list" style="margin:0;padding-left:14pt;list-style:disc">${strengths.map(s => `<li style="font-size:8pt;margin-bottom:2pt">${text(s)}</li>`).join("")}</ul>` : "",
             gaps.length ? `<div class="platform-insight-label" style="font-size:6.5pt;font-weight:700;letter-spacing:1pt;text-transform:uppercase;color:#D97706;margin:6pt 0 3pt">Gaps</div>
               <ul class="platform-insight-list" style="margin:0;padding-left:10pt;list-style:none">${gaps.map(g => `<li style="font-size:8pt;margin-bottom:2pt;padding-left:8pt;position:relative"><span style="position:absolute;left:0;color:#D97706">→</span>${text(g)}</li>`).join("")}</ul>` : "",
             otherKeys.map(pk => {
@@ -813,7 +810,6 @@ table { border-collapse: collapse; width: 100%; }
 .metric-cards-table { /* outer table — styles inline */ }
 .metric-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 10pt 12pt; }
 .metric-card-header { display: flex; align-items: flex-start; gap: 5pt; margin-bottom: 6pt; flex-wrap: nowrap; }
-.metric-card-icon { font-size: 14pt; flex-shrink: 0; }
 .metric-card-title { font-size: 9.5pt; font-weight: 700; flex: 1; line-height: 1.3; }
 .metric-score { font-size: 20pt; font-weight: 700; line-height: 1; white-space: nowrap; flex-shrink: 0; }
 .metric-denom { font-size: 9pt; color: ${GRAY}; }
