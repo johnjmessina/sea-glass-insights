@@ -30,7 +30,7 @@ const SERVICE_CONFIG: Record<string, { unitAmount: string; productName: string; 
   },
   "synthetic-survey-report": {
     unitAmount:  "39900",
-    productName: "Sea Glass Insights — Synthetic Survey Report",
+    productName: "Sea Glass Insights — Synthetic Customer Profiles",
     cancelPath:  "/services/synthetic-survey-report",
   },
   "voice-of-customer": {

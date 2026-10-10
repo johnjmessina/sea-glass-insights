@@ -606,7 +606,7 @@ export function buildSsrReportHtml(
       <section class="page cover">
         <div class="cover-inner">
           <img class="cover-logo" src="data:image/png;base64,${logoAssets.coverLogo}" alt="Sea Glass Insights">
-          <div class="cover-type">Synthetic Survey Report</div>
+          <div class="cover-type">Synthetic Customer Profiles</div>
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)}${order.location ? ` &nbsp;|&nbsp; ${esc(order.location)}` : ""} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
@@ -625,7 +625,7 @@ export function buildSsrReportHtml(
 
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<title>${esc(order.business_name)} | Synthetic Survey Report</title>
+<title>${esc(order.business_name)} | Synthetic Customer Profiles</title>
 <style>${fontFaces()}
 ${pageRules()}
 ${CSS}</style>

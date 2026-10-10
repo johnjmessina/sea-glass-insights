@@ -381,7 +381,7 @@ export async function generateSSRSection(
   const isJsonSection = jsonSections.has(sectionKey);
   const system = isJsonSection
     ? `You are a senior research analyst at Sea Glass Insights. For the "${sectionLabel}" section, return ONLY a valid JSON array — no prose, no markdown, no code fences, no explanation. The instructions specify the exact schema to follow.`
-    : `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Synthetic Survey Report. Return plain prose only — no JSON, no headers, no bullet points, no markdown. Tone: warm, credible, transparent. No em-dashes. No corporate jargon.`;
+    : `You are a senior research analyst at Sea Glass Insights. Write ONLY the "${sectionLabel}" section of a Synthetic Customer Profiles report. Return plain prose only — no JSON, no headers, no bullet points, no markdown. Tone: warm, credible, transparent. No em-dashes. No corporate jargon.`;
   const user   = `BUSINESS INTAKE:\n${intake}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${instructions}`;
 
   try {
@@ -404,7 +404,7 @@ async function generateSyntheticDraft(order: Order): Promise<Record<string, stri
   const intake = buildIntake(order);
   const system = `You must respond with valid JSON only. Do not include any text, explanation, research notes, preamble, citations, markdown, or backticks before or after the JSON object. Your entire response must be a single valid JSON object and nothing else. Any text outside the JSON object will cause a critical failure.
 
-You are a senior research analyst at Sea Glass Insights. Produce a Synthetic Survey Report for a small business. This report uses AI-generated customer personas to pressure-test the business's assumptions and surface directional insight. Be transparent about methodology. Return ONLY a valid JSON object with exactly these 7 keys. Each value is 2-4 paragraphs of plain text. No markdown. Tone: warm, clear, honest about limitations.
+You are a senior research analyst at Sea Glass Insights. Produce a Synthetic Customer Profiles report for a small business. This report uses AI-generated customer personas to pressure-test the business's assumptions and surface directional insight. Be transparent about methodology. Return ONLY a valid JSON object with exactly these 7 keys. Each value is 2-4 paragraphs of plain text. No markdown. Tone: warm, clear, honest about limitations.
 
 Keys required:
 - "research_question_framework" (what we're testing and why — restate the business's assumptions as research questions)
@@ -416,7 +416,7 @@ Keys required:
 - "honest_limitations_statement" (what this research can and cannot tell you — be genuinely direct)`;
 
   const raw = await callClaude(system, `Business intake:\n\n${intake}`);
-  return parseJsonSections(raw, "Synthetic Survey");
+  return parseJsonSections(raw, "Synthetic Customer Profiles");
 }
 
 // ── VOC: Question map generation (Phase 1) ────────────────────────────────────
