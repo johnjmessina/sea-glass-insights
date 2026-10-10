@@ -65,6 +65,17 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState<string | null>(null);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
+  // Research brief state
+  type ResearchPhase = "idle" | "running" | "done" | "error";
+  const initialOrderAny = initialOrder as unknown as Record<string, unknown>;
+  const [researchPhase, setResearchPhase] = useState<ResearchPhase>(
+    initialOrderAny.research_brief ? "done" : "idle"
+  );
+  const [researchError, setResearchError] = useState<string | null>(null);
+  const [researchBrief, setResearchBrief] = useState<Record<string, unknown> | null>(
+    (initialOrderAny.research_brief as Record<string, unknown>) ?? null
+  );
+
   // Section-by-section generation progress
   type GenPhase = "idle" | "sections";
   const [genPhase, setGenPhase]         = useState<GenPhase>("idle");
@@ -108,6 +119,25 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
   function schedNote(note: string) {
     if (noteTimer.current) clearTimeout(noteTimer.current);
     noteTimer.current = setTimeout(() => persist({ analyst_note: note }), 2000);
+  }
+
+  async function runResearch() {
+    setResearchPhase("running");
+    setResearchError(null);
+    try {
+      const res = await fetch("/api/generate-ddr-research", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ orderId: order.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Research failed");
+      setResearchBrief(data.brief as Record<string, unknown>);
+      setResearchPhase("done");
+    } catch (e) {
+      setResearchError(e instanceof Error ? e.message : "Research failed");
+      setResearchPhase("error");
+    }
   }
 
   async function generateDraft() {
@@ -573,12 +603,103 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
         </div>
       </div>
 
+      {/* Research Phase */}
+      <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
+              Step 1 — Deep Research
+            </h3>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Searches the web for this business, each competitor, market trends, and decision-relevant data.
+              Takes 1–3 minutes. Run once before generating the report.
+            </p>
+          </div>
+          <button
+            onClick={runResearch}
+            disabled={researchPhase === "running"}
+            className="bg-navy text-white font-semibold text-sm px-5 py-2 rounded-full hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+            {researchPhase === "running"
+              ? "Researching…"
+              : researchPhase === "done"
+              ? "Re-run Research"
+              : "Run Deep Research"}
+          </button>
+        </div>
+
+        {researchPhase === "running" && (
+          <div className="flex items-center gap-2.5 py-3 text-sm text-navy">
+            <div className="w-4 h-4 border-2 border-seafoam border-t-transparent rounded-full animate-spin shrink-0" />
+            <span>Searching for {order.business_name}, competitors, market conditions, and decision data…</span>
+          </div>
+        )}
+
+        {researchPhase === "error" && researchError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-600">
+            {researchError}
+          </div>
+        )}
+
+        {researchPhase === "done" && researchBrief && (() => {
+          const b = researchBrief as {
+            business?: { name?: string; online_presence?: string; reviews_summary?: string; strengths?: string[]; weaknesses?: string[] };
+            competitors?: Array<{ name?: string }>;
+            market?: { industry?: string; trends?: string };
+            decision?: { recommendation_direction?: string };
+          };
+          return (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-green-600">
+                <span>✓</span>
+                <span>Research complete — {b.competitors?.length ?? 0} competitors profiled, market data gathered</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                {b.business?.online_presence && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="font-semibold text-navy uppercase tracking-wide mb-1" style={{ fontSize: "0.6rem" }}>Business Presence</p>
+                    <p className="text-gray-600 line-clamp-3">{b.business.online_presence}</p>
+                  </div>
+                )}
+                {b.market?.trends && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="font-semibold text-navy uppercase tracking-wide mb-1" style={{ fontSize: "0.6rem" }}>Market Trends</p>
+                    <p className="text-gray-600 line-clamp-3">{b.market.trends}</p>
+                  </div>
+                )}
+                {b.business?.reviews_summary && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="font-semibold text-navy uppercase tracking-wide mb-1" style={{ fontSize: "0.6rem" }}>Customer Reviews</p>
+                    <p className="text-gray-600 line-clamp-3">{b.business.reviews_summary}</p>
+                  </div>
+                )}
+                {b.decision?.recommendation_direction && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="font-semibold text-navy uppercase tracking-wide mb-1" style={{ fontSize: "0.6rem" }}>Decision Direction</p>
+                    <p className="text-gray-600 line-clamp-3">{b.decision.recommendation_direction}</p>
+                  </div>
+                )}
+              </div>
+              {b.competitors && b.competitors.length > 0 && (
+                <p className="text-xs text-gray-400">
+                  Competitors profiled: {b.competitors.map((c) => c.name).filter(Boolean).join(", ")}
+                </p>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Report Draft */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
-            Report Draft
-          </h3>
+          <div>
+            <h3 className="text-navy font-semibold" style={{ fontFamily: "Georgia, serif" }}>
+              Step 2 — Report Draft
+            </h3>
+            {researchPhase !== "done" && (
+              <p className="text-xs text-amber-600 mt-0.5">Run Deep Research first for best results</p>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             {hasDraft && (
               <span className="text-xs text-gray-400 font-medium">
@@ -623,7 +744,9 @@ export default function DeepDiveDetail({ order: initialOrder, onBack }: Props) {
 
         {!hasDraft && !generating && (
           <p className="text-sm text-gray-400 py-4 text-center">
-            Click &ldquo;Generate AI Draft&rdquo; to create the report using Claude with live web research.
+            {researchPhase === "done"
+              ? "Research complete. Click \"Generate AI Draft\" to write the report from the research brief."
+              : "Run Deep Research first, then generate the report draft."}
           </p>
         )}
 

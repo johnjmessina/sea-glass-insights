@@ -824,10 +824,199 @@ const DDR_NO_SEARCH_SECTIONS = new Set([
   "expanded_analyst_interpretation",
 ]);
 
+// ── DDR Research Brief ─────────────────────────────────────────────────────────
+//
+// Runs a dedicated multi-search research pass before any section is written.
+// The agent is given unlimited search calls and builds a structured JSON brief
+// covering: business facts, competitor profiles, market data, and decision context.
+// The brief is stored in orders.research_brief and passed into every section.
+
+export type DdrResearchBrief = {
+  business: {
+    name: string;
+    website?: string;
+    description: string;
+    location?: string;
+    years_in_business?: string;
+    online_presence: string;
+    reviews_summary: string;
+    strengths: string[];
+    weaknesses: string[];
+  };
+  competitors: Array<{
+    name: string;
+    website?: string;
+    strengths: string;
+    weaknesses: string;
+    pricing?: string;
+    reputation: string;
+    client_edge: string;
+  }>;
+  market: {
+    industry: string;
+    key_stats: Array<{ label: string; value: string; context: string }>;
+    trends: string;
+    local_conditions: string;
+    opportunities: string;
+    threats: string;
+  };
+  decision: {
+    question: string;
+    relevant_findings: string;
+    options_analysis: string;
+    recommendation_direction: string;
+  };
+  raw_notes: string;
+};
+
+export async function generateDDRResearchBrief(order: Order): Promise<DdrResearchBrief> {
+  const intake = buildIntake(order);
+  const sd    = (order.service_data as Record<string, unknown>) ?? {};
+  const extra = (sd.deep_dive_extra as Record<string, string>) ?? {};
+  const q11   = extra.q11 ?? "";
+  const q12   = extra.q12 ?? "";
+
+  const systemPrompt = `You are a senior market research analyst at Sea Glass Insights conducting deep research for a Deep Dive Report. You have access to web search — use it multiple times to build a thorough picture.
+
+YOUR RESEARCH AGENDA:
+1. Search for the CLIENT'S BUSINESS — find their website, Google reviews, social media, news coverage. Note their positioning, pricing (if visible), customer sentiment, and online presence quality.
+2. Search for EACH COMPETITOR named in the intake — one search per major competitor. Find their website, reviews, pricing, what customers say about them, and where they are vulnerable.
+3. Search for INDUSTRY TRENDS relevant to this business type — what is changing, what is growing, what is declining, any relevant benchmarks or statistics.
+4. Search for LOCAL/REGIONAL MARKET CONDITIONS if a location is provided — local competition density, demographic trends, economic conditions.
+5. Search for anything specifically relevant to the DECISION in Q11 — benchmarks, case studies, data points that bear on the choice they are trying to make.
+
+After all research, return ONLY a valid JSON object matching this exact shape — no prose wrapper, no markdown, no code fences:
+{
+  "business": {
+    "name": "exact business name",
+    "website": "URL if found",
+    "description": "what they actually do based on research",
+    "location": "city/region if found",
+    "years_in_business": "if found",
+    "online_presence": "paragraph: quality of their web/social presence based on what you found",
+    "reviews_summary": "paragraph: what customers actually say — themes from reviews, star ratings, specific praise or complaints",
+    "strengths": ["specific strength found in research", "another strength"],
+    "weaknesses": ["specific weakness or gap found", "another weakness"]
+  },
+  "competitors": [
+    {
+      "name": "competitor name",
+      "website": "URL if found",
+      "strengths": "paragraph: what they do well based on research",
+      "weaknesses": "paragraph: where they fall short or are vulnerable",
+      "pricing": "if discoverable",
+      "reputation": "what customers say about them",
+      "client_edge": "specifically how the client can beat or differentiate from this competitor"
+    }
+  ],
+  "market": {
+    "industry": "industry name",
+    "key_stats": [
+      {"label": "stat label", "value": "$X or X%", "context": "what this means"}
+    ],
+    "trends": "paragraph: 3-4 major trends shaping this industry right now",
+    "local_conditions": "paragraph: local/regional market conditions if location provided, otherwise national",
+    "opportunities": "paragraph: specific market opportunities this business could exploit",
+    "threats": "paragraph: real competitive and market threats they face"
+  },
+  "decision": {
+    "question": "the specific decision from Q11",
+    "relevant_findings": "paragraph: what the research found that is directly relevant to this decision",
+    "options_analysis": "paragraph: what the research suggests about each option or path available",
+    "recommendation_direction": "paragraph: what the data points toward — be direct"
+  },
+  "raw_notes": "any additional research findings that don't fit above but may be useful to section writers"
+}
+
+CRITICAL: No citations, no [1] markers, no HTML tags in any value. Specific facts and numbers only where you actually found them. Do not fabricate data.`;
+
+  const userPrompt = `BUSINESS INTAKE:\n${intake}${q11 ? `\n\nSpecific Decision (Q11): ${q11}` : ""}${q12 ? `\nPrior Research (Q12): ${q12}` : ""}
+
+Search thoroughly for this business and its competitive landscape. Use multiple searches. Then return the research brief JSON.`;
+
+  const resp = await client.messages.create({
+    model:      "claude-sonnet-4-6",
+    max_tokens: 8000,
+    tools:      [{ type: "web_search_20250305", name: "web_search" }],
+    system:     systemPrompt,
+    messages:   [{ role: "user", content: userPrompt }],
+  });
+
+  const raw = cleanWebSearchResponse(resp);
+
+  // Extract JSON from response
+  const firstBrace = raw.indexOf("{");
+  const lastBrace  = raw.lastIndexOf("}");
+  if (firstBrace === -1 || lastBrace <= firstBrace) {
+    throw new Error(`Research brief returned no JSON. Raw: ${raw.slice(0, 300)}`);
+  }
+  const jsonStr = raw.slice(firstBrace, lastBrace + 1);
+  try {
+    return JSON.parse(jsonStr) as DdrResearchBrief;
+  } catch (err) {
+    throw new Error(`Research brief JSON parse failed: ${err instanceof Error ? err.message : String(err)}. Raw: ${jsonStr.slice(0, 300)}`);
+  }
+}
+
+// ── DDR section generation (brief-aware) ──────────────────────────────────────
+
+function formatBriefForSection(brief: DdrResearchBrief, sectionKey: string): string {
+  // Give each section the slice of the brief most relevant to it
+  const b = brief;
+  const businessBlock = `BUSINESS RESEARCH:
+Name: ${b.business.name}
+${b.business.website ? `Website: ${b.business.website}` : ""}
+${b.business.location ? `Location: ${b.business.location}` : ""}
+${b.business.years_in_business ? `Years in business: ${b.business.years_in_business}` : ""}
+Description: ${b.business.description}
+Online presence: ${b.business.online_presence}
+Reviews: ${b.business.reviews_summary}
+Strengths: ${b.business.strengths.join("; ")}
+Weaknesses: ${b.business.weaknesses.join("; ")}`;
+
+  const competitorBlock = `COMPETITOR RESEARCH:
+${b.competitors.map(c => `${c.name}${c.website ? ` (${c.website})` : ""}
+  Strengths: ${c.strengths}
+  Weaknesses: ${c.weaknesses}
+  ${c.pricing ? `Pricing: ${c.pricing}` : ""}
+  Reputation: ${c.reputation}
+  Client's edge: ${c.client_edge}`).join("\n\n")}`;
+
+  const marketBlock = `MARKET RESEARCH (${b.market.industry}):
+Key stats: ${b.market.key_stats.map(s => `${s.label}: ${s.value} (${s.context})`).join("; ")}
+Trends: ${b.market.trends}
+Local conditions: ${b.market.local_conditions}
+Opportunities: ${b.market.opportunities}
+Threats: ${b.market.threats}`;
+
+  const decisionBlock = `DECISION RESEARCH:
+Question: ${b.decision.question}
+Relevant findings: ${b.decision.relevant_findings}
+Options analysis: ${b.decision.options_analysis}
+Direction: ${b.decision.recommendation_direction}`;
+
+  const SECTION_BLOCKS: Record<string, string[]> = {
+    executive_summary:               [businessBlock, marketBlock, decisionBlock],
+    business_snapshot:               [businessBlock, marketBlock],
+    customer_segments:               [businessBlock, competitorBlock],
+    competitive_intelligence:        [businessBlock, competitorBlock],
+    market_context:                  [marketBlock, businessBlock],
+    decision_specific_analysis:      [decisionBlock, businessBlock, competitorBlock, marketBlock],
+    extended_recommendations:        [decisionBlock, businessBlock, competitorBlock, marketBlock],
+    priority_action_framework:       [decisionBlock, businessBlock, competitorBlock],
+    expanded_analyst_interpretation: [businessBlock, competitorBlock, marketBlock, decisionBlock],
+  };
+
+  const blocks = SECTION_BLOCKS[sectionKey] ?? [businessBlock, marketBlock];
+  const notes = b.raw_notes ? `\nADDITIONAL NOTES:\n${b.raw_notes}` : "";
+  return blocks.join("\n\n") + notes;
+}
+
 export async function generateDDRSectionWithSearch(
   order: Order,
   sectionKey: string,
   previousSections?: Record<string, string>,
+  researchBrief?: DdrResearchBrief,
 ): Promise<string> {
   const intake = buildIntake(order);
   const sd     = (order.service_data as Record<string, unknown>) ?? {};
@@ -855,10 +1044,7 @@ export async function generateDDRSectionWithSearch(
     ? `Return ONLY valid JSON — no prose wrapper, no markdown code fences, no explanation. Your entire response must be parseable by JSON.parse().`
     : `Return plain prose only — no JSON, no headers, no bullet points, no markdown. 2-4 flowing paragraphs. Tone: warm, credible, direct. No em-dashes. No corporate jargon.`;
 
-  const searchSystem   = [baseSystem, cfg.searchDirective, `Perform at most ONE focused web search with a short, specific query.`, styleRule].join("\n\n");
-  const noSearchSystem = [baseSystem, styleRule].join("\n\n");
-
-  // Build condensed prior-sections block for no-search sections (6–9)
+  // Build condensed prior-sections block for synthesis sections
   let priorContext = "";
   if (DDR_NO_SEARCH_SECTIONS.has(sectionKey) && previousSections) {
     const ordered = ["executive_summary", "business_snapshot", "customer_segments", "competitive_intelligence", "market_context", "decision_specific_analysis", "extended_recommendations", "priority_action_framework"];
@@ -874,11 +1060,27 @@ export async function generateDDRSectionWithSearch(
     }
   }
 
-  const userPrompt = `BUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${cfg.writeInstructions}`;
-
   try {
+    // ── Brief-aware path: if a research brief exists, use it instead of searching ──
+    if (researchBrief) {
+      const briefContext = formatBriefForSection(researchBrief, sectionKey);
+      const system = [baseSystem, styleRule].join("\n\n");
+      const userPrompt = `RESEARCH BRIEF (grounded in web research conducted for this client):\n${briefContext}\n\nBUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${cfg.writeInstructions}`;
+      const msg = await client.messages.create({
+        model:      "claude-sonnet-4-6",
+        max_tokens: 2000,
+        system,
+        messages:   [{ role: "user", content: userPrompt }],
+      });
+      return msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    }
+
+    // ── Legacy path: no brief available, fall back to per-section search ──
+    const searchSystem   = [baseSystem, cfg.searchDirective, `Perform at most ONE focused web search with a short, specific query.`, styleRule].join("\n\n");
+    const noSearchSystem = [baseSystem, styleRule].join("\n\n");
+    const userPrompt = `BUSINESS INTAKE:\n${intake}${extraContext ? "\n\n" + extraContext : ""}${priorContext}\n\nWrite the "${sectionLabel}" section now. ${cfg.writeInstructions}`;
+
     if (cfg.useSearch) {
-      // Race web-search call against 30 s — abandon search and fall back to intake-only if slow
       let searchResult: string | null = null;
       try {
         const msg = await Promise.race([
@@ -904,7 +1106,6 @@ export async function generateDDRSectionWithSearch(
       if (searchResult !== null) return searchResult;
     }
 
-    // No-search path: used directly for no-search sections, or as fallback when search timed out
     const msg = await client.messages.create({
       model:      "claude-sonnet-4-6",
       max_tokens: 1200,

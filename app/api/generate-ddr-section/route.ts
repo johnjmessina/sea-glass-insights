@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { generateDDRSectionWithSearch } from "@/lib/claudeServices";
+import { generateDDRSectionWithSearch, type DdrResearchBrief } from "@/lib/claudeServices";
 
 export const maxDuration = 60;
 
@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
     )
   );
 
+  const researchBrief = (order.research_brief as DdrResearchBrief | null) ?? undefined;
+
   let content: string;
   try {
     content = await Promise.race([
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
         order,
         sectionKey,
         (order.ai_draft as Record<string, string>) ?? {},
+        researchBrief,
       ),
       timeoutPromise,
     ]);

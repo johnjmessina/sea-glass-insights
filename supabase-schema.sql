@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS orders (
   q9                      TEXT,
   q10                     TEXT,
   ai_draft                JSONB,
-  analyst_commentary      JSONB
+  analyst_commentary      JSONB,
+  research_brief          JSONB
 );
 
 -- Disable RLS for this private internal tool
