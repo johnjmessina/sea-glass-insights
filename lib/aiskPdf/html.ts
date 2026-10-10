@@ -178,12 +178,13 @@ function useCasesSection(content: unknown): string {
 }
 
 /** Prompt card: split on \n---\n; prompt in monospace box, instructions below in italic */
-function promptCard(content: unknown): string {
+function promptCard(content: unknown, badgeNum?: number): string {
   const raw    = String(content ?? "").trim();
   const parts  = raw.split(/\n---\n/);
   const prompt = (parts[0] ?? raw).trim();
   const instruc = (parts[1] ?? "").trim();
   return `
+    ${badgeNum != null ? `<div class="prompt-badge">Prompt ${badgeNum} of 6</div>` : ""}
     <div class="prompt-card">
       <div class="prompt-label">Your Prompt</div>
       <pre class="prompt-text">${esc(prompt)}</pre>
@@ -274,11 +275,6 @@ section.contents { page: contents; }
 .cover-business { font-size: 28pt; font-weight: 700; color: ${NAVY}; margin: 0; line-height: 1.2; }
 .cover-sub { font-size: 11pt; color: ${GRAY}; margin-top: 12pt; }
 .cover-confidential { margin-top: auto; font-size: 8pt; color: ${GRAY}; font-style: italic; }
-.cover-includes { margin-top: 24pt; text-align: left; width: 4in; }
-.cover-includes-head { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; color: ${TEAL}; margin-bottom: 10pt; }
-.cover-includes ul { list-style: none; margin: 0; padding: 0; }
-.cover-includes li { font-size: 11pt; color: ${NAVY}; margin-bottom: 5pt; }
-.cover-includes li::before { content: "\\2014\\00a0"; color: ${TEAL}; font-weight: 700; }
 
 /* Contents */
 .toc { list-style: none; margin: 8pt 0 0; padding: 0; }
@@ -334,9 +330,24 @@ section.contents { page: contents; }
 
 /* AISK use-case cards */
 .aisk-usecase-grid { display: flex; flex-direction: column; gap: 12pt; margin-top: 4pt; }
-.aisk-usecase-card { background: ${WHITE}; border: 1pt solid #E0E0E0; border-radius: 4pt; padding: 14pt 16pt; break-inside: avoid; }
+.aisk-usecase-card { background: ${WHITE}; border: 1pt solid #D5D8DC; border-radius: 4pt; padding: 14pt 16pt; break-inside: avoid; }
 .aisk-usecase-title { font-size: 12pt; font-weight: 700; margin-bottom: 7pt; }
 .aisk-usecase-body p { margin: 0 0 6pt; font-size: 11pt; }
+
+/* Prompt badge */
+.prompt-badge { display: inline-block; font-size: 7.5pt; font-weight: 700; letter-spacing: 1pt; text-transform: uppercase; color: ${WHITE}; background: ${NAVY}; padding: 3pt 8pt; border-radius: 3pt; margin-bottom: 10pt; }
+/* Stat tiles (matching VOC upgrade) */
+.stat-tiles { display: flex; gap: 8pt; margin: 10pt 0 12pt; flex-wrap: wrap; }
+.stat-tile { flex: 1; min-width: 70pt; text-align: center; padding: 10pt 8pt; background: ${LGRY}; border-radius: 4pt; border: 0.5pt solid #D5D8DC; }
+.stat-tile-hi { background: ${NAVY}; border-color: ${NAVY}; }
+.stat-tile-hi .stat-value { color: ${WHITE}; }
+.stat-tile-hi .stat-label { color: rgba(255,255,255,0.8); }
+.stat-value { font-size: 20pt; font-weight: 700; color: ${NAVY}; line-height: 1; margin-bottom: 4pt; }
+.stat-label { font-size: 8pt; font-weight: 700; letter-spacing: 0.5pt; text-transform: uppercase; color: ${GRAY}; }
+/* Kit overview tile strip (cover replacement) */
+.kit-overview { display: flex; flex-direction: column; gap: 6pt; margin: 28pt 0 0; width: 4.5in; }
+.kit-overview-item { display: flex; align-items: center; gap: 10pt; font-size: 10.5pt; color: ${NAVY}; }
+.kit-overview-bullet { width: 6pt; height: 6pt; background: ${TEAL}; border-radius: 50%; flex-shrink: 0; }
 `;
 
 // ── Document ───────────────────────────────────────────────────────────────
@@ -369,7 +380,7 @@ export function buildAiskReportHtml(
     <section class="page sec-${s.id}">
       <h1 class="section-title">${esc(s.title)}</h1>
       ${s.isPrompt
-        ? promptCard(content)
+        ? promptCard(content, s.id.match(/custom_prompt_(\d+)/)?.[1] ? Number(s.id.match(/custom_prompt_(\d+)/)![1]) : undefined)
         : s.id === "business_type_analysis"
           ? businessAnalysisSection(content)
           : s.id === "real_use_case_examples"
@@ -399,10 +410,6 @@ export function buildAiskReportHtml(
           <div class="cover-rule"></div>
           <div class="cover-business">${esc(order.business_name)}</div>
           <div class="cover-sub">Prepared for ${esc(order.customer_name || order.business_name)}${order.location ? ` &nbsp;|&nbsp; ${esc(order.location)}` : ""} &nbsp;|&nbsp; ${esc(fmtDate(order.created_at))}</div>
-          <div class="cover-includes">
-            <div class="cover-includes-head">This Kit Includes</div>
-            <ul>${AISK_SECTIONS.filter(s => s.id !== "revision_notes").map(s => `<li>${esc(s.title)}</li>`).join("")}</ul>
-          </div>
           <div class="cover-confidential">Confidential. Prepared exclusively for ${esc(order.business_name)} by Sea Glass Insights. Not for distribution.</div>
         </div>
       </section>`;
