@@ -344,17 +344,120 @@ const SMA_AI_DRAFT = {
 };
 
 const SSR_AI_DRAFT = {
-  research_question_framework: { question: "Would our core customer base pay $35/month for a coffee subscription with weekly bag pickup and 10% off in-store?", hypothesis: "Regulars with established weekly visit patterns are likely candidates. Tourists and occasional visitors are unlikely subscribers. Price sensitivity and flexibility of pickup timing are key friction points.", methodology: "Synthetic survey simulation across 4 distinct customer personas derived from stated customer demographics and behavioral patterns." },
-  customer_personas:           [{ name: "The Morning Regular", description: "34F, local resident, visits 4–5x/week, weekday mornings. Values consistency, staff recognition, quality. Low price sensitivity. High loyalty candidate.", likelihood_score: 82 }, { name: "The Weekend Tourist", description: "45M, seasonal visitor, visits 3–4x/summer. Discovery-driven, not a subscription candidate. Values experience over program.", likelihood_score: 18 }, { name: "The Remote Worker", description: "29NB, visits 2–3x/week for WiFi. High dwell time. Subscription appeals if pickup is flexible and includes a discount on in-store orders.", likelihood_score: 67 }, { name: "The Occasional Local", description: "38F, visits 1–2x/month when time allows. Convenience-driven — often chooses Playa for speed. Subscription would need to create urgency to visit.", likelihood_score: 31 }],
-  thematic_analysis:           { key_themes: "1. Flexibility is the primary friction point — rigid weekly pickup doesn't match irregular schedules. 2. The in-store discount is the most compelling element of the offer. 3. Roast customization would significantly increase appeal. 4. Trust in the brand is high; the barrier is logistical, not relational.", sentiment: "Cautiously positive. The offer has real appeal for the core segment but the format needs refinement before broad rollout." },
-  directional_recommendations: { recommendation: "Pilot with the 'Morning Regular' segment first — highest likelihood, lowest acquisition friction. Offer 2-week pickup windows instead of rigid weekly cadence. Lead with the in-store discount as the headline benefit, not the subscription itself. Test roast customization as an add-on at higher price point ($42/month).", confidence: "Medium-high for core segment. Low for tourist and occasional segments." },
-  methodology_disclosure:      { approach: "Synthetic persona simulation based on stated customer demographics, behavioral self-report, and standard consumer psychology frameworks for subscription adoption.", limitations: "Simulated responses cannot substitute for real customer interviews or survey data. Results are directional, not predictive." },
-  honest_limitations_statement:{ statement: "This report simulates likely customer responses based on described segments. It should be treated as a structured hypothesis-generation tool, not a predictive model. We recommend validating the top two findings with 8–10 real customer conversations before making any subscription investment decision.", confidence_level: "Medium — suitable for initial go/no-go framing, not final commitment." },
+  research_question_framework: {
+    question:    "Would our core customer base pay $35/month for a coffee subscription with weekly bag pickup and 10% in-store discount?",
+    hypothesis:  "Regulars with established weekly visit patterns are likely candidates. Tourists and occasional visitors are unlikely subscribers. Price sensitivity and flexibility of pickup timing are key friction points.",
+    methodology: "Synthetic persona simulation across 4 distinct customer personas derived from stated customer demographics and behavioral patterns.",
+  },
+
+  customer_personas: [
+    {
+      name:        "The Morning Regular",
+      description: "34F, local resident, visits 4–5x/week on weekday mornings. Values consistency, staff recognition, and quality. Low price sensitivity. The ideal subscription candidate.",
+      motivation:  "Locking in her routine and feeling recognized as a valued customer",
+      concern:     "Wants flexibility — if she can’t pick up one week, she doesn’t want to lose a bag",
+      likelihood:  "High",
+      quote:       "I’d do it in a heartbeat if I could swap pickup weeks. I’m here every morning anyway.",
+    },
+    {
+      name:        "The Weekend Tourist",
+      description: "45M, seasonal Shore visitor, 3–4 visits per summer. Discovery-driven and experience-focused. Not a subscription candidate — lives too far away for regular pickup.",
+      motivation:  "Authentic local experience and something to remember the trip by",
+      concern:     "Lives in Pennsylvania — a weekly pickup model is geographically impossible",
+      likelihood:  "Low",
+      quote:       "I’d buy a bag to take home, but a subscription doesn’t make sense for me.",
+    },
+    {
+      name:        "The Remote Worker",
+      description: "29NB, visits 2–3x/week for WiFi. High dwell time and secondary purchase frequency. Subscription appeals if pickup is flexible and the in-store discount stacks.",
+      motivation:  "Making the workspace feel like a good value — if they’re there anyway, might as well save",
+      concern:     "Irregular schedule makes rigid weekly pickup stressful rather than convenient",
+      likelihood:  "Medium",
+      quote:       "A discount on my in-store orders would basically pay for itself. I just need it to be flexible.",
+    },
+    {
+      name:        "The Occasional Local",
+      description: "38F, visits 1–2x/month when time allows. Convenience-driven — often chooses Playa for speed. Subscription would need to create urgency to visit more often.",
+      motivation:  "Feeling like she’s getting value without changing her schedule significantly",
+      concern:     "Worried about paying for a bag she won’t actually pick up if life gets busy",
+      likelihood:  "Low",
+      quote:       "I love Coastal Brew but I’m honestly not sure I’d make it in every week.",
+    },
+  ],
+
+  persona_response_simulation:
+    "When presented with the subscription concept ($35/month, weekly bag pickup, 10% in-store discount), Morning Regulars responded with immediate interest contingent on pickup flexibility. Remote Workers showed conditional interest centered on the in-store discount stacking with their existing frequency. Occasional Locals and Weekend Tourists both declined — the former due to schedule unpredictability, the latter due to geography.\n\nThe simulation reveals a clear bifurcation: the offer works well for the 30–40% of the customer base who already visit weekly, and poorly for everyone else. Forcing a weekly cadence is the single largest conversion barrier. A ‘any 4 pickups per month’ format would likely convert 15–20% more of the conditional segment.",
+
+  thematic_analysis: [
+    {
+      theme:    "Flexibility is the core friction point",
+      body:     "Rigid weekly pickup doesn’t match the schedules of Remote Workers or Occasional Locals. A flexible window (‘any 4 pickups per month’) would significantly expand the addressable segment.",
+      strength: 92,
+      evidence: "Cited by 3 of 4 personas as a top concern. Even the Morning Regular flagged it — ‘What if I travel?’",
+    },
+    {
+      theme:    "The in-store discount is the most compelling benefit",
+      body:     "The discount on in-store orders resonates across segments more than the bag itself. For Remote Workers especially, the discount framing transforms the subscription from a commitment into a savings vehicle.",
+      strength: 85,
+      evidence: "Remote Worker and Morning Regular both cited the discount as the clearest value driver.",
+    },
+    {
+      theme:    "Roast customization would meaningfully increase appeal",
+      body:     "Multiple personas expressed interest in choosing roast level or bean origin as part of the subscription. Even a binary choice (light vs. dark) would add perceived value and reduce ‘stuck with one thing’ hesitation.",
+      strength: 68,
+    },
+    {
+      theme:    "Trust in the brand is high — the barrier is logistical, not relational",
+      body:     "No persona expressed doubt about Coastal Brew’s product quality or reliability. Hesitation is entirely structural: pickup timing, geographic access, and schedule variability. The brand equity exists; the format doesn’t yet serve it.",
+      strength: 55,
+    },
+  ],
+
+  directional_recommendations: [
+    {
+      title: "Pilot with Morning Regulars first",
+      body:  "This segment has the highest likelihood, lowest friction, and most predictable behavior. A 20-person pilot could be launched with a simple paper sign-up and a staff-driven ask at checkout. No app required.",
+      label: "P1",
+    },
+    {
+      title: "Replace weekly pickup with a monthly pickup window",
+      body:  "Change the core format from ‘weekly bag’ to ‘any 4 pickups per month.’ This single change would expand the addressable segment and remove the most-cited conversion barrier across all personas.",
+      label: "P1",
+    },
+    {
+      title: "Lead with the in-store discount, not the subscription",
+      body:  "Frame it as ‘10% off every visit, plus a free bag every month’ rather than ‘a coffee subscription.’ The discount is the clearest daily value driver and the bag becomes the bonus, not the burden.",
+      label: "P2",
+    },
+    {
+      title: "Test roast customization as a premium tier",
+      body:  "Offer a $42/month tier with roast selection. This segments Morning Regulars (who will pay more for personalization) from price-sensitive Remote Workers, and creates a natural upgrade path.",
+      label: "P2",
+    },
+  ],
+
+  methodology_disclosure: {
+    approach:    "Synthetic persona simulation based on stated customer demographics, behavioral self-report, and standard consumer psychology frameworks for subscription adoption. Each persona was constructed from actual customer segment descriptions provided in the intake.",
+    limitations: "Simulated responses cannot substitute for real customer interviews or survey data. Results are directional, not predictive. Actual adoption rates may differ significantly based on pricing sensitivity, timing, and word-of-mouth dynamics not captured here.",
+  },
+
+  honest_limitations_statement: {
+    statement:        "This report simulates likely customer responses based on described segments. It should be treated as a structured hypothesis-generation tool, not a predictive model. We recommend validating the top two findings with 8–10 real customer conversations before making any subscription investment decision.",
+    confidence_level: "Medium — suitable for initial go/no-go framing, not final commitment.",
+  },
 };
 
 const DDR_AI_DRAFT = {
-  executive_summary:
-    "The core strategic question — second location in Long Branch vs. mobile cart for beach events — resolves clearly in favor of the mobile cart as a first expansion move. Long Branch requires capital, staffing, and lease commitment before the core retention problem at the Asbury Park location is solved. A beach cart tests the brand in the tourist channel with minimal downside, generates real market data, and preserves optionality for a permanent second location informed by actual demand signals.",
+  executive_summary: {
+    intro:           "The core strategic question — second location in Long Branch vs. mobile cart for beach events — resolves clearly in favor of the mobile cart as a first expansion move. Long Branch requires capital, staffing, and lease commitment before the core retention problem at the Asbury Park location is solved.",
+    bullets: [
+      "Mobile cart entry cost is $15–25K vs. $180–240K for a second brick-and-mortar — 10x less capital at risk",
+      "Loyalty infrastructure gap must be closed before expansion or the vulnerability replicates at scale",
+      "Roasting story remains the brand’s clearest differentiator and is not yet communicated digitally or in-store",
+    ],
+    key_finding:     "The Asbury Park retention problem — broken loyalty loop, absent digital strategy, no tourist conversion — must be solved before any expansion. Scaling a leaky bucket doesn’t fix the leak.",
+    priority_action: "Pursue the mobile cart as the first expansion vehicle while solving retention at the Asbury Park location in parallel. These are not sequential — they can happen simultaneously.",
+  },
 
   business_snapshot:
     "3-year independent specialty coffee operation, single location Asbury Park NJ. In-house roasting. Average ticket $7.20. 12% weekday afternoon traffic decline since Playa Coffee opened nearby. Strengths: staff warmth, product quality, roasting authenticity, established local loyalty base. Vulnerabilities: no loyalty infrastructure, underperforming digital presence, no conversion mechanism for tourist visits.",
@@ -370,13 +473,38 @@ const DDR_AI_DRAFT = {
   ],
 
   market_context:
-    "Jersey Shore summer economy is heavily tourist-driven with a strong June–September spike. Weekday traffic is local and habitual; weekend traffic is mixed and discovery-driven. Independent coffee shops with strong local identity are outperforming chains in post-pandemic loyalty metrics nationally. Authenticity is a durable differentiator — and Coastal Brew's in-house roasting story is the clearest expression of it in this market.",
+    "Jersey Shore summer economy is heavily tourist-driven with a strong June–September spike. Weekday traffic is local and habitual; weekend traffic is mixed and discovery-driven. Independent coffee shops with strong local identity are outperforming chains in post-pandemic loyalty metrics nationally. Authenticity is a durable differentiator — and Coastal Brew’s in-house roasting story is the clearest expression of it in this market.",
 
   decision_specific_analysis:
     "Long Branch second location requires 12–18 month lead time, $180–240K estimated buildout, new hiring, and management attention that would pull focus from the Asbury Park retention problem. Risk: replicates the current vulnerability at scale before it is solved.\n\nMobile cart: estimated $15–25K entry cost. Deploys in the tourist channel — beach events, farmers markets, festivals — where Coastal Brew currently has zero presence. Tests the brand beyond the Asbury Park block with minimal commitment. Generates real revenue and real market data before any permanent capital commitment.",
 
-  extended_recommendations:
-    "Pursue the mobile cart as the first expansion vehicle. Target 3–4 summer weekend events to validate demand before committing to a permanent unit.\n\nSolve the Asbury Park loyalty loop first: staff-scripted checkout mention, a counter card, and a basic punch card if the app timeline is long. This takes one week and costs almost nothing.\n\nDevelop a roasting content series for Instagram — 5 posts per week showing the process, the people, and the product. This is the single highest-leverage marketing investment available at current scale.",
+  extended_recommendations: [
+    {
+      title:     "Solve the Asbury Park loyalty loop before anything else",
+      rationale: "Staff-scripted checkout mention, a counter card, and a basic punch card. This takes one week and costs almost nothing. Do it this week.",
+      priority:  1,
+    },
+    {
+      title:     "Pursue the mobile cart as the first expansion vehicle",
+      rationale: "Target 3–4 summer weekend events to validate demand before committing to a permanent unit. Estimated $15–25K. Real revenue, real data, preserved optionality.",
+      priority:  1,
+    },
+    {
+      title:     "Build a roasting content series for Instagram",
+      rationale: "Five posts per week: Monday roasting, Wednesday product, Friday staff, Saturday community, Sunday seasonal. The story already exists in the shop — it just needs to be captured.",
+      priority:  2,
+    },
+    {
+      title:     "Pilot a pastry partnership on 60-day trial",
+      rationale: "Source from a local bakery on revenue-share. Increases average ticket, extends morning window, creates a cross-promotional relationship at zero upfront cost.",
+      priority:  2,
+    },
+    {
+      title:     "Revisit Long Branch after 6 months of retention data",
+      rationale: "Use loyalty program data and mobile cart performance to make the second location decision from evidence, not ambition. If the numbers support it then, the case becomes easy.",
+      priority:  3,
+    },
+  ],
 
   priority_action_framework: {
     phases: [
@@ -389,7 +517,7 @@ const DDR_AI_DRAFT = {
   expanded_analyst_interpretation: {
     strategic_framing:  "The core tension in this business is between a genuinely exceptional in-store experience and an almost complete absence of mechanisms to extend that experience beyond the physical visit. Every gap identified — no loyalty follow-through, no digital conversion, no tourist retention — is a version of the same problem: the shop is excellent at creating the moment and poor at capturing it.",
     competitive_read:   "Playa Coffee is not winning on quality. It is winning on habit and convenience for a specific use case — the rushed weekday afternoon. Coastal Brew should not compete on that dimension; it will lose. The response is to deepen loyalty among customers who already value what Coastal Brew does, and to reach the tourist segment before they form a Playa habit.",
-    long_term_view:     "The second location question should be answered by data, not ambition. The mobile cart generates that data at 10% of the cost and risk. If beach event revenue is strong and the brand travels well outside Asbury Park, Long Branch becomes an obvious next step. If it doesn't travel, that's critical information worth $20K to learn.",
+    long_term_view:     "The second location question should be answered by data, not ambition. The mobile cart generates that data at 10% of the cost and risk. If beach event revenue is strong and the brand travels well outside Asbury Park, Long Branch becomes an obvious next step. If it doesn’t travel, that’s critical information worth $20K to learn.",
   },
 };
 
