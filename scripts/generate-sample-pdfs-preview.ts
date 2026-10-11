@@ -118,13 +118,127 @@ For the growth path forward, four specific actions stand out: First, activate th
 };
 
 const MIR_AI_DRAFT = {
-  executive_summary:       "Coastal Brew Coffee occupies a defensible niche as the Shore's premier independent specialty roaster, with authentic craft credentials and staff-driven loyalty that a chain competitor cannot replicate at scale. The 12% weekday afternoon traffic decline warrants attention but signals an awareness gap rather than a fundamental rejection of the indie experience. Priority actions center on loyalty infrastructure, afternoon traffic recovery, and a disciplined digital content strategy before any expansion decision.",
-  business_snapshot:       { overview: "Independent specialty coffee shop, in operation 3 years, single location in Asbury Park NJ. In-house roasting operation serving espresso drinks and retail whole-bean bags. Avg ticket $7.20. Highest-margin items are house blends.", financials: "Revenue growth target: 20% over next 12 months without significant headcount increase. No current loyalty program. Instagram presence: ~1,400 followers, low engagement." },
-  customer_profile:        { segments: "Two primary segments: weekday morning regulars (25–45, local residents, habit-driven) and weekend tourists (seasonal beach visitors, discovery-driven). Secondary: remote workers seeking reliable WiFi environment.", behavior: "Regulars are loyalty candidates but retention mechanisms are absent. Tourists represent one-time high-value visits with no current conversion to repeat engagement." },
-  competitive_landscape:   { primary: "Playa Coffee — regional chain, opened nearby 6 months ago. Drive-through format appeals to convenience-driven customers. Self-reported to have captured 12% of Coastal Brew's weekday afternoon traffic.", differentiation: "Coastal Brew holds a clear quality and authenticity advantage. Staff warmth and in-house roasting create genuine experiential differentiation that Playa cannot replicate." },
-  positioning:             { current: "Premium indie roaster — positioned on craft, community, and authenticity. Identity is strong but undercommunicated both digitally and in-store.", opportunity: "The roasting story is a high-value brand asset that is currently invisible to most customers. Surfacing it through content and in-store storytelling would reinforce premium positioning." },
-  insights:                { key_findings: "1. Loyalty loop is broken — the program exists but is never mentioned at the point of maximum engagement (checkout). 2. Digital presence is underperforming relative to in-store experience quality. 3. Outdoor seating is an untapped revenue asset. 4. Retail bag upsell is absent despite being the highest-margin category.", risk: "Second-location expansion before core retention infrastructure is in place risks replicating the vulnerability at scale." },
-  recommendations:         { immediate: "Implement staff-scripted loyalty mention at checkout. Deploy outdoor seating consistently on appropriate weather days. Introduce retail bag upsell conversation tied to drink orders.", medium_term: "Develop roasting-focused social content strategy. Pilot weekend pastry partnership on 60-day trial. Evaluate loyalty app after verbal program awareness is established.", long_term: "Use loyalty data to inform second-location timing and format. Assess mobile cart for beach events as lower-risk expansion test." },
+  executive_summary:
+    "Coastal Brew Coffee occupies a defensible niche as the Shore's premier independent specialty roaster, with authentic craft credentials and staff-driven loyalty that a chain competitor cannot replicate at scale. The 12% weekday afternoon traffic decline warrants attention but signals an awareness gap rather than a fundamental rejection of the indie experience. Priority actions center on loyalty infrastructure, afternoon traffic recovery, and a disciplined digital content strategy before any expansion decision.",
+
+  business_snapshot: {
+    business_name:        "Coastal Brew Coffee",
+    location:             "Asbury Park, NJ",
+    business_descriptor:  "Independent specialty coffee shop & in-house roaster",
+    time_in_business:     "3 years",
+    business_type:        "Specialty Coffee / Retail",
+    business_stage:       "Growth",
+    primary_offering:     "Espresso drinks, pour-overs, and retail whole-bean bags roasted in-house",
+    target_customer:      "Local weekday regulars (25–45) and seasonal beach tourists",
+    top_competitors:      ["Playa Coffee (regional chain)", "Dunkin' (convenience)", "Home brewing"],
+    marketing_channels:   ["Instagram", "Word of mouth", "In-store signage"],
+    key_challenge:        "12% weekday afternoon traffic decline; no loyalty retention infrastructure",
+    success_goal:         "20% revenue growth over next 12 months without significant headcount increase",
+  },
+
+  customer_profile: [
+    {
+      name:       "Weekday Morning Regular",
+      desc:       "Local residents aged 25–45 who build their morning routine around Coastal Brew. High visit frequency, high loyalty potential, no current retention mechanism.",
+      motivation: "Habit, quality, and genuine connection with staff",
+      key_need:   "A reason to feel recognized and rewarded for their loyalty",
+    },
+    {
+      name:       "Weekend Beach Tourist",
+      desc:       "Seasonal visitors discovering Coastal Brew through proximity or word of mouth. High average ticket, zero repeat engagement infrastructure.",
+      motivation: "Discovery, local authenticity, a break from chain coffee",
+      key_need:   "Something to take home — a bag of beans, a reason to return next summer",
+    },
+    {
+      name:       "Remote Worker",
+      desc:       "Professionals seeking a reliable work environment with quality coffee. Mid-day dwell time, WiFi-dependent, willing to pay a premium for the environment.",
+      motivation: "Productive environment plus quality beverage",
+      key_need:   "Consistent WiFi, a reason to stay longer and order more",
+    },
+  ],
+
+  competitive_landscape: [
+    {
+      name:     "Playa Coffee",
+      strength: "Regional chain with drive-through format — pure convenience play. Opened nearby 6 months ago; self-reported to have taken 12% of Coastal Brew's weekday afternoon traffic.",
+      edge:     "Coastal Brew wins on quality, authenticity, and human connection — all things a drive-through cannot replicate.",
+    },
+    {
+      name:     "Dunkin'",
+      strength: "Price and speed. Dominant with the convenience-first customer who views coffee as a commodity.",
+      edge:     "No overlap on the target customer. Coastal Brew's drinker has already self-selected out of the Dunkin' experience.",
+    },
+    {
+      name:     "Home Brewing",
+      strength: "Zero cost per cup and total convenience. Accelerated during pandemic; some habitual customers shifted permanently.",
+      edge:     "Retail whole-bean sales convert the home brewer into a Coastal Brew customer six days a week instead of one.",
+    },
+  ],
+
+  positioning: {
+    strengths: [
+      "In-house roasting is a genuine and rare differentiator — almost no indie shops at this scale roast on-premise",
+      "Staff warmth is measurable in customer retention and word-of-mouth; chains cannot replicate this at scale",
+      "Physical location is high-foot-traffic and walkable from the beach — a natural discovery point for tourists",
+      "Craft credentials are real and communicable — the story exists, it just isn't being told",
+    ],
+    vulnerabilities: [
+      "Loyalty program exists but is never mentioned at checkout — the moment of maximum engagement",
+      "Digital presence (1,400 Instagram followers, low engagement) dramatically underrepresents actual brand quality",
+      "No mechanism to convert tourists into ongoing customers — every summer visit is a one-time transaction",
+      "Outdoor seating is an available revenue asset that is inconsistently deployed",
+    ],
+  },
+
+  insights: [
+    {
+      title: "The loyalty loop is broken at the last inch",
+      body:  "The program exists and customers are interested — staff simply never mention it at checkout. Scripting a 10-second loyalty ask would cost nothing and could recover meaningful retention within 30 days.",
+    },
+    {
+      title: "The roasting story is invisible",
+      body:  "In-house roasting is the clearest brand differentiator Coastal Brew has — and it has never appeared in any social post or in-store signage we observed. This is the single highest-leverage untapped asset.",
+    },
+    {
+      title: "Digital presence underrepresents in-store quality",
+      body:  "The Instagram experience gives a potential customer no reason to prioritize Coastal Brew. The actual in-store experience would earn a 5-star review from anyone who walked in. The gap between these two realities is the marketing problem.",
+    },
+    {
+      title: "Outdoor seating is an untapped revenue lever",
+      body:  "On moderate-weather days, outdoor seating is not deployed consistently. This is free incremental capacity that signals vitality to passersby and extends dwell time for existing customers.",
+    },
+    {
+      title: "Retail bag upsell is structurally absent",
+      body:  "Retail whole-bean bags are the highest-margin SKU and convert tourists into ongoing customers — but there is no upsell conversation, no counter card, and no checkout prompt. This is a missed transaction on every visit.",
+    },
+  ],
+
+  recommendations: [
+    {
+      title: "Script the loyalty mention at checkout",
+      body:  "Every staff member asks every customer about the loyalty program at the point of payment. Write the script, post it at the register, train it in one shift meeting. Cost: zero.",
+    },
+    {
+      title: "Introduce a retail bag upsell conversation",
+      body:  "Tie the whole-bean recommendation to the drink order: 'This is our house blend — we roast it here. Bags are at the counter if you want to take it home.' One sentence, highest-margin SKU, works equally well for regulars and tourists.",
+    },
+    {
+      title: "Deploy outdoor seating consistently",
+      body:  "Add outdoor setup to the morning open checklist on any day above 60°F and no rain. Visible outdoor seating is a foot-traffic signal and a dwell-time extender. No cost, immediate impact.",
+    },
+    {
+      title: "Build a roasting content series for Instagram",
+      body:  "Five posts per week: Monday roasting process, Wednesday product close-up, Friday staff feature, Saturday community moment, Sunday seasonal or educational. The roasting story is the content strategy — it is already happening in the shop every day.",
+    },
+    {
+      title: "Pilot a pastry partnership on 60-day trial",
+      body:  "Source weekend pastries from a local bakery on a revenue-share or wholesale basis. Increases average ticket, extends morning window, and creates a cross-promotional relationship with another local business.",
+    },
+    {
+      title: "Test the mobile cart before committing to a second location",
+      body:  "Estimated $15–25K entry vs $180–240K for a second brick-and-mortar. Deploy at 3–4 summer beach events to validate demand in the tourist channel before any permanent capital commitment. Lower risk, faster signal.",
+    },
+  ],
 };
 
 const SMA_AI_DRAFT = {
