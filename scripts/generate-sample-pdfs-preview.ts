@@ -325,15 +325,85 @@ Test a flexible subscription format: 'any 4 pickups per month' rather than weekl
 };
 
 const AISK_AI_DRAFT = {
-  business_type_analysis:  { business_type: "Independent Specialty Coffee Roaster", key_characteristics: "Artisan product with strong craft identity. Staff-driven loyalty. Dual customer base (local regulars + seasonal tourists). Limited marketing resources. High opportunity for authentic content and customer relationship tools.", ai_opportunity: "AI is most useful here for: consistent customer communication, social content generation, loyalty program management, and competitive research that would otherwise require consultant engagement." },
-  ai_best_practices:       { principles: "Start narrow: one use case mastered is worth ten half-implemented. AI tools amplify what's already working — they don't fix what's broken. For a staff-first business like Coastal Brew, AI should handle the repetitive and the administrative so the humans can focus on the irreplaceable.", pitfalls: "Avoid using AI to replace the authentic voice that customers already respond to. AI-generated social posts that sound generic will underperform the real thing. Use AI to draft, humans to refine and post." },
-  custom_prompt_1:         { title: "Weekly Social Content Planner", prompt: "You are a social media content strategist for Coastal Brew Coffee, an independent specialty coffee shop in Asbury Park, NJ. We roast our own beans in-house and our strongest differentiator is our staff's genuine relationships with regular customers.\n\nFor this week, create a 4-post Instagram content plan. For each post include: the content concept, a caption draft (under 150 words, conversational, no hashtag spam), and one story idea to support it. The tone should feel like a real person who loves coffee and their community — not a marketing department.\n\nThis week's focus: [INSERT FOCUS — e.g., 'our fall roast launch' or 'introducing a new team member']" },
-  custom_prompt_2:         { title: "Customer Response Templates", prompt: "You are helping Coastal Brew Coffee respond to customer reviews and messages. The shop's voice is warm, genuine, and community-rooted — never corporate or scripted-feeling.\n\nWrite a response to the following review. Acknowledge specifically what they mentioned, add one personal detail if possible, and invite them back naturally:\n\nReview: [PASTE REVIEW HERE]\n\nKeep the response under 80 words. Don't use the phrase 'Thank you for your feedback.'" },
-  custom_prompt_3:         { title: "Loyalty Program Script Generator", prompt: "Write a short, natural verbal script for Coastal Brew Coffee staff to use when mentioning our loyalty program at checkout. The tone should feel like a genuine recommendation from a person, not a sales pitch.\n\nContext: the customer just paid and is waiting for their order. The staff member should mention the loyalty program in a way that feels helpful and low-pressure.\n\nCreate 3 variations: one for a first-time visitor, one for a returning customer who isn't enrolled, and one for an existing member checking their status." },
-  custom_prompt_4:         { title: "Competitive Monitor Summary", prompt: "I'm going to paste in recent Google and Yelp reviews for Playa Coffee in Asbury Park, NJ — our main competitor. Summarize: (1) what customers like most about Playa, (2) what complaints appear repeatedly, and (3) any gaps in their experience that Coastal Brew could directly address in our own marketing or operations.\n\nReviews: [PASTE REVIEWS HERE]\n\nKeep the summary under 300 words. Focus on actionable intelligence, not general observations." },
-  custom_prompt_5:         { title: "Event & Seasonal Promotion Brief", prompt: "Coastal Brew Coffee is planning a [INSERT EVENT TYPE — e.g., 'fall harvest popup' or 'holiday retail bag promotion']. Write a complete promotional brief including: a headline, a short description for social media, suggested in-store signage copy, and one email subject line.\n\nEvent details: [DESCRIBE EVENT]\nDate/duration: [DATES]\nKey offer: [WHAT CUSTOMERS GET]\n\nTone: warm, community-forward, artisan — not discount-driven." },
-  custom_prompt_6:         { title: "Monthly Business Reflection Prompt", prompt: "At the end of each month, use this prompt to reflect on business performance and set priorities.\n\nThis month at Coastal Brew Coffee:\n- Revenue vs. last month: [UP/DOWN X%]\n- Biggest win: [DESCRIBE]\n- Biggest frustration: [DESCRIBE]\n- Customer feedback theme: [WHAT WERE YOU HEARING]\n- One thing I avoided dealing with: [BE HONEST]\n\nBased on the above, give me: (1) the one thing that actually matters most to address next month, (2) a 3-step action plan for it, and (3) one question I should be asking that I'm probably not." },
-  real_use_case_examples:  { use_cases: [{ title: "Content Calendar in 20 Minutes", body: "The owner used the Weekly Social Content Planner prompt every Sunday evening. In 20 minutes they had a full week of Instagram content drafted and ready to review. Engagement increased 40% over 6 weeks as posting became consistent." }, { title: "Turning a Negative Review Into a Loyal Customer", body: "A 3-star review mentioned a long wait time with no acknowledgment. The Customer Response Template produced a warm, specific reply in 3 minutes. The reviewer returned the following week and updated to 5 stars." }, { title: "The Checkout Script That Doubled Loyalty Signups", body: "Three variations of the loyalty mention script were tested with staff. The 'returning customer' version outperformed the others. Loyalty program enrollment increased from 2/day to 9/day within two weeks of consistent use." }] },
+  business_type_analysis:
+    "Coastal Brew Coffee is an independent specialty coffee roaster — a business category where craft identity and staff-driven loyalty are the primary competitive advantages.\n\nThe dual customer base (local regulars and seasonal Shore tourists) creates both an opportunity and a structural tension: regulars want relationship and recognition; tourists want discovery and a story to tell. Both segments respond to authenticity, which Coastal Brew has in abundance through its in-house roasting operation.\n\nAI is most useful here for consistent customer communication, social content generation, and competitive research that would otherwise require consultant engagement. The goal is not to automate the human warmth that defines the brand — it is to free up time and mental bandwidth so that warmth can show up more consistently.",
+
+  ai_best_practices_introduction:
+    "The most important thing to understand about AI tools is that they work best when you are specific. A vague prompt gets a generic answer. A prompt that includes your business name, your customer type, and the exact situation you are dealing with gets something you can actually use.\n\nThink of AI as a conversation, not a search engine. If the first response is close but not quite right, say so. Tell the AI what to change. Ask it to try a different tone, cut it in half, or make it sound less formal. Most people give up after one try — the people who get real value from these tools are the ones who treat it like a back-and-forth.\n\nOne of the most useful things you can do is ask AI to interview you before it writes anything. Say: 'Before you write the Instagram caption, ask me 3 questions about what I want it to accomplish.' This almost always produces a better result than diving straight into the output.\n\nThese prompts work in ChatGPT, Claude, or any major AI chatbot. You do not need a paid subscription to start — the free versions of both tools are capable of everything in this kit.",
+
+  custom_prompt_1:
+    `You are a social media content strategist for Coastal Brew Coffee, an independent specialty coffee shop in Asbury Park, NJ. We roast our own beans in-house and our strongest differentiator is our staff's genuine relationships with regular customers.
+
+For this week, create a 4-post Instagram content plan. For each post include: the content concept, a caption draft (under 150 words, conversational, no hashtag spam), and one story idea to support it. The tone should feel like a real person who loves coffee and their community — not a marketing department.
+
+This week's focus: [INSERT FOCUS — e.g., 'our fall roast launch' or 'introducing a new team member']
+---
+Copy and paste this prompt directly into ChatGPT or Claude. Replace the bracketed placeholder with your actual focus for the week before hitting send. Run it every Sunday to plan the week ahead.`,
+
+  custom_prompt_2:
+    `You are helping Coastal Brew Coffee respond to customer reviews and messages. The shop's voice is warm, genuine, and community-rooted — never corporate or scripted-feeling.
+
+Write a response to the following review. Acknowledge specifically what they mentioned, add one personal detail if possible, and invite them back naturally:
+
+Review: [PASTE REVIEW HERE]
+
+Keep the response under 80 words. Don't use the phrase 'Thank you for your feedback.'
+---
+Paste any Google or Yelp review where the bracketed placeholder is. Works for both positive and negative reviews. If the review is negative, add this line after pasting it: "This is a difficult review — please help me respond with empathy and not defensiveness."`,
+
+  custom_prompt_3:
+    `Write a short, natural verbal script for Coastal Brew Coffee staff to use when mentioning our loyalty program at checkout. The tone should feel like a genuine recommendation from a person, not a sales pitch.
+
+Context: the customer just paid and is waiting for their order. The staff member should mention the loyalty program in a way that feels helpful and low-pressure.
+
+Create 3 variations: one for a first-time visitor, one for a returning customer who isn't enrolled, and one for an existing member checking their status.
+---
+Run this once and print the three scripts for your staff. Post them near the register. Revisit every few months and regenerate with updated context if the program changes.`,
+
+  custom_prompt_4:
+    `I'm going to paste in recent Google and Yelp reviews for Playa Coffee in Asbury Park, NJ — our main competitor. Summarize: (1) what customers like most about Playa, (2) what complaints appear repeatedly, and (3) any gaps in their experience that Coastal Brew could directly address in our own marketing or operations.
+
+Reviews: [PASTE REVIEWS HERE]
+
+Keep the summary under 300 words. Focus on actionable intelligence, not general observations.
+---
+Paste 10-20 recent reviews from Playa's Google or Yelp profile. Run this monthly to track shifts in customer sentiment. The gaps you find in their reviews are your marketing talking points.`,
+
+  custom_prompt_5:
+    `Coastal Brew Coffee is planning a [INSERT EVENT TYPE — e.g., 'fall harvest popup' or 'holiday retail bag promotion']. Write a complete promotional brief including: a headline, a short description for social media, suggested in-store signage copy, and one email subject line.
+
+Event details: [DESCRIBE EVENT]
+Date/duration: [DATES]
+Key offer: [WHAT CUSTOMERS GET]
+
+Tone: warm, community-forward, artisan — not discount-driven.
+---
+Fill in the bracketed placeholders with your specific event details before running. This prompt works for any seasonal promotion, partnership launch, or special offering. Use the output as a first draft — read it out loud and adjust anything that doesn't sound like you.`,
+
+  custom_prompt_6:
+    `At the end of each month, use this prompt to reflect on business performance and set priorities.
+
+This month at Coastal Brew Coffee:
+- Revenue vs. last month: [UP/DOWN X%]
+- Biggest win: [DESCRIBE]
+- Biggest frustration: [DESCRIBE]
+- Customer feedback theme: [WHAT WERE YOU HEARING]
+- One thing I avoided dealing with: [BE HONEST]
+
+Based on the above, give me: (1) the one thing that actually matters most to address next month, (2) a 3-step action plan for it, and (3) one question I should be asking that I'm probably not.
+---
+Run this on the last Sunday of each month. The more honest you are with the inputs, the more useful the output. This prompt is designed to cut through the noise and tell you where to actually focus.`,
+
+  real_use_case_examples: {
+    "Content Calendar in 20 Minutes":
+      "The owner used the Weekly Social Content Planner prompt every Sunday evening. In 20 minutes they had a full week of Instagram content drafted and ready to review. Engagement increased 40% over 6 weeks as posting became consistent. The key was the specificity of the focus line — 'our fall roast launch' produced dramatically better content than a generic request.",
+
+    "Turning a Negative Review Into a Loyal Customer":
+      "A 3-star review mentioned a long wait time with no acknowledgment from staff. The Customer Response Template produced a warm, specific reply in 3 minutes that named the experience, explained what had changed, and invited the customer back personally. The reviewer returned the following week and updated their review to 5 stars.",
+
+    "The Checkout Script That Doubled Loyalty Signups":
+      "Three variations of the loyalty mention script were tested with different staff members over two weeks. The 'returning customer' variation outperformed the others by a wide margin. Loyalty program enrollment increased from 2 sign-ups per day to 9 within two weeks of consistent use. The script was printed and taped near the register — visible to staff, invisible to customers.",
+  },
 };
 
 // ── Main ─────────────────────────────────────────────────────────────────────

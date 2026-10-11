@@ -169,17 +169,48 @@ function useCasesSection(content: unknown): string {
     return paragraphs(content);
   }
   const c = content as Obj;
-  if (!c || typeof c !== "object" || Array.isArray(c)) return "";
+  if (!c || typeof c !== "object") return "";
+
+  // Handle { use_cases: [...] } wrapper shape
+  if (Array.isArray((c as Obj).use_cases)) {
+    return `<div class="aisk-usecase-grid">${((c as Obj).use_cases as Obj[]).map((item, i) => {
+      const g = item as Obj;
+      return useCaseCard(String(g.title ?? `Example ${i+1}`), String(g.body ?? g.description ?? ""), i);
+    }).join("")}</div>`;
+  }
+
+  if (Array.isArray(c)) return "";
   const keys = Object.keys(c);
   return `<div class="aisk-usecase-grid">${keys.map((k, i) => {
     const label = k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-    return useCaseCard(label, String((c as Obj)[k] ?? ""), i);
+    const val = (c as Obj)[k];
+    // Each value may be a string or an object with title/body
+    if (val && typeof val === "object") {
+      const g = val as Obj;
+      return useCaseCard(String(g.title ?? label), String(g.body ?? g.description ?? ""), i);
+    }
+    return useCaseCard(label, String(val ?? ""), i);
   }).join("")}</div>`;
 }
 
 /** Prompt card: split on \n---\n; prompt in monospace box, instructions below in italic */
 function promptCard(content: unknown, badgeNum?: number): string {
-  const raw    = String(content ?? "").trim();
+  // Handle object shape { prompt: "...", instructions?: "..." } or { title, prompt }
+  let resolved: unknown = content;
+  if (content && typeof content === "object" && !Array.isArray(content)) {
+    const c = content as Record<string, unknown>;
+    if (typeof c.prompt === "string") {
+      // Build the canonical "prompt\n---\ninstructions" format
+      const instruc = typeof c.instructions === "string" ? c.instructions
+                    : typeof c.how_to_use   === "string" ? c.how_to_use
+                    : "";
+      resolved = instruc ? `${c.prompt}\n---\n${instruc}` : c.prompt;
+    } else {
+      // Fallback: join all string values
+      resolved = Object.values(c).filter(v => typeof v === "string").join("\n\n");
+    }
+  }
+  const raw    = String(resolved ?? "").trim();
   const parts  = raw.split(/\n---\n/);
   const prompt = (parts[0] ?? raw).trim();
   const instruc = (parts[1] ?? "").trim();
