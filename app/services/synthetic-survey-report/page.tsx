@@ -64,7 +64,7 @@ export default function SyntheticSurveyReportPage() {
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$399</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48-72 hour delivery</span>
         </div>
-        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "560px", margin: "0 auto 20px" }}>We use AI-generated customer personas to pressure-test your assumptions and surface directional insight. No existing customer list required.</p>
+        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "560px", margin: "0 auto 20px" }}>We start with a research question — a specific hypothesis or assumption you want to test — then build AI-generated customer personas to pressure-test it. No existing customer list required. Full methodology disclosure and an honest limitations statement are included in every report.</p>
         <div style={{ display: "inline-block", border: "1px solid rgba(10,47,97,0.2)", borderRadius: "8px", padding: "10px 18px", backgroundColor: "rgba(10,47,97,0.05)", marginBottom: "24px" }}>
           <p style={{ fontFamily: MT, fontSize: "0.78rem", color: NAVY, margin: 0 }}>Results are presented as directional insight, not statistically validated data. Full methodology disclosure is included in every deliverable.</p>
         </div>

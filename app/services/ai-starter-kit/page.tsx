@@ -12,7 +12,7 @@ const GRAY = "#6B7280"; const LGRAY = "#9CA3AF"; const WHITE = "#FFFFFF";
 
 const CHECKLIST = [
   "Business Type Analysis",
-  "5-6 Custom-Written Prompts for your specific business",
+  "6 Custom-Written Prompts for your specific business",
   "Prompt-by-Prompt Instructions",
   "Works with ChatGPT, Claude, or any major AI tool",
   "Built for real use cases: marketing, responses, social captions",
@@ -21,7 +21,7 @@ const CHECKLIST = [
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
-  { num: "2", title: "We Write Your Prompts", body: "We study your business and write 5-6 prompts built specifically for your situation — not generic templates pulled from a library." },
+  { num: "2", title: "We Write Your Prompts", body: "We study your business and write 6 prompts built specifically for your situation — not generic templates pulled from a library." },
   { num: "3", title: "Use Them Immediately", body: "Your kit arrives within 48 hours with instructions for each prompt. Copy, paste, and start saving time the same day." },
 ];
 

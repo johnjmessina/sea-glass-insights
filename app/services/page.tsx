@@ -121,7 +121,7 @@ const GRID_SERVICES: GridSvc[] = [
   {
     name: "AI Starter Kit",
     price: "$99 / $79 add-on", turnaround: "48 hrs",
-    desc: "Five to six custom AI prompts built specifically for your business type, ready to use immediately.",
+    desc: "Six custom AI prompts built specifically for your business type, ready to use immediately.",
     bundles: [],
     href: "/services/ai-starter-kit",
   },

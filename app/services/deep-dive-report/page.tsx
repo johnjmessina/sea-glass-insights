@@ -22,7 +22,7 @@ const CHECKLIST = [
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
-  { num: "2", title: "A Real Analyst Gets to Work", body: "We research your market, your competitors, and your positioning with greater rigor than the standard report allows. More sources, more time, more context for your specific situation." },
+  { num: "2", title: "A Custom Research Agent Gets to Work", body: "We build a dedicated AI research agent configured specifically for your business and your competitive landscape. That agent does the deep research — pulling from more sources, running deeper queries, and covering more ground than the standard report allows. Your analyst then reviews every finding and adds expert interpretation for your situation." },
   { num: "3", title: "Your Report Arrives", body: "A deeply researched report with a decision-specific analysis section lands in your inbox within 5-7 days. Comprehensive findings and a prioritized action framework included." },
 ];
 
@@ -71,7 +71,7 @@ export default function DeepDiveReportPage() {
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$399</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>5-7 day delivery</span>
         </div>
-        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "560px", margin: "0 auto 28px" }}>Everything in the Market Intelligence Report, but deeper. The same competitor set examined with greater rigor, more sources, more context, and more analyst time spent on what each finding actually means for your business. Built for businesses facing a major decision or responding to a significant competitive threat.</p>
+        <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "560px", margin: "0 auto 28px" }}>We build a custom AI research agent on your behalf — configured specifically for your business, your competitors, and your market. That agent goes deeper than the standard report allows. More sources, more queries, more coverage. A real analyst reviews everything and adds expert interpretation. Built for businesses facing a major decision or responding to a significant competitive threat.</p>
         <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started →</a>
       </section>
 
