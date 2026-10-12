@@ -37,7 +37,7 @@ export default function AboutPage() {
           Research Rooted in the Jersey Shore.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
-          Professional research powered by AI, reviewed by a local analyst.
+          Premium market research for small businesses on the coast, priced for small business.
         </p>
       </section>
 
