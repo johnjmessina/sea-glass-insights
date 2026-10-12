@@ -334,7 +334,7 @@ export default function BundlesPage() {
                 <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $449
                 </button>
-                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Available in the Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
+                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Available in the the coast. Please only share what you are comfortable sharing.</p>
               </div>
             </form>
           </div>
@@ -499,7 +499,7 @@ export default function BundlesPage() {
                 <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $599
                 </button>
-                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
+                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in the coast. Please only share what you are comfortable sharing.</p>
               </div>
             </form>
           </div>
@@ -583,7 +583,7 @@ export default function BundlesPage() {
                 <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                   Proceed to Payment — $699
                 </button>
-                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in Monmouth County and Jersey Shore area. Please only share what you are comfortable sharing.</p>
+                <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Secret Shopping available in the coast. Please only share what you are comfortable sharing.</p>
               </div>
             </form>
           </div>

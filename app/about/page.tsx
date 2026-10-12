@@ -34,7 +34,7 @@ export default function AboutPage() {
           style={{ maxWidth: "420px", width: "100%", height: "auto", display: "block", margin: "0 auto 40px" }}
         />
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 24px" }}>
-          Research Rooted in the Jersey Shore.
+          Research Rooted in the Coast.
         </h1>
         <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "clamp(0.92rem, 2vw, 1rem)", color: GRAY, maxWidth: "600px", margin: "0 auto", lineHeight: 1.8 }}>
           Professional research powered by AI, reviewed by a local analyst.
@@ -54,13 +54,13 @@ export default function AboutPage() {
                 Hi, I&rsquo;m John Messina. I have spent the last ten years as a market research professional, working with large organizations to study markets, understand customers, and turn data into decisions. I started Sea Glass Insights to bring that same level of research to local small businesses, at a price point built for small business.
               </P>
               <P>
-                I grew up vacationing on the Jersey Shore and eventually made it my home. I want to play a role in keeping it the kind of place people love to come back to. The small businesses here are what make these towns worth visiting, and I believe they deserve the same quality of research and intelligence that large companies invest in.
+                I grew up vacationing on the coast and eventually made it my home. I want to play a role in keeping it the kind of place people love to come back to. The small businesses here are what make these towns worth visiting, and I believe they deserve the same quality of research and intelligence that large companies invest in.
               </P>
               <P>
                 I offer research services focused on what small businesses actually need to know about their customers, their competition, and their market. What makes this work is knowing how to ask the right questions. AI is only as good as the direction you give it. With over ten years of research experience, I know how to ask the right questions, frame the right problems, and make sure what comes back is actually useful for your business. The findings you receive are not generic. They are built around you. My goal is to be a genuine asset, not just another vendor.
               </P>
               <P>
-                Based in Bradley Beach, we work with small businesses across the Jersey Shore and beyond. I live and work in the same community you do. That local knowledge is part of what you get.
+                Based in Bradley Beach, we work with small businesses across the coast and beyond. I live and work in the same community you do. That local knowledge is part of what you get.
               </P>
               <P>
                 Every small business has an edge. Let&rsquo;s refine yours.

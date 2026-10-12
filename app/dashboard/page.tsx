@@ -231,7 +231,7 @@ const TEST_DATA: Partial<Record<ServiceType, Partial<ManualForm>>> = {
   social_media_audit: {
     customerName: "Marina Oakes", businessName: "Saltwater & Honey",
     email: "marina@saltwaterandhoney.com", location: "Spring Lake, NJ",
-    q1: "Saltwater & Honey makes handmade soy candles and coastal lifestyle accessories inspired by the Jersey Shore, sold online and at local boutiques.",
+    q1: "Saltwater & Honey makes handmade soy candles and coastal lifestyle accessories inspired by the shore, sold online and at local boutiques.",
     q2: "Instagram @saltwaterandhoney (2.1k followers), Facebook page (800 followers), Pinterest (untended), no TikTok",
     q3: "Product flat-lays, behind-the-scenes pours, Shore town scent stories, seasonal launches. Mostly static images, occasional Reels.",
     q4: "Instagram engagement is declining despite daily posting. Stories outperform grid but neither is converting followers to buyers.",

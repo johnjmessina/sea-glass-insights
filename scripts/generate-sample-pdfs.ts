@@ -32,7 +32,7 @@ const SAMPLE_BUSINESS = {
 };
 
 const COMMON_ANSWERS = {
-  q1: "Independent specialty coffee shop serving the Jersey Shore community. We roast in-house and sell retail bags alongside espresso drinks.",
+  q1: "Independent specialty coffee shop serving the coastal community. We roast in-house and sell retail bags alongside espresso drinks.",
   q2: "We've been open 3 years and are considering expanding to a second location in nearby Long Branch.",
   q3: "Our primary customers are 25–45 year old local residents and seasonal beach visitors. We see heavy weekday morning regulars and weekend tourist spikes.",
   q4: "Main competition is a regional chain (Playa Coffee) that opened nearby 6 months ago. We've noticed a 12% drop in weekday afternoon traffic.",

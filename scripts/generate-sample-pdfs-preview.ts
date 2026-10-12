@@ -473,7 +473,7 @@ const DDR_AI_DRAFT = {
   ],
 
   market_context:
-    "Jersey Shore summer economy is heavily tourist-driven with a strong June–September spike. Weekday traffic is local and habitual; weekend traffic is mixed and discovery-driven. Independent coffee shops with strong local identity are outperforming chains in post-pandemic loyalty metrics nationally. Authenticity is a durable differentiator — and Coastal Brew’s in-house roasting story is the clearest expression of it in this market.",
+    "Coastal summer economy is heavily tourist-driven with a strong June–September spike. Weekday traffic is local and habitual; weekend traffic is mixed and discovery-driven. Independent coffee shops with strong local identity are outperforming chains in post-pandemic loyalty metrics nationally. Authenticity is a durable differentiator — and Coastal Brew’s in-house roasting story is the clearest expression of it in this market.",
 
   decision_specific_analysis:
     "Long Branch second location requires 12–18 month lead time, $180–240K estimated buildout, new hiring, and management attention that would pull focus from the Asbury Park retention problem. Risk: replicates the current vulnerability at scale before it is solved.\n\nMobile cart: estimated $15–25K entry cost. Deploys in the tourist channel — beach events, farmers markets, festivals — where Coastal Brew currently has zero presence. Tests the brand beyond the Asbury Park block with minimal commitment. Generates real revenue and real market data before any permanent capital commitment.",
