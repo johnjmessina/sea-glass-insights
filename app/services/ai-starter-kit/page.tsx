@@ -12,12 +12,12 @@ const GRAY = "#6B7280"; const LGRAY = "#9CA3AF"; const WHITE = "#FFFFFF";
 
 const CHECKLIST = [
   "Business Type Analysis",
+  "Business Type Analysis",
   "6 Custom-Written Prompts for your specific business",
   "Prompt-by-Prompt Instructions",
+  "Real Use Case Examples — see each prompt in action for your specific business",
   "Works with ChatGPT, Claude, or any major AI tool",
-  "Built for real use cases: marketing, responses, social captions",
   "One Round of Revisions",
-  "Every prompt is written specifically for your business type, your tone, and your real use cases — not generic templates you could find anywhere online.",
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },

@@ -17,12 +17,12 @@ const WHITE = "#FFFFFF";
 const CHECKLIST = [
   "Executive Summary",
   "Business Snapshot",
-  "Customer Profile (3 segments)",
+  "Customer Profile (3–4 segments)",
   "Competitive Landscape (up to 3 competitors)",
   "Market Positioning analysis",
   "Key Insights",
-  "Actionable Recommendations",
-  "Analyst note",
+  "4 Recommendations ordered by impact and feasibility (first two actionable within 30 days)",
+  "A Note from the Analyst — John's personal interpretation of what the findings mean for your business",
 ];
 
 const HIW = [

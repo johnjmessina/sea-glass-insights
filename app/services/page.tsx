@@ -65,12 +65,12 @@ function BundleBadge({ name }: { name: keyof typeof BUNDLE_DETAILS }) {
 const MIR_INCLUDES = [
   "Executive Summary",
   "Business Snapshot",
-  "Customer Profile (3 segments)",
+  "Customer Profile (3–4 segments)",
   "Competitive Landscape (up to 3 competitors)",
   "Market Positioning analysis",
   "Key Insights",
-  "Actionable Recommendations",
-  "Analyst note",
+  "4 Recommendations ordered by impact and feasibility",
+  "A Note from the Analyst — John's personal interpretation for your business",
 ];
 
 type GridSvc = {
