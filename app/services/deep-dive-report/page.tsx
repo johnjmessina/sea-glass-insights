@@ -19,6 +19,7 @@ const CHECKLIST = [
   "Priority Action Framework",
   "Decision-Specific Analysis section",
   "Expanded Analyst Interpretation",
+  "Analyst Note — John Messina's personal closing interpretation for your business",
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },

@@ -12,7 +12,7 @@ const NAVY = "#0A2F61"; const TEAL = "#00CED1"; const SAND = "#F4EADA";
 const GRAY = "#6B7280"; const LGRAY = "#9CA3AF"; const WHITE = "#FFFFFF";
 
 const CHECKLIST = [
-  "Custom Research Questions",
+  "Research Question Framework",
   "AI-Generated Customer Personas (3-5 types)",
   "Persona Response Simulation",
   "Thematic Analysis of patterns and contradictions",
