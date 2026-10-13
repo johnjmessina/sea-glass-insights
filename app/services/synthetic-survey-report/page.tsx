@@ -19,6 +19,7 @@ const CHECKLIST = [
   "Directional Recommendations",
   "Full Methodology Disclosure",
   "Honest Limitations Statement",
+  "Analyst Note — John Messina's personal interpretation for your business",
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },

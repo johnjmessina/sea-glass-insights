@@ -21,7 +21,7 @@ const CHECKLIST = [
   "Competitive Landscape (up to 3 competitors)",
   "Market Positioning analysis",
   "Key Insights",
-  "4 Recommendations ordered by impact and feasibility (first two actionable within 30 days)",
+  "Recommendations ordered by impact and feasibility, first two actionable within 30 days",
   "A Note from the Analyst — John's personal interpretation of what the findings mean for your business",
 ];
 

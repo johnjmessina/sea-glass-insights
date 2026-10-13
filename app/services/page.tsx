@@ -69,7 +69,7 @@ const MIR_INCLUDES = [
   "Competitive Landscape (up to 3 competitors)",
   "Market Positioning analysis",
   "Key Insights",
-  "4 Recommendations ordered by impact and feasibility",
+  "Recommendations ordered by impact and feasibility",
   "A Note from the Analyst — John's personal interpretation for your business",
 ];
 
@@ -107,7 +107,7 @@ const GRID_SERVICES: GridSvc[] = [
   {
     name: "Synthetic Customer Profiles",
     price: "$399", turnaround: "48-72 hrs",
-    desc: "We work with you to build the exact customer profiles you want to understand, then use AI to simulate how they would respond to your business, whether they are customers you already have or ones you are trying to attract.",
+    desc: "Start with a research question — a specific hypothesis or assumption you want to test. We build AI-generated customer personas around it and simulate their responses, delivering directional insight without requiring an existing customer list.",
     bundles: ["Market & Mind"],
     href: "/services/synthetic-survey-report",
   },

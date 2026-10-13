@@ -17,8 +17,8 @@ const CHECKLIST = [
   "Expanded Market Context and trend analysis",
   "Extended Recommendations with implementation guidance",
   "Priority Action Framework",
-  "Decision-Specific Analysis section",
-  "Expanded Analyst Interpretation",
+  "Decision-Specific Analysis — structured comparison of your top business decision with real numbers and trade-offs",
+  "Expanded Analyst Interpretation — Strategic Framing, Competitive Read, and Long Term View",
   "Analyst Note — John Messina's personal closing interpretation for your business",
 ];
 const HIW = [
