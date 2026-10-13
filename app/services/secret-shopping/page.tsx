@@ -21,7 +21,7 @@ const CHECKLIST = [
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "A Trained Researcher Visits", body: "We visit your location as a genuine first-time customer, experiencing your business exactly as your customers do. No announcements, no pre-visit contact." },
-  { num: "3", title: "Your Report Arrives", body: "A complete scored report with narrative notes across all seven dimensions lands in your inbox within 5-7 days. Specific observations and actionable recommendations included." },
+  { num: "3", title: "Your Report Arrives", body: "A complete scored report with narrative notes across all seven dimensions lands in your inbox. Specific observations and actionable recommendations included." },
 ];
 
 type FormData = { customerName: string; email: string; businessName: string; };
@@ -62,7 +62,6 @@ export default function SecretShoppingPage() {
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>See your business through a customer&rsquo;s eyes.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$299</span>
-          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>5-7 day delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "520px", margin: "0 auto 16px" }}>A professional in-person visit to your business, scored across seven dimensions of the customer experience. Delivered as a complete formatted report with narrative notes and specific recommendations.</p>
         <p style={{ fontFamily: MT, fontSize: "0.78rem", color: GRAY, marginBottom: "24px" }}>Available for businesses on the coast. Travel surcharge may apply for locations outside this area.</p>
@@ -126,7 +125,7 @@ export default function SecretShoppingPage() {
 
             <div style={{ textAlign: "right" }}>
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment &mdash; $299</button>
-              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. No subscriptions. Report delivered within 5-7 days of the visit.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. No subscriptions.</p>
             </div>
           </form>
         </div>

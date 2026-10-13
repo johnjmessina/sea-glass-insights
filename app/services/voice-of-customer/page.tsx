@@ -25,7 +25,7 @@ const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "Pay and Upload Your List", body: "After payment, you'll receive a secure upload link. Send us your customer contact list as a CSV, XLS, or XLSX file." },
   { num: "3", title: "We Design and Send the Survey", body: "We design a custom survey based on your goals and distribute it to your customers on your behalf." },
-  { num: "4", title: "Your Report Arrives", body: "A complete findings report with themes, key highlights, and analyst interpretation delivered within 1-2 weeks." },
+  { num: "4", title: "Your Report Arrives", body: "A complete findings report with themes, key highlights, and analyst interpretation delivered to your inbox." },
 ];
 
 type FormData = { customerName: string; email: string; businessName: string; };
@@ -65,7 +65,6 @@ export default function VoiceOfCustomerPage() {
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Real feedback from your real customers.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$499</span>
-          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>1-2 week delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "580px", margin: "0 auto 20px" }}>A custom survey sent to your real customers, analyzed and delivered as a professional report. Requires an existing customer contact list.</p>
         <div style={{ display: "inline-block", border: "1px solid rgba(10,47,97,0.2)", borderRadius: "8px", padding: "10px 18px", backgroundColor: "rgba(10,47,97,0.05)", marginBottom: "24px" }}>

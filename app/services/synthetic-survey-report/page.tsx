@@ -24,7 +24,7 @@ const CHECKLIST = [
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "Personas Are Built and Surveyed", body: "We design 3-5 customer personas based on your context and run your research questions through them — capturing reactions, objections, and preferences across each customer type." },
-  { num: "3", title: "Your Report Arrives", body: "Your report brings your customer personas to life. Behavioral patterns, preferences, and recommendations you can act on. Delivered in 48-72 hours." },
+  { num: "3", title: "Your Report Arrives", body: "Your report brings your customer personas to life. Behavioral patterns, preferences, and recommendations you can act on." },
 ];
 
 type FormData = { customerName: string; email: string; businessName: string; };
@@ -63,7 +63,6 @@ export default function SyntheticSurveyReportPage() {
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Customer insight when you don&rsquo;t have a customer list.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$399</span>
-          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48-72 hour delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "560px", margin: "0 auto 20px" }}>We start with a research question — a specific hypothesis or assumption you want to test — then build AI-generated customer personas to pressure-test it. No existing customer list required. Full methodology disclosure and an honest limitations statement are included in every report.</p>
         <div style={{ display: "inline-block", border: "1px solid rgba(10,47,97,0.2)", borderRadius: "8px", padding: "10px 18px", backgroundColor: "rgba(10,47,97,0.05)", marginBottom: "24px" }}>
@@ -131,7 +130,7 @@ export default function SyntheticSurveyReportPage() {
             </div>
             <div style={{ textAlign: "center" }}>
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $399</button>
-              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Report delivered within 48-72 hours.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee.</p>
             </div>
           </form>
         </div>

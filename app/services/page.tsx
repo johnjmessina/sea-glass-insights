@@ -76,7 +76,6 @@ const MIR_INCLUDES = [
 type GridSvc = {
   name: string;
   price: string;
-  turnaround: string;
   desc: string;
   bundles: (keyof typeof BUNDLE_DETAILS)[];
   href: string;
@@ -85,42 +84,42 @@ type GridSvc = {
 const GRID_SERVICES: GridSvc[] = [
   {
     name: "Social Media Audit",
-    price: "$199", turnaround: "48-72 hrs",
+    price: "$199",
     desc: "We score your Facebook, Instagram, TikTok, and other active platforms across multiple dimensions to show you exactly where your social presence stands.",
     bundles: ["Starter Intelligence"],
     href: "/services/social-media-audit",
   },
   {
     name: "Secret Shopping",
-    price: "$299", turnaround: "5-7 days",
+    price: "$299",
     desc: "A local researcher visits your business as a real customer, scores the experience across seven dimensions, and delivers a detailed report. Every visit is customized to the scenario that matters most to you.",
     bundles: ["The Field Report", "Complete Shopper Experience"],
     href: "/services/secret-shopping",
   },
   {
     name: "Deep Dive Report",
-    price: "$399", turnaround: "5-7 days",
+    price: "$399",
     desc: "Everything in the MIR, but deeper. Greater rigor, more sources, more context, more analyst time spent on what each finding actually means for your business.",
     bundles: [],
     href: "/services/deep-dive-report",
   },
   {
     name: "Synthetic Customer Profiles",
-    price: "$399", turnaround: "48-72 hrs",
+    price: "$399",
     desc: "Start with a research question — a specific hypothesis or assumption you want to test. We build AI-generated customer personas around it and simulate their responses, delivering directional insight without requiring an existing customer list.",
     bundles: ["Market & Mind"],
     href: "/services/synthetic-survey-report",
   },
   {
     name: "Voice of Customer Survey",
-    price: "$499", turnaround: "1-2 weeks",
+    price: "$499",
     desc: "Real feedback from your real customers, analyzed and delivered by a market research professional.",
     bundles: ["Complete Shopper Experience"],
     href: "/services/voice-of-customer",
   },
   {
     name: "AI Starter Kit",
-    price: "$99 / $79 add-on", turnaround: "48 hrs",
+    price: "$99 / $79 add-on",
     desc: "Six custom AI prompts built specifically for your business type, ready to use immediately.",
     bundles: [],
     href: "/services/ai-starter-kit",
@@ -177,7 +176,6 @@ export default function ServicesPage() {
               </h2>
               <div style={{ display: "flex", alignItems: "baseline", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
                 <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "1.6rem", fontWeight: 700, color: NAVY }}>$199</span>
-                <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", color: LGRAY, fontWeight: 500 }}>48-72 hour delivery</span>
                 <span style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.82rem", color: LGRAY, fontWeight: 500 }}>Flat fee</span>
               </div>
               <p style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.93rem", color: GRAY, lineHeight: 1.8, marginBottom: "28px" }}>
@@ -229,7 +227,6 @@ export default function ServicesPage() {
                     </h3>
                     <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "12px" }}>
                       <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.95rem", fontWeight: 700, color: NAVY }}>{svc.price}</div>
-                      <div style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.72rem", color: LGRAY, marginTop: "2px" }}>{svc.turnaround}</div>
                     </div>
                   </div>
 

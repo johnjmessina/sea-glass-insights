@@ -22,7 +22,7 @@ const CHECKLIST = [
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "We Write Your Prompts", body: "We study your business and write 6 prompts built specifically for your situation — not generic templates pulled from a library." },
-  { num: "3", title: "Use Them Immediately", body: "Your kit arrives within 48 hours with instructions for each prompt. Copy, paste, and start saving time the same day." },
+  { num: "3", title: "Use Them Immediately", body: "Your kit arrives with instructions for each prompt. Copy, paste, and start saving time the same day." },
 ];
 
 type FormData = { customerName: string; email: string; businessName: string; };
@@ -62,7 +62,6 @@ export default function AIStarterKitPage() {
         <h1 style={{ fontFamily: CG, fontSize: "clamp(2.2rem,5vw,3.4rem)", fontWeight: 700, color: NAVY, lineHeight: 1.2, maxWidth: "640px", margin: "0 auto 20px" }}>Custom AI prompts built for your business.</h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$99</span>
-          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48 hour delivery</span>
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: TEAL, fontWeight: 600 }}>$79 as an add-on</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "540px", margin: "0 auto 28px" }}>We learn your business first, then write six custom prompts ready to use immediately with ChatGPT, Claude, or any major AI tool. No generic templates. Built for the tasks that actually save you time.</p>
@@ -124,7 +123,7 @@ export default function AIStarterKitPage() {
             </div>
             <div style={{ textAlign: "center" }}>
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>Proceed to Payment — $99</button>
-              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Delivered within 48 hours. Includes one round of revisions.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.78rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Includes one round of revisions.</p>
             </div>
           </form>
         </div>

@@ -28,7 +28,7 @@ const CHECKLIST = [
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
   { num: "2", title: "A Real Analyst Gets to Work", body: "We personally review your profiles, evaluate them across all seven dimensions, and deliver specific findings and actionable recommendations tailored to your business." },
-  { num: "3", title: "Your Audit Arrives", body: "A professionally written scored report lands in your inbox within 48-72 hours. Specific findings and actionable recommendations you can implement immediately." },
+  { num: "3", title: "Your Audit Arrives", body: "A professionally written scored report lands in your inbox. Specific findings and actionable recommendations you can implement immediately." },
 ];
 
 type FormData = { customerName: string; email: string; businessName: string; };
@@ -72,7 +72,6 @@ export default function SocialMediaAuditPage() {
         </h1>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap", marginBottom: "16px" }}>
           <span style={{ fontFamily: MT, fontSize: "1.4rem", fontWeight: 700, color: NAVY }}>$199</span>
-          <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>48-72 hour delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "520px", margin: "0 auto 28px" }}>
           A scored assessment of your social media presence across seven dimensions, from profile setup and content quality to engagement, brand consistency, and overall platform utilization.
@@ -121,7 +120,7 @@ export default function SocialMediaAuditPage() {
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: CG, fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 700, color: NAVY, textAlign: "center", marginBottom: "8px" }}>Get Your Social Media Audit</h2>
           <p style={{ fontFamily: MT, fontSize: "0.9rem", color: GRAY, textAlign: "center", marginBottom: "40px", lineHeight: 1.7 }}>
-            Fill out the form below. After submitting you&rsquo;ll be directed to a secure payment page. Your audit will be delivered within 48-72 hours.
+            Fill out the form below. After submitting you&rsquo;ll be directed to a secure payment page.
           </p>
           <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             <div style={{ backgroundColor: WHITE, border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px" }}>
@@ -149,7 +148,7 @@ export default function SocialMediaAuditPage() {
               <button type="submit" style={{ backgroundColor: "transparent", color: NAVY, fontFamily: MT, fontWeight: 700, fontSize: "1rem", padding: "14px 48px", borderRadius: "9999px", border: "1.5px solid #0A2F61", cursor: "pointer", letterSpacing: "0.02em" }}>
                 Proceed to Payment — $199
               </button>
-              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "12px" }}>Flat fee. Delivered within 48-72 hours.</p>
+              <p style={{ fontFamily: MT, fontSize: "0.75rem", color: LGRAY, marginTop: "12px" }}>Flat fee.</p>
             </div>
           </form>
         </div>
