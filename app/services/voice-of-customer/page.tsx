@@ -15,10 +15,11 @@ const CHECKLIST = [
   "Custom Survey Design (up to 10 questions)",
   "Distribution-Optimized Format",
   "Secure Contact List Upload (after payment)",
-  "Response Collection and analysis",
-  "Thematic Analysis of patterns and findings",
-  "Visual Report with findings and themes",
-  "Analyst Interpretation and recommendations",
+  "Response Collection and Quantitative Summary",
+  "Thematic Analysis of patterns, contradictions, and open-ended responses",
+  "Visual Findings Summary — key data points presented for fast decision-making",
+  "Analyst Interpretation & Recommendations",
+  "Analyst Note — John Messina's personal interpretation for your business",
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },

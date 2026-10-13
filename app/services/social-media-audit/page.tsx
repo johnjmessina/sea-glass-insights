@@ -15,13 +15,14 @@ const LGRAY = "#9CA3AF";
 const WHITE = "#FFFFFF";
 
 const CHECKLIST = [
-  "Profile and Setup review",
-  "Content Quality scoring",
-  "Posting Consistency analysis",
-  "Engagement assessment",
-  "Brand Consistency evaluation",
-  "Platform Utilization review",
-  "Overall Presence Score with written recommendations",
+  "Profile & Setup Review — handle, bio, photo, and link-in-bio strategy",
+  "Content Quality Scoring — Visual Quality, Caption Quality, Brand Consistency, Call to Action, Content Variety",
+  "Posting Consistency Analysis with specific scheduling recommendations",
+  "Engagement Assessment benchmarked against independent food & beverage standards",
+  "Brand Consistency Evaluation across voice, palette, and visual identity",
+  "Platform Utilization Review — are you on the right platforms and using them well",
+  "Overall Presence Score with prioritized written recommendations",
+  "Analyst Note — John Messina's personal take on what the findings mean for your business",
 ];
 
 const HIW = [

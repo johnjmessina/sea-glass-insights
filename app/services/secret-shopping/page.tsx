@@ -12,10 +12,11 @@ const GRAY = "#6B7280"; const LGRAY = "#9CA3AF"; const WHITE = "#FFFFFF";
 
 const CHECKLIST = [
   "In-person visit by a trained researcher",
-  "Scored assessment across 7 dimensions",
-  "Section-by-section narrative notes",
-  "Analyst Observations",
-  "Formatted deliverable report",
+  "Experience Scorecard across 7 dimensions: First Impression, Physical Environment, Staff Engagement, Core Experience, Purchase Process, Digital Touchpoints, Lasting Impression",
+  "Analyst Observations — Best Moment, Biggest Missed Opportunity, and an Immediate Fix",
+  "Section-by-section Narrative Notes",
+  "Summary & Recommendations with prioritized action steps",
+  "Analyst Note — John Messina's personal take on what the findings mean for your business",
 ];
 const HIW = [
   { num: "1", title: "Get Started in Seconds", body: "Enter your name, business, and email to get started. We'll send you a link to complete your order details after payment." },
@@ -64,7 +65,7 @@ export default function SecretShoppingPage() {
           <span style={{ fontFamily: MT, fontSize: "0.82rem", color: GRAY }}>5-7 day delivery</span>
         </div>
         <p style={{ fontFamily: MT, fontSize: "0.92rem", color: GRAY, maxWidth: "520px", margin: "0 auto 16px" }}>A professional in-person visit to your business, scored across seven dimensions of the customer experience. Delivered as a complete formatted report with narrative notes and specific recommendations.</p>
-        <p style={{ fontFamily: MT, fontSize: "0.78rem", color: GRAY, marginBottom: "24px" }}>Available for businesses in the the coast. Travel surcharge may apply for locations outside this area.</p>
+        <p style={{ fontFamily: MT, fontSize: "0.78rem", color: GRAY, marginBottom: "24px" }}>Available for businesses on the coast. Travel surcharge may apply for locations outside this area.</p>
         <a href="#intake-form" style={{ display: "inline-block", backgroundColor: "transparent", color: NAVY, border: "1.5px solid #0A2F61", fontFamily: MT, fontWeight: 600, fontSize: "1rem", padding: "13px 36px", borderRadius: "9999px", textDecoration: "none" }}>Get Started &rarr;</a>
       </section>
       <div style={{ backgroundColor: SAND, padding: "6px 24px", textAlign: "center" }}>
